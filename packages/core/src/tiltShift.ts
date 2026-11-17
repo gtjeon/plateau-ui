@@ -1,13 +1,13 @@
 import { abs, float, max, min, screenUV, smoothstep, texture as unwatched, vec2, vec4 } from 'three/tsl'
 import {
   DepthTexture,
-  FramebufferTexture,
   HalfFloatType,
-  LinearFilter,
   NodeMaterial,
   QuadMesh,
   RenderTarget,
   Vector2,
+  Vector4,
+  type FramebufferTexture,
   type Node,
   type OrthographicCamera,
   type Scene,
@@ -16,6 +16,7 @@ import {
 import { PICTURE_ONLY } from './passes.js'
 import { drawDepth } from './offscreen.js'
 import { uniform } from './repaint.js'
+import { weaveQuad } from './quads.js'
 
 /**
  * The miniature look: the picture kept sharp at one depth and blurred the
@@ -164,6 +165,9 @@ export class TiltShiftSettings implements ViewerTiltShift {
  */
 const TAPS = 8
 
+/** The first of the blur's two copies of the canvas; see {@link TiltShiftPass.render}. */
+const ONE_PIXEL = new Vector4(0, 0, 1, 1)
+
 /**
  * The blur itself: depth taken again on its own, the finished picture copied
  * off the canvas, a half-size sheet of it blurred across and then down, and
@@ -192,10 +196,19 @@ export class TiltShiftPass {
   private readonly depth = new RenderTarget(1, 1, { depthTexture: this.depthTexture })
   /**
    * The finished picture, copied off the canvas before it is drawn over.
-   * Read smoothly, which three's copy texture is not by default: the half sheet
-   * reads it between four pixels and takes the four of them.
+   * Read smoothly, as a target's texture is: the half sheet reads it between
+   * four pixels and takes the four of them.
+   *
+   * A target's texture and not three's `FramebufferTexture`. Three makes that
+   * one again as 8-bit wherever it is made with no target set
+   * (`Textures.updateTexture`), whatever type it was given: WebGPU takes its
+   * format from the canvas's frame buffer all the same, WebGL takes it from the
+   * type, and a resolve of the frame's half floats into 8 bits is one WebGL
+   * refuses (measured 2026-11-17). And the type written back each frame had
+   * three make the texture again in every frame it drew, on both. A target's
+   * texture is made to the type it is given, once.
    */
-  private readonly picture = linear(new FramebufferTexture(1, 1))
+  private readonly picture = new RenderTarget(1, 1, { type: HalfFloatType, depthBuffer: false })
   /**
    * Half-size sheets in half floats, as the frame is: the picture with how far
    * from the focus each point stands in its alpha (−1 far behind to 1 far in
@@ -274,17 +287,16 @@ export class TiltShiftPass {
     }
     // The copy is made to the shape of what it copies: the canvas is drawn
     // through a frame buffer of the renderer's own type (half floats, under a
-    // tone curve), and three refuses a copy between two formats
+    // tone curve), and three refuses a copy between two formats. Made again by
+    // three's own path for a target, which is what makes it anew at its size:
+    // never drawn into, nothing else does, and the copy went into the 1×1 it
+    // was first made at (seen: the whole map one grey)
     const type = renderer.getOutputBufferType()
-    if (
-      this.picture.image.width !== width ||
-      this.picture.image.height !== height ||
-      this.picture.type !== type
-    ) {
-      this.picture.image.width = width
-      this.picture.image.height = height
-      this.picture.type = type
-      this.picture.needsUpdate = true
+    if (this.picture.width !== width || this.picture.height !== height || this.picture.texture.type !== type) {
+      this.picture.texture.type = type
+      this.picture.dispose()
+      this.picture.setSize(width, height)
+      renderer.initRenderTarget(this.picture)
     }
     this.texel.value.set(1 / halfWide, 1 / halfHigh)
     this.near.value = camera.near
@@ -301,7 +313,19 @@ export class TiltShiftPass {
       camera.layers.mask = layers
     }
 
-    renderer.copyFramebufferToTexture(this.picture)
+    // Twice, the first time one pixel. Three's WebGL copy reads whichever frame
+    // buffer is bound when it is called, and binds the canvas's own only after
+    // it has copied (`WebGLTextureUtils.copyFramebufferToTexture`): inside a
+    // draw that is the same thing, out of one, as here, it is whatever was drawn
+    // into last — the depth just above, whose colour is the distance its
+    // stand-ins write — and the blur was of that, magenta and green bands over
+    // the map on WebGL2 (measured 2026-11-17). The pixel is for what it leaves
+    // bound. WebGPU names its source, and copies the same picture both times.
+    // Three types what it copies into as its own frame buffer texture; it
+    // copies into any
+    const picture = this.picture.texture as FramebufferTexture
+    renderer.copyFramebufferToTexture(picture, ONE_PIXEL)
+    renderer.copyFramebufferToTexture(picture)
 
     const { autoClear } = renderer
     const to = renderer.getRenderTarget()
@@ -320,6 +344,30 @@ export class TiltShiftPass {
       renderer.setRenderTarget(to)
       renderer.autoClear = autoClear
     }
+  }
+
+  /**
+   * Weaves the blur's four quads off the frame, before it first draws.
+   *
+   * The same stop as the corner shading's (`OcclusionPass.weave`): made on the
+   * spot, its four pipelines were part of a first frame of 1.35 s on a card
+   * that had never made them. Each quad is woven with the sheet it draws into
+   * set, in the order the frame draws them, so each sheet makes its own
+   * texture before the quad after it reads it; and the depth and the copied
+   * picture are made by their own targets first, for the reason given there.
+   */
+  async weave(renderer: WebGPURenderer): Promise<void> {
+    renderer.initRenderTarget(this.depth)
+    renderer.initRenderTarget(this.picture)
+    // In the order the frame draws them, each sheet set while its quad is
+    // walked, so each makes its own texture before the next quad reads it
+    await Promise.all([
+      weaveQuad(renderer, this.shrinking, this.small),
+      weaveQuad(renderer, this.spreadingAcross, this.across),
+      weaveQuad(renderer, this.spreadingDown, this.down),
+      // The mix draws into whatever the frame is drawing into: the canvas
+      weaveQuad(renderer, this.mixing, null),
+    ])
   }
 
   dispose(): void {
@@ -367,7 +415,7 @@ export class TiltShiftPass {
   /** The half sheet: the picture, and where each point stands in the alpha. */
   private shrink(): NodeMaterial {
     const material = quadMaterial()
-    const colour = unwatched(this.picture, screenUV)
+    const colour = unwatched(this.picture.texture, screenUV)
     material.colorNode = vec4(colour.rgb, this.standsAt(screenUV))
     return material
   }
@@ -413,19 +461,13 @@ export class TiltShiftPass {
    */
   private mix(): NodeMaterial {
     const material = quadMaterial()
-    const sharp = unwatched(this.picture, screenUV)
+    const sharp = unwatched(this.picture.texture, screenUV)
     const blurred = unwatched(this.down.texture, screenUV)
     const blur = this.blurOf(this.standsAt(screenUV))
     const t = blur.div(2).clamp(0, 1)
     material.colorNode = vec4(sharp.rgb.mul(t.oneMinus()).add(blurred.rgb.mul(t)), float(1))
     return material
   }
-}
-
-function linear(texture: FramebufferTexture): FramebufferTexture {
-  texture.minFilter = LinearFilter
-  texture.magFilter = LinearFilter
-  return texture
 }
 
 /** A quad's material: drawn over whatever is there, reading no depth and writing none. */

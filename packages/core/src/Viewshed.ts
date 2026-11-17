@@ -413,18 +413,23 @@ export class Viewshed implements Layer {
   }
 
   /**
-   * Hangs the sheet as it is put on, which a sheet allows: its geometry carries
-   * its corners from the start and draws none of them until it is first laid,
-   * so a viewer weaving what a page handed its constructor weaves this against
-   * the shape it will draw. See CLAUDE.md, "그 처음이 생성자 시점으로".
+   * Hangs the sheet once woven, as a change of drawing does ({@link redraw}).
+   *
+   * It was hung at once and left to the viewer's weaving of the whole scene,
+   * which walks past a root told `visible = false`: a sight a page shows only
+   * once the city stands was drawn unwoven in that frame (measured
+   * 2026-11-17, security-camera), and one put on after the viewer started was
+   * never woven at all. The meshes are woven themselves, shown, whatever the
+   * root says; the geometry carries its corners from the start (CLAUDE.md,
+   * "그 처음이 생성자 시점으로").
    */
   attach(viewer: Viewer): void {
     this.viewer = viewer
     this.mask.set(viewer.maskArea)
     this.mask.fadeInto(viewer.colors.backdrop)
     this.look = null
-    this.meshes = this.make(viewer)
-    this.root.add(...this.meshes)
+    this.meshes = []
+    this.redraw()
   }
 
   /** Takes the sheet down with the paint that read this viewer's sight. */

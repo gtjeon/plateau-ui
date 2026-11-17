@@ -1,18 +1,19 @@
 import { cameraFar, positionView, vec4 } from 'three/tsl'
 import {
   Color,
+  DepthTexture,
   MeshBasicNodeMaterial,
   NoBlending,
+  RenderTarget,
   type Camera,
   type Material,
   type Object3D,
   type Node,
-  type RenderTarget,
   type Scene,
   type WebGPURenderer,
 } from 'three/webgpu'
 import { outlinedBy, type OutlineNode } from './outlines.js'
-import { LAND, occludes } from './passes.js'
+import { LAND, occludes, PICTURE_ONLY } from './passes.js'
 
 /**
  * Stands in for a material while depth alone is drawn, and writes into the
@@ -249,6 +250,112 @@ function underStandIns(
   } finally {
     renderer.setRenderObjectFunction(drawObject)
   }
+}
+
+/**
+ * A target the shape of the passes' own, to weave their stand-ins against;
+ * see {@link weaveStandIns}. One pixel, since a pipeline is woven for the
+ * shape of what it draws into and not for its size.
+ */
+let rehearsal: RenderTarget | undefined
+
+/**
+ * Weaves, off the frame, the shaders the passes that draw under stand-ins
+ * will want for these things: the sun's map ({@link drawCasters}), the depth
+ * the corner shading and the blur measure from ({@link drawDepth}) and, where
+ * a mask has ended the land, the land on its own ({@link drawLand}).
+ *
+ * **Why.** `Viewer.weave` weaves a thing for the canvas, and a stand-in drawn
+ * into a target of its own is a pipeline of its own. Three made those on the
+ * spot (`createRenderPipeline`) the first time each kind of thing was drawn
+ * there, and on a machine that had never built them the card stopped the
+ * picture while it did. Measured 2026-11-17 on the public simple-map, opened
+ * with the shader caches emptied: 18 of the page's 29 pipelines made inside a
+ * frame, one frame of 1.35 s as the first things were drawn and five more of
+ * 0.2 to 0.6 s as the land and the city came in — which is what someone opening
+ * the page for the first time sees as the buildings stalling and then jumping
+ * up. Opened again, the card has them and nothing stops.
+ *
+ * **How.** Three's own `compileAsync`, with the stand-in put in place of each
+ * material as it walks. It walks with `renderObject` itself rather than with
+ * the function a pass sets (`setRenderObjectFunction`, which {@link underStandIns}
+ * uses), so `renderObject` is swapped for the length of the walk. The walk runs
+ * through before the first thing `compileAsync` waits for, so the swap is in
+ * place for exactly that and is put back before anything else can draw; what
+ * it leaves to be built afterwards already carries the stand-in.
+ *
+ * The scene is put as {@link drawOffscreen} puts it — no background — and the
+ * target is one of the shape every one of those passes draws into: a colour
+ * of eight-bit bytes and a depth texture, one sample. Each walk sees what its
+ * pass sees and no more: the depths leave out what is only laid over the
+ * picture (a mark, a painted shape), and the land on its own is the land
+ * alone. Walked with the viewer's own layers, they wove a stand-in for every
+ * mark and every painted shape, and an uncut twin of the city and the trees,
+ * that no pass ever draws — and the tiles waited on those as well (reviewed
+ * 2026-11-17).
+ *
+ * **Not where the scene has fog.** The passes draw with the fog taken off, and
+ * three reads the fog again as it builds, after the walk and after its first
+ * wait, when it is back on: what was woven was a fogged stand-in no pass
+ * draws, and the passes went on making theirs in the frame (reviewed
+ * 2026-11-17). Fog can only be kept off for the walk — kept off any longer,
+ * the frames in between draw without it — so with fog on this weaves nothing,
+ * and the passes are made in the frame as they were before any of this.
+ */
+export async function weaveStandIns(
+  renderer: WebGPURenderer,
+  scene: Scene,
+  camera: Camera,
+  things: readonly Object3D[],
+  land: boolean,
+): Promise<void> {
+  if (scene.fog) return
+  rehearsal ??= new RenderTarget(1, 1, { depthTexture: new DepthTexture(1, 1) })
+  const ways: { readonly dress: (material: Material) => Material | null; readonly sees: number }[] = [
+    {
+      // A line is left out of the depth and casts nothing; see `drawDepth`
+      dress: (material) => (drawnAsLine(material) ? null : standIn(material)),
+      // As the corner shading's depth sees (`OcclusionPass`, the blur's the
+      // same): the viewer's own layers bar what is only laid over the picture.
+      // The sun's camera sees three's first layer alone, which is among these
+      sees: camera.layers.mask & ~(1 << PICTURE_ONLY),
+    },
+  ]
+  // As `Underground` draws it: the land and nothing else
+  if (land) ways.push({ dress: uncut, sees: 1 << LAND })
+
+  type Draw = WebGPURenderer['renderObject']
+  const swappable = renderer as unknown as { renderObject: Draw }
+  const ownProperty = Object.prototype.hasOwnProperty.call(renderer, 'renderObject')
+  const own = renderer.renderObject
+  const woven: Promise<unknown>[] = []
+  for (const way of ways) {
+    const was = renderer.getRenderTarget()
+    const wasFace = renderer.getActiveCubeFace()
+    const wasLevel = renderer.getActiveMipmapLevel()
+    const { background } = scene
+    const layers = camera.layers.mask
+    scene.background = null
+    camera.layers.mask = way.sees
+    renderer.setRenderTarget(rehearsal)
+    swappable.renderObject = function (this: WebGPURenderer, ...args: Parameters<Draw>) {
+      // The fifth is the material, as in {@link underStandIns}
+      const twin = way.dress(args[4])
+      if (!twin) return
+      args[4] = twin
+      own.apply(this, args)
+    }
+    try {
+      for (const thing of things) woven.push(renderer.compileAsync(thing, camera, scene))
+    } finally {
+      if (ownProperty) swappable.renderObject = own
+      else delete (swappable as { renderObject?: Draw }).renderObject
+      renderer.setRenderTarget(was, wasFace, wasLevel)
+      camera.layers.mask = layers
+      scene.background = background
+    }
+  }
+  await Promise.all(woven)
 }
 
 /**

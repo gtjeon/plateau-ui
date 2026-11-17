@@ -796,6 +796,10 @@ export class Solid implements PutsItselfOn {
 
   private _glows: boolean
   private _visible: boolean
+  /** @internal Held out of the picture until its group has woven it; see `SolidLayer.weaveIn`. */
+  unwoven = false
+  /** @internal Which weaving of it is the latest, so that an older one ending late shows nothing. */
+  weavings = 0
   private _masked: boolean
   private _fill: boolean
   private _fillColor: ThemeColor | undefined
@@ -1105,7 +1109,7 @@ export class Solid implements PutsItselfOn {
 
   /** @internal The mask's answer, put together with the page's own. */
   showing(kept: boolean): void {
-    this.root.visible = this._visible && kept
+    this.root.visible = this._visible && kept && !this.unwoven
   }
 
   /**
@@ -1795,7 +1799,10 @@ export class SolidLayer implements Layer {
     }
     this.solids.push(solid)
     solid.held(this)
-    if (this.viewer) solid.dress(this.materialOf(solid))
+    if (this.viewer) {
+      solid.dress(this.materialOf(solid))
+      this.weaveIn(solid)
+    }
     // A solid's root is a group, and a group is where three takes the stage
     // from — so it says this layer's again. Left at nought it would be read as
     // `structure` and the thing the map is stood on would be sorted among the
@@ -1925,9 +1932,49 @@ export class SolidLayer implements Layer {
     // and reaches a material through the scene it is drawn in, so these
     // are the same wherever the group is put. The mask is not, which is
     // what the line above is for.
-    for (const solid of this.solids) solid.dress(this.materialOf(solid))
+    for (const solid of this.solids) {
+      solid.dress(this.materialOf(solid))
+      this.weaveIn(solid)
+    }
     this.cutting = true
     this.laying = true
+  }
+
+  /**
+   * Weaves a solid's shaders off the frame and holds it out of the picture
+   * until they are made, as a tile is held; see `Viewer.weave`.
+   *
+   * Hung at once and left to the viewer's weaving of the whole scene, a solid
+   * was drawn unwoven whenever that weaving did not take it in: one the page
+   * made `visible: false` (three's walk passes over what is hidden), one not
+   * stood yet (it sits at the world's nought, out of the frustum), and every
+   * one put on after the viewer started. Its shader and its stand-in were
+   * then built inside the frame that first drew it — on security-camera, as
+   * the camera was shown on the city's first `idle` (measured 2026-11-17).
+   * Woven here whether shown or not, a hidden one costs nothing when shown.
+   */
+  private weaveIn(solid: Solid): void {
+    const viewer = this.viewer
+    if (!viewer) return
+    const ours = ++solid.weavings
+    // Held out only once frames are being drawn: before, the first frame waits
+    // for the scene to be woven, a solid shown in it with the rest
+    // (`Viewer.framing`)
+    solid.unwoven = viewer.framing
+    solid.showing(this.maskKeeps(solid))
+    // A weaving that fails is not the solid's failure: it is shown all the
+    // same and woven in the frame, as it always was
+    void viewer
+      .weave(solid.root)
+      .catch(() => undefined)
+      .then(() => {
+        if (solid.weavings !== ours) return
+        solid.unwoven = false
+        if (solid.heldBy !== this) return
+        solid.showing(this.maskKeeps(solid))
+        // In the picture now, and not yet in the sun's map
+        viewer.stirShadows()
+      })
   }
 
   /**

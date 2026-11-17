@@ -21,7 +21,7 @@ export function paint(viewer: Viewer, scheme: Scheme): void {
  * Draws the buildings' folds or takes them away. Their colour is the palette's
  * `edge`, so each palette inks them in its own.
  */
-export function outline(viewer: Viewer, on: boolean): void {
+export function drawEdges(viewer: Viewer, on: boolean): void {
   viewer.buildings.edges = on
 }
 

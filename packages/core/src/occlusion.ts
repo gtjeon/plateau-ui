@@ -24,6 +24,7 @@ import { PICTURE_ONLY } from './passes.js'
 import { MaskShader, type MaskArea } from './mask.js'
 import { drawDepth } from './offscreen.js'
 import { LIGHT } from './theme.js'
+import { weaveQuad } from './quads.js'
 
 /**
  * How much a corner darkens for being closed in by what is around it, as a
@@ -909,6 +910,32 @@ export class OcclusionPass {
       // camera of its own (`wider`), which nothing else reads.
       renderer.autoClear = autoClear
     }
+  }
+
+  /**
+   * Weaves the pass's own shaders off the frame, before it first draws.
+   *
+   * The filter and the multiply are quads of their own, and three made their
+   * pipelines on the spot the first time they were drawn. On a card that had
+   * never made them that was a stop in the very first frame, with the blur's
+   * and the canvas's own: 1.35 s on the public simple-map opened with the
+   * shader caches emptied (2026-11-17); see `weaveStandIns` in `offscreen.ts`
+   * for the rest of that measurement.
+   *
+   * The depth the shading reads is made by its own target first, as a frame
+   * would make it. A depth texture a material takes up before its target has
+   * drawn into it is destroyed and made again under that material (CLAUDE.md,
+   * 주의할 점, "깊이 텍스처는 처음 접근한 쪽이 생성하고"). Each quad is woven with
+   * the target it draws into set, which is also what has that target make its
+   * own texture before the next quad reads it.
+   */
+  async weave(renderer: WebGPURenderer): Promise<void> {
+    renderer.initRenderTarget(this.depth)
+    await Promise.all([
+      weaveQuad(renderer, this.filtering, this.clean),
+      // The multiply draws into whatever the frame is drawing into: the canvas
+      weaveQuad(renderer, this.multiply, null),
+    ])
   }
 
   dispose(): void {

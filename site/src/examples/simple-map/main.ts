@@ -31,7 +31,7 @@
  */
 import { Viewer } from '@plateau-ui/core'
 import { SCHEMES } from './data.js'
-import { miniature, outline, paint } from './looks.js'
+import { drawEdges, miniature, paint } from './looks.js'
 import { ui } from './ui.js'
 
 /**
@@ -73,6 +73,6 @@ viewer.camera.fitBounds({ southWest: [139.695829, 35.641973], northEast: [139.70
 
 ui(SCHEMES, {
   scheme: (scheme) => paint(viewer, scheme),
-  edges: (on) => outline(viewer, on),
+  edges: (on) => drawEdges(viewer, on),
   tiltShift: (on) => miniature(viewer, on),
 })

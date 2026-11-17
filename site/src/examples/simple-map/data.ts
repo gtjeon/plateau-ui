@@ -51,7 +51,7 @@ export const SCHEMES: readonly Scheme[] = [
   // No hue anywhere, as a photograph in black and white: white walls over a
   // grey ground, the roads and the water darker greys, the glass a grey the
   // walls are told apart by. A darker shade than the library's, so it is the
-  // light and the shadow that draw the city. Where the outlines are on, the
+  // light and the shadow that draw the city. Where the edges are on, the
   // folds are black ink
   {
     name: 'モノクロ',
@@ -77,7 +77,7 @@ export const SCHEMES: readonly Scheme[] = [
     },
   },
   // A city under neon: dark violet walls and ground, the glass and the river
-  // cyan, and magenta for the ink — the folds where the outlines are on, the
+  // cyan, and magenta for the ink — the folds where the edges are on, the
   // wards' boundary. The shade is a pale violet, so the faces the sun has left
   // go over to violet rather than to grey: the fill takes its hue and not its
   // level (`Palette.shadow`), and a deeper one turned the whole city blue

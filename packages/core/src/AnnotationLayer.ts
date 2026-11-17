@@ -1275,6 +1275,8 @@ export class AnnotationLayer implements Layer {
    * the three never pays for its shader.
    */
   private readonly meshes = new Map<Draws, AnnotationMesh>()
+  /** The meshes made but not hung yet, waiting to hold a mark to be woven with; see {@link place}. */
+  private readonly unhung = new Set<AnnotationMesh>()
   /** What the last mark taken on was numbered, so that no two ever share one. */
   private named = 0
   /** That the pictures want drawing again. The work happens on the next frame. */
@@ -1509,6 +1511,7 @@ export class AnnotationLayer implements Layer {
     this.clear()
     for (const mesh of this.meshes.values()) mesh.dispose()
     this.meshes.clear()
+    this.unhung.clear()
     this.atlas.dispose()
   }
 
@@ -1700,6 +1703,25 @@ export class AnnotationLayer implements Layer {
     // A half nobody asked for this time still has its mesh; it is emptied
     // rather than thrown away, since the next frame may want it back.
     for (const [draws, mesh] of this.meshes) if (!drawn.has(draws)) mesh.set([])
+
+    // A mesh made this frame is hung once its cards are woven, and only the
+    // cards that hold a mark are woven: one with no marks has no instance
+    // buffers yet, and a shader woven against it is not the one it draws with.
+    // Hung at once, the first frame drew both halves of the page's pins
+    // unwoven, four pipelines made on the spot (measured 2026-11-17,
+    // security-camera). Its marks show a few frames later instead
+    for (const mesh of this.unhung) {
+      const holding = mesh.meshes.filter((card) => card.visible)
+      if (holding.length === 0) continue
+      this.unhung.delete(mesh)
+      void viewer
+        .weave(...holding)
+        .catch(() => undefined)
+        .then(() => {
+          if (![...this.meshes.values()].includes(mesh)) return
+          for (const card of mesh.meshes) this.root.add(card)
+        })
+    }
   }
 
   /**
@@ -1778,8 +1800,9 @@ export class AnnotationLayer implements Layer {
       mesh = new AnnotationMesh(this.atlas, draws)
       mesh.fade(draws === 'behind' ? this._dimmed : 1)
       this.meshes.set(draws, mesh)
-      // Each card says its own place in the stage; see `AnnotationMesh`
-      for (const card of mesh.meshes) this.root.add(card)
+      // Hung by `place` once woven. Each card says its own place in the
+      // stage; see `AnnotationMesh`
+      this.unhung.add(mesh)
     }
     return mesh
   }

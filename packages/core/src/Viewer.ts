@@ -6,6 +6,7 @@ import {
   Vector3,
   WebGPURenderer,
   type Light,
+  type Material,
   type Mesh,
   type Object3D,
   type ColorRepresentation,
@@ -22,6 +23,7 @@ import { Events, type DragPhase, type Dragging, type Hit, type Position } from '
 import { paintedIn, type PaintedKind } from './paints.js'
 import { JAPAN } from './geo/japan.js'
 import { MARKS, PICTURE_ONLY, occludes, type FramePass } from './passes.js'
+import { weaveStandIns } from './offscreen.js'
 import {
   EARTH_CIRCUMFERENCE,
   latToY,
@@ -1372,6 +1374,18 @@ export class Viewer {
   private shadowShape = 0
   /** Whether the sun's map has had its texture made; see {@link SunShadow.prime}. */
   private shadowPrimed = false
+  /**
+   * Whether a pass over the picture made from here on weaves as it is made;
+   * before, `begin` weaves the ones there are once the scene is woven. See
+   * {@link weavePass}.
+   */
+  private passesWeave = false
+  /** Whether the frames have begun; see {@link framing}. */
+  private framesBegun = false
+  /** The passes over the picture whose shaders are made, which are the only ones drawn; see {@link weavePass}. */
+  private readonly passesWoven = new WeakSet<OcclusionPass | TiltShiftPass>()
+  /** The weaving under way for each pass over the picture; see {@link weavePass}. */
+  private readonly passesWeaving = new Map<OcclusionPass | TiltShiftPass, Promise<void>>()
   /** The scene as last drawn, to tell whether this frame would draw it again; see `repaint.ts`. */
   private readonly sceneState = new SceneState()
   /** The count of changed uniforms this viewer last saw; see `uniformChanges`. */
@@ -1995,6 +2009,17 @@ export class Viewer {
     // yet and weaves its own as it lands. See {@link weave}.
     await this.weave(this.scene)
     if (this.disposed) return
+    // The passes the viewer runs over the picture, woven as well before the
+    // first frame rather than inside it; see `OcclusionPass.weave`. From the
+    // same moment one made later weaves itself as it is made, so that none
+    // falls between the two: the flag was set once these were done, and a
+    // pass made while they wove was never woven (reviewed 2026-11-17)
+    this.passesWeave = true
+    this.weavePass(this.occlusionPass)
+    this.weavePass(this.tiltShiftPass)
+    await Promise.all(this.passesWeaving.values())
+    if (this.disposed) return
+    this.framesBegun = true
     this.renderer.setAnimationLoop(() => {
       this.frameBegan = performance.now()
       // The sun's map has its own texture made here, before any material has
@@ -2125,8 +2150,9 @@ export class Viewer {
    * the first says yes and the second says no. Asked, rather than assumed.
    */
   private draw(standing: boolean): void {
-    this.occlusionPass?.reckon(this.renderer, this.threeCamera)
-    const shading = standing && this.occlusionPass?.shows ? this.occlusionPass : null
+    const occlusion = this.drawable(this.occlusionPass)
+    occlusion?.reckon(this.renderer, this.threeCamera)
+    const shading = standing && occlusion?.shows ? occlusion : null
     const blurring = this.reckonTiltShift()
     if (!shading && !blurring) {
       void this.renderer.render(this.scene, this.threeCamera)
@@ -2634,10 +2660,68 @@ export class Viewer {
   }
 
   /**
-   * Brings the corner shading into line with the settings as they now stand.
-   * Turning it on and off, changing its numbers, changing its colour: all
-   * here.
+   * Weaves a pass the viewer runs over the picture, off the frame; see
+   * `OcclusionPass.weave`.
+   *
+   * The pass is not drawn until this is done ({@link drawable}), and the frame
+   * after it is asked for. Drawn while its quads were still being made, three
+   * left out each quad whose pipeline was not there yet but still cleared what
+   * it draws into, so the frame showed no blur, or the blurred bands black, or
+   * the whole map in the shading's tint; and since a still map draws only what
+   * changed, that frame stayed. Measured 2026-11-17 with the card made slow
+   * the way a cold one is: the blur switched off and on in simple-map was
+   * still missing three seconds later.
+   *
+   * A failure is not the pass's failure: unwoven, it is drawn all the same and
+   * woven the old way, inside the frame that first draws it.
    */
+  private weavePass(pass: OcclusionPass | TiltShiftPass | null): void {
+    if (!pass || !this.started || this.disposed) return
+    if (this.passesWoven.has(pass) || this.passesWeaving.has(pass)) return
+    // And what the passes before it are still making, as {@link weave} waits
+    // on the weavings before it: a blur switched off and on again before its
+    // shaders were made is handed the first one's, unmade, and told it is done
+    const earlier = [...this.passesWeaving.values()]
+    const weaving = (async (): Promise<void> => {
+      try {
+        await pass.weave(this.renderer)
+      } catch {
+        // Drawn and woven in the frame instead, as it always was
+      }
+      await Promise.all(earlier)
+      this.passesWeaving.delete(pass)
+      this.passesWoven.add(pass)
+      if (pass === this.occlusionPass || pass === this.tiltShiftPass) this.repaintAsked = true
+    })()
+    this.passesWeaving.set(pass, weaving)
+  }
+
+  /** `pass` where it may be drawn this frame, which is once it is woven; see {@link weavePass}. */
+  private drawable<Pass extends OcclusionPass | TiltShiftPass>(pass: Pass | null): Pass | null {
+    return pass && this.passesWoven.has(pass) ? pass : null
+  }
+
+  /**
+   * Lets a pass over the picture go, as the page turns it off.
+   *
+   * One still being woven is let go once the weaving is done. Three goes on
+   * building what it was handed after each of its waits, on whatever it finds
+   * there: let go of under it, the pass's sheets were made again by the
+   * building and nothing freed them a second time (reviewed 2026-11-17). Once
+   * the viewer is down, the renderer that held them is gone with it.
+   */
+  private letPassGo(pass: OcclusionPass | TiltShiftPass | null): void {
+    if (!pass) return
+    const weaving = this.passesWeaving.get(pass)
+    if (!weaving) {
+      pass.dispose()
+      return
+    }
+    void weaving.then(() => {
+      if (!this.disposed) pass.dispose()
+    })
+  }
+
   /** Makes the blur or lets it go as the page turns it on and off. */
   private syncTiltShift(): void {
     if (this.disposed) return
@@ -2645,11 +2729,14 @@ export class Viewer {
     // would see it switched or set (`repaint.ts`)
     this.repaintAsked = true
     if (!this._tiltShift.enabled) {
-      this.tiltShiftPass?.dispose()
+      this.letPassGo(this.tiltShiftPass)
       this.tiltShiftPass = null
       return
     }
-    this.tiltShiftPass ??= new TiltShiftPass()
+    if (!this.tiltShiftPass) {
+      this.tiltShiftPass = new TiltShiftPass()
+      if (this.passesWeave) this.weavePass(this.tiltShiftPass)
+    }
   }
 
   /**
@@ -2668,7 +2755,7 @@ export class Viewer {
    * The most it blurs grows with the sine of the pitch for the same reason.
    */
   private reckonTiltShift(): TiltShiftPass | null {
-    const pass = this.tiltShiftPass
+    const pass = this.drawable(this.tiltShiftPass)
     if (!pass) return null
     const settings = this._tiltShift
     const camera = this.threeCamera
@@ -2685,6 +2772,11 @@ export class Viewer {
     return pass.shows ? pass : null
   }
 
+  /**
+   * Brings the corner shading into line with the settings as they now stand.
+   * Turning it on and off, changing its numbers, changing its colour: all
+   * here.
+   */
   private syncOcclusion(): void {
     // The settings outlive the viewer, since a page may go on holding them; a
     // write to one after `dispose` would otherwise make a pass nobody frees
@@ -2694,11 +2786,14 @@ export class Viewer {
     this.repaintAsked = true
     const settings = this._occlusion
     if (!settings.enabled) {
-      this.occlusionPass?.dispose()
+      this.letPassGo(this.occlusionPass)
       this.occlusionPass = null
       return
     }
-    this.occlusionPass ??= new OcclusionPass()
+    if (!this.occlusionPass) {
+      this.occlusionPass = new OcclusionPass()
+      if (this.passesWeave) this.weavePass(this.occlusionPass)
+    }
     this.occlusionPass.shade(this.palette.shadow)
     // The radius is given in real metres, so the world's stretch with latitude
     // is taken back out of it
@@ -4085,7 +4180,111 @@ export class Viewer {
     // there is nothing to weave with.
     if (!this.started) await this.starting.catch(() => undefined)
     if (!this.started || this.disposed) return
-    await Promise.all(weaving.map((thing) => this.renderer.compileAsync(thing, this.threeCamera, this.scene)))
+    // For the canvas, and then for the passes that draw the same things under
+    // stand-ins into targets of their own — the sun's map, the depth the
+    // corner shading and the blur measure from, the land under a mask. Those
+    // were left to be made on the spot, and on a card that had never made
+    // them the picture stopped while it did; see `weaveStandIns`
+    //
+    // Each as shown and in view, whatever it says this moment. Three's walk
+    // passes over what is told `visible = false` and over what its frustum
+    // test leaves out (`_projectObject`), and both are things the frames to
+    // come draw: a page's solid or sight hidden until the city stands, a thing
+    // a layer holds out of the picture until it is woven, a solid not stood
+    // yet and sitting at the world's nought. Left to the walk, those were
+    // built in the frame that first drew them (measured 2026-11-17 on
+    // security-camera: the camera's housing, its stand-in in the sight's cube
+    // and the sight's sheet, made with `createRenderPipeline` as the camera
+    // appeared). Only the things handed over are shown, not what is under
+    // them, so what a layer hides inside one stays hidden. Put back as soon as
+    // the walk is done: three walks before it first waits and reads neither
+    // again after
+    const shown = weaving.filter((thing) => !thing.visible)
+    const culled: Object3D[] = []
+    for (const thing of weaving) {
+      thing.traverse((object) => {
+        if (!object.frustumCulled) return
+        object.frustumCulled = false
+        culled.push(object)
+      })
+    }
+    for (const thing of shown) thing.visible = true
+    let forCanvas: Promise<unknown>[] = []
+    let forPasses: Promise<unknown> = Promise.resolve()
+    try {
+      forCanvas = weaving.map((thing) => this.renderer.compileAsync(thing, this.threeCamera, this.scene))
+      forPasses = weaveStandIns(this.renderer, this.scene, this.threeCamera, weaving, this._maskArea !== null)
+    } finally {
+      for (const thing of shown) thing.visible = false
+      for (const object of culled) object.frustumCulled = true
+    }
+    const mine = Promise.allSettled([...forCanvas, forPasses])
+
+    /*
+     * And whatever an earlier weaving of the same materials is still making.
+     *
+     * Three makes a pipeline once and hands the same one to everything that
+     * asks for it after — and a weaving that asks while it is still being made
+     * is handed it, unmade, and told it is done. A second tile of the city
+     * woven while the first was still making the city's shader was hung at
+     * once; the canvas left it out until the shader was there, and the sun's
+     * map, whose stand-in was made long before, drew it. Filmed 2026-11-17 in
+     * the playground opened cold with the rise slowed: the shadows of a street
+     * lay on the ground a quarter of a second before the street. So a weaving
+     * waits for the ones before it that share a material — the tiles of one
+     * kind share theirs — and only for those, so that the land does not wait
+     * on the city.
+     */
+    const materials = new Set<Material>()
+    for (const thing of weaving) {
+      thing.traverse((object) => {
+        const worn = (object as Mesh).material
+        if (!worn) return
+        for (const material of Array.isArray(worn) ? worn : [worn]) materials.add(material)
+      })
+    }
+    const earlier = new Set<Promise<unknown>>()
+    for (const material of materials) {
+      const before = this.weavingFor.get(material)
+      if (before) earlier.add(before)
+    }
+    // What the next weaving of these waits on is this one and all it waits on
+    // in turn, and not this one alone. Left as this one alone, a weaving that
+    // was handed the city's shader unmade finished at once, and the one after
+    // it waited on that and nothing else: the second tile waited, the third
+    // was hung in the middle of the first's shader being made (probed
+    // 2026-11-17, cold: three tiles drawn into the sun's map 0.4 s before the
+    // canvas could draw them). Neither rejects — `mine` is settled whatever
+    // happens, and so is every one before it
+    const whole = Promise.all([mine, ...earlier])
+    for (const material of materials) this.weavingFor.set(material, whole)
+    const settled = await mine
+    await whole
+    for (const material of materials) {
+      if (this.weavingFor.get(material) === whole) this.weavingFor.delete(material)
+    }
+    // Failing as the weaving did before it waited on anything: a shader that
+    // would not weave is said by the frame that draws it
+    const failed = settled.find((result) => result.status === 'rejected')
+    if (failed) throw failed.reason
+  }
+
+  /** The weaving under way for each material, for the next weaving of it to wait on; see {@link weave}. */
+  private readonly weavingFor = new Map<Material, Promise<unknown>>()
+
+  /**
+   * @internal Whether frames are being drawn, so that a thing put on now may be
+   * drawn before a weaving of it is done.
+   *
+   * Before, it may not: the first frame waits for the scene as it stands to be
+   * woven, and a weaving asked for until then waits for the viewer to start
+   * (see {@link weave}), which ends after that first frame. A layer holding a
+   * thing out of the picture until it is woven holds it only from here on —
+   * held from the start, a thing the page put on the map with the viewer was
+   * missing from its first frames.
+   */
+  get framing(): boolean {
+    return this.framesBegun
   }
 
   /**

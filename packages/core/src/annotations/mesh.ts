@@ -363,6 +363,15 @@ export class AnnotationMesh {
     // back to tell from a front, so both are drawn rather than the winding
     // being turned about to suit a rule that decides nothing.
     this.material.side = DoubleSide
+    // In one pass rather than three's two for a see-through thing drawn both
+    // sides (back faces first, then front), which draws the same here: every
+    // card on the screen turns the same way, so the two passes drew all of
+    // them in one and nothing in the other (measured 2026-11-17: the picture
+    // is unchanged to the noise of two runs). Drawn in two, it could not be
+    // woven: `compileAsync` builds after its walk, by when three has put the
+    // side back to both, so it wove a pipeline that culls nothing and the
+    // frame made the two that cull, on the spot
+    this.material.forceSinglePass = true
     // Marks are drawn last and over one another freely; writing depth would have
     // whatever of one rectangle is short of solid cut a hole in the next — a
     // letter's edge, or the whole of a dimmed mark. The clear part could not: it

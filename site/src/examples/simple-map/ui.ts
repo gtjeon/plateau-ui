@@ -1,6 +1,6 @@
 /**
- * The panel: a row for each palette, the outlines' switch, and the miniature
- * look's.
+ * The panel: a row for each palette, the switch for the buildings' edges, and
+ * the miniature look's.
  *
  * Nothing here calls the library: it lays out the rows, the first chosen, and
  * hands what is picked to whoever asked. The swatches are the palette's own
@@ -14,7 +14,7 @@ import { SWATCHES, type Scheme } from './data.js'
 export interface Picks {
   /** A palette was chosen. */
   readonly scheme: (scheme: Scheme) => void
-  /** The outlines were switched on or off. */
+  /** The buildings' edges were switched on or off. */
   readonly edges: (on: boolean) => void
   /** The miniature look was switched on or off. */
   readonly tiltShift: (on: boolean) => void

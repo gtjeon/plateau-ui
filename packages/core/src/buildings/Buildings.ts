@@ -3822,7 +3822,6 @@ export class Buildings implements Layer {
     if (this.linesWanted) {
       for (const mesh of meshes) this.folds.trace(mesh, this.hidden.outOf(mesh))
     }
-    this.beginGrowing(meshes)
 
     const group = new Group()
     // A group is where three takes the stage from, and from the nearest one —
@@ -3849,6 +3848,15 @@ export class Buildings implements Layer {
       drop([group])
       return null
     }
+    // The rise is timed from here, once the tile is woven and about to hang,
+    // and not from when it was shaped. It was started before the weaving
+    // until 2026-11-17, and on a card building its shaders for the first time
+    // the weaving outlasted the rise: the tile hung with its buildings already
+    // standing, a whole street popping up at once (filmed: the public
+    // simple-map, opened cold). The clock is written into the corners the
+    // shader reads, which are there already, so writing it now changes no
+    // shader.
+    this.beginGrowing(meshes)
 
     if (only) {
       const foot = one ? footOf(one, only.at) : undefined

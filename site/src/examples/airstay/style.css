@@ -1,0 +1,246 @@
+/*
+ * A page of its own, so it names its own colours rather than reaching for
+ * anyone else's. The brand is a coral red, and nothing else is coloured.
+ */
+:root {
+  --ink: #2b3038;
+  --brand: #e5484d;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  color: var(--ink);
+  font:
+    14px/1.6 system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* The brand, over the slope it has its houses on. */
+.brand {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  /* A card is a name and a price now, so the panel is only as wide as those */
+  min-width: 164px;
+  max-width: min(192px, calc(100% - 32px));
+  /* Five cards are taller than a short window; the panel scrolls, not the page */
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgb(43 48 56 / 0.16);
+}
+
+.brand-title {
+  margin: 0;
+  color: var(--brand);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.brand-lead {
+  margin: 0;
+  font-size: 12px;
+}
+
+/* Where it is, under a line, since the page shows one place and no map of Japan. */
+.brand-where {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgb(43 48 56 / 0.1);
+  color: rgb(43 48 56 / 0.6);
+  font-size: 11px;
+}
+
+/* Quiet, but there: the brand is made up and the page should say so. */
+.brand-note {
+  margin: 10px 0 0;
+  color: rgb(43 48 56 / 0.45);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+/* One card a stay. Five of them make the panel tall, so it scrolls inside. */
+.stays {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stay {
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  border: 1px solid rgb(43 48 56 / 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.stay:hover,
+.stay:focus-visible {
+  border-color: rgb(43 48 56 / 0.28);
+  background: rgb(43 48 56 / 0.03);
+  outline: none;
+}
+
+/* The open one is marked by its edge, and its rate on the map by its colour. */
+.stay.is-open {
+  border-color: var(--brand);
+}
+
+.stay h2 {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.stay-rate {
+  margin: 2px 0 0;
+  font-size: 11px;
+}
+
+.stay-rate b {
+  font-size: 13px;
+  /* So five prices line up down the list rather than wandering */
+  font-variant-numeric: tabular-nums;
+}
+
+.stay-rate span {
+  color: rgb(43 48 56 / 0.6);
+}
+
+/*
+ * The price over a roof, which is the same price the card down the side shows
+ * and is set from the same rules. A button, because it is one: pressing it
+ * opens the stay, as pressing the card does.
+ *
+ * Turned round for the one being looked at — dark on light becomes light on
+ * dark — which is the same thing `.stay.is-open` does to the card, said here
+ * for the plate.
+ */
+.rate {
+  border: none;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1f2328;
+  font:
+    700 12px system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rate.is-open {
+  background: #1f2328;
+  color: #ffffff;
+}
+
+.rate:focus-visible {
+  outline: 2px solid #1f2328;
+  outline-offset: 2px;
+}
+
+/*
+ * On a phone the panel folds to its first line, which is all of the map it
+ * then covers, and the arrow at its corner opens it. Opened, it takes no more
+ * than half the screen and scrolls inside that. Done with a checkbox and its
+ * label, so it needs no script: the box is what remembers whether the panel
+ * is open, and the label is the arrow that ticks it. Off a phone neither is
+ * shown and the panel is as it always was.
+ */
+.fold-toggle,
+.fold-button {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .brand {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    max-height: 50dvh;
+    overflow-y: auto;
+    padding: 10px 44px 10px 12px;
+    font-size: 13px;
+  }
+
+  /* The first line, which is all there is while folded: one size and one
+     height in every example, 40px with the padding */
+  .brand-title {
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .fold-toggle:not(:checked) ~ .brand-title {
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+
+  /* Kept for the keyboard and the screen reader, out of sight */
+  .fold-toggle {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fold-button {
+    display: block;
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .fold-button::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid currentcolor;
+    border-bottom: 2px solid currentcolor;
+    opacity: 0.6;
+    transform: rotate(45deg);
+  }
+
+  .fold-toggle:checked ~ .fold-button::after {
+    top: 16px;
+    transform: rotate(-135deg);
+  }
+
+  .fold-toggle:focus-visible ~ .fold-button {
+    outline: 2px solid currentcolor;
+    outline-offset: -2px;
+  }
+
+  .fold-toggle:not(:checked) ~ .fold-body {
+    display: none;
+  }
+}

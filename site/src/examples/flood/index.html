@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>画像タイルを重ねる | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <aside class="panel">
+      <input type="checkbox" id="fold" class="fold-toggle" aria-label="パネルを開閉" />
+      <!--
+        Where the picture lands. The three are the library's own words, and the
+        first is the one the page opens on; see `main.ts`.
+      -->
+      <label class="switch">
+        <span>映す先</span>
+        <select id="paints">
+          <option value="all">地面と建物</option>
+          <option value="ground">地面だけ</option>
+          <option value="buildings">建物だけ</option>
+        </select>
+      </label>
+      <label for="fold" class="fold-button" title="開く・閉じる"></label>
+      <div class="fold-body">
+        <!--
+        How many houses stand in each band, and how the reader points at one.
+        The rows are built by `ui.ts` from the legend's own colours, so the
+        markup leaves the list empty.
+      -->
+        <p class="heading">帯ごとの家<span>ふれるとその家が光ります</span></p>
+        <ul class="tally" id="tally"></ul>
+        <p class="note">灰色：図が塗っていない土地　白：タイルがない土地</p>
+      </div>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

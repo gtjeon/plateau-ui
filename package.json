@@ -1,0 +1,21 @@
+{
+  "name": "plateau-ui-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "pnpm --filter @plateau-ui/core build",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,css,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,css,json,md}\"",
+    "dev:site": "pnpm --filter site dev",
+    "share": "pnpm --filter site share"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "prettier": "3.9.8"
+  }
+}

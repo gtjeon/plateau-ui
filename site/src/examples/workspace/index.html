@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>複数の円で地図を切り抜く | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <aside class="brand">
+      <input type="checkbox" id="fold" class="fold-toggle" aria-label="パネルを開閉" />
+      <h1 class="brand-title">Workspace</h1>
+      <label for="fold" class="fold-button" title="開く・閉じる"></label>
+      <div class="fold-body">
+        <p class="brand-lead">駅のそばの、働ける場所。</p>
+        <!--
+        A row a station, name and floor, and both are already written with the
+        stations, so the rows are filled in here when the page runs.
+      -->
+        <ul class="stations" id="stations"></ul>
+      </div>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

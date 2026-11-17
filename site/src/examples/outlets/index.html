@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>区画内の建物を塗る | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!--
+      The whole window is the map, and the writing is printed on it as a
+      mall's site map prints it: a heading in the corner with the key under it,
+      and each zone's name standing over the zone it names (`main.ts` puts
+      those up). No card round any of it. The heading stands on the ground
+      round the mall, which the mask leaves empty, and a reader's drag goes
+      through it to the map.
+    -->
+    <div id="map"></div>
+    <header id="heading">
+      <h1>エリアマップ</h1>
+      <p>ゾーンごとに色分け</p>
+      <!-- Filled by `ui.ts` off the same grey the map paints the car parks with -->
+      <p id="key"></p>
+    </header>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

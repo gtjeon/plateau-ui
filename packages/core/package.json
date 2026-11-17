@@ -1,0 +1,59 @@
+{
+  "name": "@plateau-ui/core",
+  "version": "0.1.0-alpha.2",
+  "license": "MIT",
+  "description": "日本の 3D 建物マップを手軽に描ける、three.js ベースのライブラリ。",
+  "keywords": [
+    "plateau",
+    "3d-city-model",
+    "japan",
+    "map",
+    "three",
+    "webgpu",
+    "3d-tiles",
+    "gis"
+  ],
+  "author": "jeon",
+  "homepage": "https://gtjeon.github.io/plateau-ui/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gtjeon/plateau-ui.git",
+    "directory": "packages/core"
+  },
+  "bugs": "https://github.com/gtjeon/plateau-ui/issues",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_LICENSES.md"
+  ],
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "three": "~0.186.0"
+  },
+  "devDependencies": {
+    "@types/earcut": "^3.0.0",
+    "@types/three": "0.186.0",
+    "@webgpu/types": "^0.1.60",
+    "earcut": "^3.2.3",
+    "three": "0.186.0",
+    "typescript": "6.0.3",
+    "vite": "8.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

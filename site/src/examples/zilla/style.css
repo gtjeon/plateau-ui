@@ -1,0 +1,182 @@
+/*
+ * A page of its own, so it names its own colours rather than reaching for
+ * anyone else's. Greys, as the map is the library's own.
+ */
+:root {
+  --ink: #2b3038;
+  --edge: rgb(43 48 56 / 0.14);
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  color: var(--ink);
+  font:
+    14px/1.6 system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+  background: #e9e9ea;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* The ways of shaking, over the city they shake. */
+.ways {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  width: 232px;
+  max-width: calc(100% - 32px);
+  padding: 8px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgb(43 48 56 / 0.16);
+}
+
+.ways-title {
+  margin: 0 0 4px;
+  padding: 6px 8px 8px;
+  border-bottom: 1px solid var(--edge);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ways-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shake {
+  display: block;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shake:hover,
+.shake:focus-visible {
+  background: rgb(43 48 56 / 0.06);
+}
+
+/* The one being used. */
+.shake[aria-pressed='true'] {
+  background: rgb(43 48 56 / 0.1);
+}
+
+.shake-name {
+  display: block;
+  font-weight: 600;
+}
+
+/* What that one's field says, which is the whole of what tells them apart. */
+.shake-note {
+  display: block;
+  color: rgb(43 48 56 / 0.66);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/*
+ * On a phone the panel folds to its first line, which is all of the map it
+ * then covers, and the arrow at its corner opens it. Opened, it takes no more
+ * than half the screen and scrolls inside that. Done with a checkbox and its
+ * label, so it needs no script: the box is what remembers whether the panel
+ * is open, and the label is the arrow that ticks it. Off a phone neither is
+ * shown and the panel is as it always was.
+ */
+.fold-toggle,
+.fold-button {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .ways {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    max-height: 50dvh;
+    overflow-y: auto;
+    padding: 10px 44px 10px 12px;
+    font-size: 13px;
+  }
+
+  /* The first line, which is all there is while folded: one size and one
+     height in every example, 40px with the padding */
+  .ways-title {
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .fold-toggle:not(:checked) ~ .ways-title {
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+
+  /* Kept for the keyboard and the screen reader, out of sight */
+  .fold-toggle {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fold-button {
+    display: block;
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .fold-button::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid currentcolor;
+    border-bottom: 2px solid currentcolor;
+    opacity: 0.6;
+    transform: rotate(45deg);
+  }
+
+  .fold-toggle:checked ~ .fold-button::after {
+    top: 16px;
+    transform: rotate(-135deg);
+  }
+
+  .fold-toggle:focus-visible ~ .fold-button {
+    outline: 2px solid currentcolor;
+    outline-offset: -2px;
+  }
+
+  .fold-toggle:not(:checked) ~ .fold-body {
+    display: none;
+  }
+}

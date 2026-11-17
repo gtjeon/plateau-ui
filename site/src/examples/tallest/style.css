@@ -1,0 +1,61 @@
+/*
+ * A page of its own, so it names its own colours rather than reaching for
+ * anyone else's. There is nothing over the map here — what a reader reads is
+ * drawn in it — so this is the page the map fills and nothing more.
+ */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #ffffff;
+  font:
+    14px/1.6 system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * No plate under the plate, and no band round the letters. What stands behind
+ * them is the sheet, or the sky over it, both of them the page's one paper —
+ * so there is nothing to part them from, and either would only fatten them.
+ */
+.plate {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  color: #52514e;
+  font:
+    500 10.5px system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+  white-space: nowrap;
+}
+
+/*
+ * The height is what the page is for, so it is set large and at the dark end
+ * of the page's one hue; what hangs under it is a weight lighter as well as
+ * smaller, since two lines both set bold read as two headings.
+ *
+ * The towers' blue taken down rather than a second colour brought in. A page
+ * that measures one thing wants one hue, and the figure is that hue at its
+ * darkest — far enough from the wall it stands over to read as writing and
+ * not as part of the shape, near enough to belong to it. Dark and not merely
+ * grey: black would have said nothing, and the grey of the lines under it is
+ * where the saying stops.
+ *
+ * Measured: 15.2:1 against the paper, ΔE 16 from the wall it stands over, and
+ * 25 from the grey under it — so the two lines of one plate are not one
+ * colour badly printed.
+ */
+.plate b {
+  color: #0b1a38;
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}

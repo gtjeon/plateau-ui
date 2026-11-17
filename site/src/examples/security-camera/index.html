@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>見える範囲を塗る | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <aside class="panel">
+      <input type="checkbox" id="fold" class="fold-toggle" aria-label="パネルを開閉" />
+      <h1 class="title">見える範囲を塗る</h1>
+      <label for="fold" class="fold-button" title="開く・閉じる"></label>
+      <div class="fold-body">
+        <p class="note"><span class="swatch" aria-hidden="true"></span>カメラに映る範囲</p>
+        <p class="hint">地面・屋上・壁を押すと印が立ち、映るかどうかを表示する。地面は高さ1.6mで調べる。</p>
+      </div>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

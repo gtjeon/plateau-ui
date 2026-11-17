@@ -1,0 +1,52 @@
+# Stages @plateau-ui/core on npm when a GitHub release is published. Staged, not live: the version goes out
+# only once a maintainer approves it on npmjs.com (or with `npm stage approve`), with their own second factor.
+#
+# The release's tag has to be the package's version with a `v` in front (`v0.1.0-alpha.1`), or nothing is
+# staged. A version with a pre-release part goes out under that part's name as its npm tag (`alpha`), so
+# `npm install @plateau-ui/core` keeps giving the last plain version; anything else goes out as `latest`.
+#
+# No token: npm's trusted publishing takes the run's own identity (`id-token: write`), and adds a provenance
+# statement saying which commit and which workflow built the package. It is set up on npmjs.com, on the
+# package's settings, naming this repository and this file, and allowed to stage and nothing more: someone
+# who took this workflow over could put a version in front of the maintainer, not in front of users.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - name: Build the library
+        run: pnpm build
+      - name: Check the tag is the version, and pick the npm tag
+        id: version
+        working-directory: packages/core
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "v$version" ]; then
+            echo "The release is $TAG but the package is $version" >&2
+            exit 1
+          fi
+          channel=$(node -p "(process.argv[1].split('-')[1] || 'latest').split('.')[0]" "$version")
+          echo "channel=$channel" >> "$GITHUB_OUTPUT"
+      - name: Stage it for approval
+        working-directory: packages/core
+        run: npm stage publish --tag ${{ steps.version.outputs.channel }}

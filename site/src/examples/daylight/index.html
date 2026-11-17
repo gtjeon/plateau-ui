@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>太陽の位置を決める | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!-- The house and nothing over it. -->
+    <div id="map"></div>
+
+    <!--
+      What moves the light, and it is the page's and not the map's: the library
+      is handed a moment and draws the sun of it, so which moment is furniture
+      standing on top. The same card as the other examples' — a title, a line
+      saying what it is for, and what is chosen under a rule — and folded to
+      its title on a phone, as theirs are.
+
+      Here is the shape of what is chosen: the two days, the date of whichever
+      is chosen, a reading and a handle. Which days there are, where each
+      starts and ends, and how fine the handle is are all set from `data.ts`,
+      so the panel carries nothing of its own to drift from what the map is lit
+      by.
+
+      The days come first because they are the coarser choice: one picks which
+      sun, the handle picks where along it. `#days` is left empty and filled
+      with one button a day — a day written in here would be a day the map has
+      never been lit by.
+
+      `#day` is the date alone and not the date and the word. The word is on
+      the button that is pressed, and a panel that said 冬至 twice over would
+      be reading itself back.
+    -->
+    <aside class="panel">
+      <input type="checkbox" id="fold" class="fold-toggle" aria-label="パネルを開閉" />
+      <h1 class="title">太陽の位置を決める</h1>
+      <label for="fold" class="fold-button" title="開く・閉じる"></label>
+      <div class="fold-body">
+        <p class="note">日付と時刻を選び、その時刻の影を表示する。</p>
+        <div id="clock" class="group">
+          <div id="days"></div>
+          <p id="day"></p>
+          <label for="time">時刻</label>
+          <output id="now" for="time"></output>
+          <input id="time" type="range" />
+        </div>
+      </div>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

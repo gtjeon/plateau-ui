@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+*.log
+.idea/
+.vite/
+
+# Kept on this machine only: the working notes, and the launch settings with
+# this machine's paths in them
+/CLAUDE.md
+/CONCEPT.md
+/.claude/
+/playground/

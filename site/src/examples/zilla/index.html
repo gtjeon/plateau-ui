@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>建物をまとめて動かす | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <aside class="ways">
+      <input type="checkbox" id="fold" class="fold-toggle" aria-label="パネルを開閉" />
+      <h1 class="ways-title">足音の伝わり方</h1>
+      <label for="fold" class="fold-button" title="開く・閉じる"></label>
+      <div class="fold-body">
+        <!--
+        The four are written once, with what each one's field says, and filled
+        in here when the page runs.
+      -->
+        <ul class="ways-list" id="shakes"></ul>
+      </div>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

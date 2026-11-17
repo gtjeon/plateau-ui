@@ -1,0 +1,43 @@
+Trex.glb
+========
+
+Title:   Trex, from the Dinosaur Animated Pack (December 2018)
+Author:  Quaternius
+         https://quaternius.com
+         https://www.patreon.com/quaternius
+License: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+         https://creativecommons.org/publicdomain/zero/1.0/
+
+The pack's own License.txt reads:
+
+  LowPoly Models by @Quaternius
+  Consider supporting me on Patreon, even $1 helps me a lot!
+  https://www.patreon.com/quaternius
+
+  License:
+  CC0 1.0 Universal (CC0 1.0)
+  Public Domain Dedication
+  https://creativecommons.org/publicdomain/zero/1.0/
+
+The file here is the pack's FBX/Trex.fbx turned into glTF binary with three.js
+itself (0.186): read with three/addons/loaders/FBXLoader.js and written with
+three/addons/exporters/GLTFExporter.js. Its mesh, skeleton and all six of its
+clips (TRex_Walk, TRex_Run, TRex_Idle, TRex_Attack, TRex_Jump, TRex_Death,
+each named "Armature|…") are as the FBX has them, with three changes:
+
+- its faces are put in order of material, so the mesh is drawn in five parts
+  rather than 166;
+- each of its five materials (Green, Black, LightGreen, Red, LightYellow) is a
+  plain glTF material of the FBX's diffuse color, fully rough and not metal.
+  The FBX gives each an emissive color equal to its diffuse one at nought
+  strength, which glTF cannot say, so that is left out rather than made to
+  glow;
+- the few vertices the FBX weights to more than four bones keep their four
+  strongest, as glTF holds four.
+
+The walk measured on the converted file — how far a stride carries the
+creature, and how wide and how high its body is along its length — comes
+within 0.3 % of the same measured on the FBX itself.
+
+No credit is asked for. The example credits the model in the viewer's
+credits line anyway, while it is shown.

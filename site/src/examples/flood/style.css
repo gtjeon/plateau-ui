@@ -1,0 +1,244 @@
+/*
+ * A page of its own, so it names its own colours rather than reaching for
+ * anyone else's. The map fills the screen and one panel sits over it.
+ */
+:root {
+  --ink: #2b3038;
+  --paper: rgb(255 255 255 / 0.92);
+  --faint: rgb(43 48 56 / 0.62);
+  --under: rgb(43 48 56 / 0.16);
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #e9e9ea;
+  color: var(--ink);
+  font:
+    14px/1.6 system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* The one switch, over the town it changes. */
+.panel {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  width: 268px;
+  max-width: calc(100% - 32px);
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--paper);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px var(--under);
+}
+
+.switch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* What the menu is for. The weight is on these words alone: set on the label
+   it is inherited by the menu as well, and a menu reads as a heading. */
+.switch span {
+  font-weight: 600;
+}
+
+/* The browser's own menu, in the page's text rather than the label's. */
+.switch select {
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.heading {
+  margin: 12px 0 0;
+  font-weight: 600;
+}
+
+/* What touching a row does, said beside what the rows are. */
+.heading span {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--faint);
+}
+
+/* One row a band: the colour as the legend prints it, and the count. */
+.tally {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+/*
+ * A row is a button and is drawn as one: the reader points at it and the city
+ * answers, so it has a face of its own at rest rather than only on being
+ * touched. A row that looked like a line of text would be a row nobody tries.
+ */
+.band {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 5px 8px;
+  border: 1px solid rgb(43 48 56 / 0.14);
+  border-radius: 7px;
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: 0 1px 1px rgb(43 48 56 / 0.06);
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    border-color 120ms,
+    box-shadow 120ms;
+}
+
+.band:hover,
+.band:focus-visible {
+  border-color: rgb(43 48 56 / 0.4);
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(43 48 56 / 0.14);
+  outline: none;
+}
+
+/* Pressed, so that a touch that does something looks like it did. */
+.band:active {
+  box-shadow: inset 0 1px 2px rgb(43 48 56 / 0.16);
+  transform: translateY(1px);
+}
+
+.band:focus-visible {
+  box-shadow: 0 0 0 2px rgb(43 48 56 / 0.35);
+}
+
+.chip {
+  width: 13px;
+  height: 13px;
+  border: 1px solid rgb(43 48 56 / 0.3);
+  border-radius: 2px;
+}
+
+/* Ground the picture leaves clear, and ground it cannot answer for. */
+.chip.clear {
+  background: #e9ecef;
+}
+
+.chip.unknown {
+  background: #fff;
+  border-style: dashed;
+}
+
+.note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--faint);
+}
+
+/*
+ * On a phone the panel folds to its first line, which is all of the map it
+ * then covers, and the arrow at its corner opens it. Opened, it takes no more
+ * than half the screen and scrolls inside that. Done with a checkbox and its
+ * label, so it needs no script: the box is what remembers whether the panel
+ * is open, and the label is the arrow that ticks it. Off a phone neither is
+ * shown and the panel is as it always was.
+ */
+.fold-toggle,
+.fold-button {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .panel {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    max-height: 50dvh;
+    overflow-y: auto;
+    padding: 10px 44px 10px 12px;
+    font-size: 13px;
+  }
+
+  /* The first line, which is all there is while folded: one size and one
+     height in every example, 40px with the padding */
+  .switch {
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .fold-toggle:not(:checked) ~ .switch {
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+
+  /* Kept for the keyboard and the screen reader, out of sight */
+  .fold-toggle {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fold-button {
+    display: block;
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .fold-button::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid currentcolor;
+    border-bottom: 2px solid currentcolor;
+    opacity: 0.6;
+    transform: rotate(45deg);
+  }
+
+  .fold-toggle:checked ~ .fold-button::after {
+    top: 16px;
+    transform: rotate(-135deg);
+  }
+
+  .fold-toggle:focus-visible ~ .fold-button {
+    outline: 2px solid currentcolor;
+    outline-offset: -2px;
+  }
+
+  .fold-toggle:not(:checked) ~ .fold-body {
+    display: none;
+  }
+}

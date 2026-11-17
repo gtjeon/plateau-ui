@@ -1,0 +1,62 @@
+/*
+ * A page of its own, so it names its own colours rather than reaching for
+ * anyone else's. They are the map's greys; the only colour that matters on
+ * this screen is the one in the roofs, and that is drawn on a canvas.
+ */
+:root {
+  --ink: #23252a;
+  --dim: #6b6e76;
+  --air: rgb(247 247 248 / 0.92);
+  --edge: rgb(35 37 42 / 0.12);
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  color: var(--ink);
+  font:
+    14px/1.6 system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+  background: #e9e9ea;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* Top left, where a reader starts: the map says nothing about what to press. */
+.pads {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  width: min(320px, calc(100vw - 32px));
+  padding: 14px 16px 12px;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  background: var(--air);
+  backdrop-filter: blur(6px);
+}
+
+.pads-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pads-note {
+  margin: 0;
+  color: var(--dim);
+}
+
+/* The running count, which changes as roofs are pressed. */
+.pads-hint {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--edge);
+  font-weight: 600;
+}

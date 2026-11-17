@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>3D化画像タイルを表示する | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <aside class="panel">
+      <input type="checkbox" id="fold" class="fold-toggle" aria-label="パネルを開閉" />
+      <!-- The portal's legend, one row a band, built by `main.ts` from the colours it matches. -->
+      <p class="heading">浸水継続時間（想定最大規模）</p>
+      <label for="fold" class="fold-button" title="開く・閉じる"></label>
+      <div class="fold-body">
+        <ul class="legend" id="legend"></ul>
+        <p class="note">※「2週間以上〜」の色は「4週間以上〜」の場合もあります。</p>
+
+        <!-- What the steps are, so a reader does not take them for depths. -->
+        <p class="note">段の高さは帯の順番（短い帯から2mずつ）。</p>
+
+        <!-- How much of the steps goes on, and them in one colour or the legend's; see `main.ts`. -->
+        <label class="row">
+          不透明度
+          <input type="range" id="opacity" min="0" max="1" step="0.05" value="0.9" />
+          <output id="opacity-value">0.90</output>
+        </label>
+        <label class="row"><input type="checkbox" id="one-color" /> 一色で塗る</label>
+      </div>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

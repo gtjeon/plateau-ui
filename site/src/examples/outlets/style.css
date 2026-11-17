@@ -1,0 +1,181 @@
+/*
+ * A page of its own, so it names its own colours rather than reaching for
+ * anyone else's. The zones' colours are the one thing not written here: they
+ * belong to the zones, are read from `data.ts` as the map is coloured, and are
+ * set on the names over the map from there — a colour written twice is a
+ * colour that drifts.
+ *
+ * What the writing is after is the site map a mall prints in its leaflet: a
+ * heading set large in a corner, the zones named in their own colours over
+ * their own roofs, and the small print of the key under the heading. Printed
+ * on the map rather than laid over it in panels, so the writing and the place
+ * it is about are one sheet.
+ */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #ffffff;
+  font:
+    14px/1.6 system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+  color: #1d1f23;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * The heading in the top corner, where a leaflet's is. Large and tight, as a
+ * printed heading is set, and nothing behind it: the ground round the mall is
+ * cut away, so the corner it stands in is paper.
+ *
+ * It takes no pointer. It is print, not a control, and a drag that starts on
+ * it is a drag of the map under it.
+ */
+#heading {
+  position: absolute;
+  z-index: 2;
+  top: 26px;
+  left: 30px;
+  pointer-events: none;
+}
+
+#heading h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+}
+
+#heading p {
+  margin: 6px 0 0;
+  color: #5c6068;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* The key, under a short rule as a leaflet's small print sits under its heading */
+#key {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  padding-top: 8px;
+  border-top: 1px solid #d7d9dd;
+}
+
+/* Its colour is set in ui.ts, off the same value the map paints with */
+#key .chip {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 1px solid;
+}
+
+/* ── A zone's name over its roofs ───────────────────────── */
+
+/*
+ * The zone's letter in its own colour and its name beside it, printed with a
+ * white edge round every stroke so it reads over roofs, roads and woods
+ * alike, as a map's names are. A button, since pressing one flies to the zone.
+ */
+.zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zone:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 4px;
+}
+
+/* Square and not round: what it stands for is a patch of ground */
+.zone .letter {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  background: var(--zone);
+  box-shadow: 0 0 0 2px #ffffff;
+  color: #ffffff;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.zone .words {
+  display: grid;
+  line-height: 1.25;
+}
+
+/*
+ * The name in the zone's darker line colour, which holds against the white
+ * edge where the fill colour itself is too light for a stroke this thin.
+ */
+.zone .name {
+  color: var(--zone-edge);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 4px #ffffff;
+}
+
+.zone .count {
+  color: #33363c;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 3px #ffffff;
+}
+
+/* A phone has a third of the width, so the heading and the names step down */
+@media (max-width: 640px) {
+  #heading {
+    top: 14px;
+    left: 16px;
+  }
+
+  #heading h1 {
+    font-size: 22px;
+  }
+
+  #heading p {
+    font-size: 12px;
+  }
+
+  .zone {
+    gap: 6px;
+  }
+
+  .zone .letter {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .zone .name {
+    font-size: 13px;
+    -webkit-text-stroke-width: 3px;
+  }
+
+  .zone .count {
+    font-size: 11px;
+  }
+}

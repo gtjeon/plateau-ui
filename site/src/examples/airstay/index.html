@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>3Dモデルを置く | plateau-ui</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <aside class="brand">
+      <input type="checkbox" id="fold" class="fold-toggle" aria-label="パネルを開閉" />
+      <h1 class="brand-title">AirStay</h1>
+      <label for="fold" class="fold-button" title="開く・閉じる"></label>
+      <div class="fold-body">
+        <p class="brand-lead">海の見える坂に、泊まる。</p>
+        <p class="brand-where">神奈川県鎌倉市 七里ヶ浜</p>
+
+        <ul class="stays" id="stays"></ul>
+
+        <p class="brand-note">plateau-ui のデモページです。宿泊施設ではなく、名前も料金も作り物です。</p>
+      </div>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

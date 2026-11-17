@@ -1,0 +1,77 @@
+/*
+ * A page of its own, so it names its own colours rather than reaching for
+ * anyone else's.
+ */
+:root {
+  --ink: #2b3038;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  color: var(--ink);
+  font:
+    14px/1.6 system-ui,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* The one switch, over the city it changes. */
+.panel {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  width: 248px;
+  max-width: calc(100% - 32px);
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgb(43 48 56 / 0.16);
+}
+
+.switch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* What the menu is for. The weight is on these words alone: set on the label
+   it is inherited by the menu as well, and a menu reads as a heading. */
+.switch span {
+  font-weight: 600;
+}
+
+/* The browser's own menu, in the page's text rather than the label's. */
+.switch select {
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/*
+ * The ward under the pointer. It keeps its height while it is empty, so the
+ * note under it does not jump up and down as the pointer crosses a boundary.
+ */
+.ward {
+  margin: 10px 0 0;
+  min-height: 1.6em;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgb(43 48 56 / 0.62);
+}

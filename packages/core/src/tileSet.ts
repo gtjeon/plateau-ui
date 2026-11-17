@@ -173,6 +173,11 @@ export class TileSet<T> {
     return count
   }
 
+  /** Whether the tile of this key is held: landed, or on its way. */
+  holds(key: string): boolean {
+    return this.tiles.has(key)
+  }
+
   /** Tiles on screen and still on their way. */
   get loading(): T[] {
     const tiles: T[] = []

@@ -3339,7 +3339,19 @@ export class Buildings implements Layer {
   }
 
   private handOver(): void {
-    this.tiles.sync([...this.byName, ...this.covering])
+    // While the city goes under, what the view covered is kept only where it
+    // has landed, to go under with the rest: nothing more of it is fetched.
+    // `beginLeaving` lets go of what was on its way, and the view's tiles are
+    // forgotten only once the city is down (`letCityGo`), so until then a
+    // handing over for anything else — a building a page moved or brought is
+    // looked for again each time the view is — asked for them all again. They landed,
+    // rose while the street around them sank, and were let go of half way
+    // up (measured 2026-11-17 in the playground: a building moved, a fresh
+    // place, the zoom taken under the city's at once — 21 of the 22 tiles
+    // that came up came up while the city was going under)
+    const covering =
+      this.leaving === null ? this.covering : this.covering.filter((fetch) => this.tiles.holds(fetch.key))
+    this.tiles.sync([...this.byName, ...covering])
   }
 
   /**

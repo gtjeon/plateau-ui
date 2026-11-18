@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>plateau-ui — PLATEAU AWARD 2026</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!--
+      The entry's slides. Every picture is the library's own drawing: frames of
+      the film (img/film-*, img/page-*) and the site as it is published
+      (img/site-*). tools/pdf.mjs prints this to one PDF, a page a slide.
+    -->
+
+    <!-- 1 -->
+    <section class="slide cover">
+      <div class="band">
+        <div>
+          <div class="award">PLATEAU AWARD 2026 一般部門</div>
+          <div class="who">応募者：plateau-ui</div>
+        </div>
+        <div class="try">
+          <b>サイトで、いますぐ動かせます</b>
+          gtjeon.github.io/plateau-ui
+        </div>
+        <img class="qr" src="../shots/outro/qr.png" alt="" />
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide divider">
+      <div class="lead-in">
+        <div class="num">01</div>
+        <h2>課題</h2>
+        <p class="say">PLATEAU のデータは誰でも使えます。<br />それでも、自分のページに載せるまでには壁があります。</p>
+        <ul class="topics"><li>ページに載せるまでの、3 つの壁</li></ul>
+      </div>
+      <ol class="parts"><li class="now"><span>01</span>課題</li><li><span>02</span>plateau-ui</li><li><span>03</span>できること</li><li><span>04</span>広がり</li></ol>
+      <div class="foot"><span>plateau-ui</span><span>2 / 14</span></div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide">
+      <div class="head"><h2>PLATEAU は誰でも使える。でも、ページに載せるまでが遠い。</h2></div>
+      <div class="who-for">
+        <p class="person">
+          <small>たとえば</small>
+          物件ページで、その建物と街を<br />立体で見せたい。<br />
+          施設案内に、駅からの道を<br />3D で描きたい。<br />
+          そう考えた Web 開発者。
+        </p>
+        <div class="hurdles">
+          <div class="card"><b>データ</b><p>3D Tiles・ベクトルタイル・標高を、配信元ごとに探して組み合わせる</p></div>
+          <div class="card"><b>描画</b><p>地形の上に建物を立て、光と影をつけ、重くならないように描く</p></div>
+          <div class="card"><b>部品化</b><p>1 棟だけ塗る、マーカーを付ける、ページのボタンや一覧とつなぐ</p></div>
+        </div>
+      </div>
+      <p class="aim">3D や GIS の専門家でなくても、PLATEAU を自分のサービスのページで使えるように。</p>
+      <div class="foot"><span>plateau-ui</span><span>3 / 14</span></div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide divider reveal">
+      <div class="lead-in">
+        <div class="num">02</div>
+        <h2>plateau-ui</h2>
+        <p class="say">オープンデータを組み合わせて、<br />どのサイトにもなじむ街並みを、数行で。</p>
+        <ul class="topics"><li>オープンデータの組み合わせ</li><li>数行で始める</li><li>ほかの道具との違い</li></ul>
+      </div>
+      <ol class="parts"><li><span>01</span>課題</li><li class="now"><span>02</span>plateau-ui</li><li><span>03</span>できること</li><li><span>04</span>広がり</li></ol>
+      <div class="foot"><span>plateau-ui</span><span>4 / 14</span></div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide">
+      <div class="head"><h2>オープンデータを組み合わせて、街並みをつくる</h2></div>
+      <p class="lead">どのサイトにもなじむ東京の街並みを、Web で使える UI として届けます。</p>
+      <div class="blend">
+        <img class="shot" src="img/street.jpg" alt="" />
+        <div class="mix">
+          <div class="card"><small>PLATEAU　建物の用途</small><b>用途に合わせて、窓を生成する</b></div>
+          <div class="card"><small>国土地理院　ベクトルタイルの道路</small><b>道に面した壁にだけ、窓を開ける</b></div>
+          <div class="card green">
+            <div><small>PLATEAU　土地利用</small><b>公園に、緑と木を植える</b></div>
+            <img src="img/green.jpg" alt="" />
+          </div>
+          <div class="card"><small>国土地理院　標高タイル</small><b>起伏の上に、建物を立てる</b></div>
+        </div>
+      </div>
+      <p class="anywhere">PLATEAU が整備された街なら、どこでも同じコードで。データは公開 CDN から読み込み、出典は地図の下に自動で表示します。</p>
+      <div class="foot"><span>plateau-ui</span><span>5 / 14</span></div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide">
+      <div class="head"><h2>npm ひとつと、数行のコードで。</h2></div>
+      <div class="answer">
+        <div>
+<pre><span class="c"># インストール</span>
+npm install @plateau-ui/core three
+
+<span class="k">import</span> { Viewer } <span class="k">from</span> '@plateau-ui/core'
+
+<span class="k">new</span> Viewer({
+  container: 'map',
+  center: [139.7671, 35.6812], <span class="c">// [経度, 緯度]</span>
+  zoom: 17,
+  pitch: 60,
+  mask: { shapes: [{ shape: 'view' }] },
+})</pre>
+          <ul>
+            <li>地図サービスの契約や API キーはいりません</li>
+            <li>データは国のオープンデータを、公開 CDN から直接読み込み</li>
+            <li>TypeScript の型つき、ライセンスは MIT</li>
+          </ul>
+        </div>
+        <figure>
+          <img class="shot" src="img/film-wall.jpg" alt="" />
+          <figcaption>地形・建物・道路・川・緑地・影まで、最初から描かれます。</figcaption>
+        </figure>
+      </div>
+      <div class="foot"><span>plateau-ui</span><span>6 / 14</span></div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide">
+      <div class="head"><h2>ほかの道具との違い</h2></div>
+      <table class="compare">
+        <thead>
+          <tr><th></th><th>どんな道具か</th><th>主な使いどころ</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>PLATEAU VIEW</th><td>PLATEAU の公式ビューア（Web アプリ）</td><td>データを見る・探す</td></tr>
+          <tr><th>CesiumJS</th><td>地球全体を扱う 3D 地球儀エンジン</td><td>GIS・可視化のアプリを作る</td></tr>
+          <tr><th>Unity・Unreal 向け SDK</th><td>ゲームエンジン用のプラグイン</td><td>アプリ・ゲーム・XR を作る</td></tr>
+          <tr class="ours"><th>plateau-ui</th><td>Web ページに載せる three.js のライブラリ</td><td>自分のサービスのページに、街を部品として載せる</td></tr>
+        </tbody>
+      </table>
+      <div class="points">
+        <div class="card"><b>ページの一部として</b><p>好きな大きさの枠に入り、クリックやホバーのイベントでページの UI とつながる</p></div>
+        <div class="card"><b>three.js そのまま</b><p>three.js の知識と資産（メッシュ・ライト・マテリアル）がそのまま使える</p></div>
+        <div class="card"><b>1 棟を単位に</b><p>PLATEAU の建物 ID で、選ぶ・塗る・動かす・取り寄せる</p></div>
+      </div>
+      <p class="fair">※ 用途の違いを並べたもので、優劣の比較ではありません。</p>
+      <div class="foot"><span>plateau-ui</span><span>7 / 14</span></div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide divider">
+      <div class="lead-in">
+        <div class="num">03</div>
+        <h2>できること</h2>
+        <p class="say">建物を 1 棟ずつ動かし、<br />実際のサービスのページに載せます。</p>
+        <ul class="topics"><li>建物を、思いのままに</li><li>あなたのページに</li></ul>
+      </div>
+      <ol class="parts"><li><span>01</span>課題</li><li><span>02</span>plateau-ui</li><li class="now"><span>03</span>できること</li><li><span>04</span>広がり</li></ol>
+      <div class="foot"><span>plateau-ui</span><span>8 / 14</span></div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide">
+      <div class="head"><h2>建物を、思いのままに</h2></div>
+      <p class="lead">どれも数行。動画の第 1 部で、ひとつのタワーに順にかけています。</p>
+      <div class="grid grid-4">
+        <figure><img src="img/film-outline.jpg" alt="" /><figcaption>選んで縁取る<code>setStyle(id, { outline: true })</code></figcaption></figure>
+        <figure><img src="img/film-floors.jpg" alt="" /><figcaption>階ごとに塗る<code>setStyle(id, { floors: [{ at: 3 }] })</code></figcaption></figure>
+        <figure><img src="img/film-roof.jpg" alt="" /><figcaption>屋上に絵を貼る<code>setStyle(id, { roofImage: { image } })</code></figcaption></figure>
+        <figure><img src="img/film-marker.jpg" alt="" /><figcaption>マーカーを付ける<code>viewer.add(new Marker({ at }))</code></figcaption></figure>
+        <figure><img src="img/film-move.jpg" alt="" /><figcaption>動かす・移す<code>place(id, { at, facing: 90 })</code></figcaption></figure>
+        <figure><img src="img/film-sight.jpg" alt="" /><figcaption>カメラから見える範囲<code>new Viewshed({ at, facing })</code></figcaption></figure>
+        <figure><img src="img/film-theme.jpg" alt="" /><figcaption>地図の色を変える<code>viewer.theme = { … }</code></figcaption></figure>
+        <figure><img src="img/film-night.jpg" alt="" /><figcaption>時刻で影が回り、夜が来る<code>viewer.sun = { by: 'time', at }</code></figcaption></figure>
+      </div>
+      <div class="foot"><span>plateau-ui</span><span>9 / 14</span></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide">
+      <div class="head"><h2>あなたのページに</h2></div>
+      <p class="lead">サイトのサンプルを、実際のサービスの形のページに入れたところです（ページはすべて架空のものです）。</p>
+      <div class="grid grid-4 pages">
+        <figure><img src="img/page-estate.jpg" alt="" /><figcaption>不動産 <span>日当たり</span></figcaption></figure>
+        <figure><img src="img/page-stay.jpg" alt="" /><figcaption>宿泊 <span>建物モデルを置く</span></figcaption></figure>
+        <figure><img src="img/page-outlets.jpg" alt="" /><figcaption>商業施設 <span>エリアマップ</span></figcaption></figure>
+        <figure><img src="img/page-office.jpg" alt="" /><figcaption>企業 <span>拠点紹介</span></figcaption></figure>
+        <figure><img src="img/page-cityhall.jpg" alt="" /><figcaption>自治体 <span>施設への道順</span></figcaption></figure>
+        <figure><img src="img/page-hazard.jpg" alt="" /><figcaption>防災 <span>浸水が続く時間</span></figcaption></figure>
+        <figure><img src="img/page-quake.jpg" alt="" /><figcaption>防災 <span>揺れのイメージ</span></figcaption></figure>
+        <div class="more-card"><b>15</b>本のサンプルが<br />サイトで動きます</div>
+      </div>
+      <div class="foot"><span>plateau-ui</span><span>10 / 14</span></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide divider">
+      <div class="lead-in">
+        <div class="num">04</div>
+        <h2>広がり</h2>
+        <p class="say">three.js の上で広げられ、<br />PLATEAU を使う人を増やします。</p>
+        <ul class="topics"><li>three.js の上で</li><li>PLATEAU を使う人を、増やす</li></ul>
+      </div>
+      <ol class="parts"><li><span>01</span>課題</li><li><span>02</span>plateau-ui</li><li><span>03</span>できること</li><li class="now"><span>04</span>広がり</li></ol>
+      <div class="foot"><span>plateau-ui</span><span>11 / 14</span></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide">
+      <div class="head"><h2>three.js の上で</h2></div>
+      <p class="lead">three.js でできることは、この上でもそのままできます。</p>
+      <div class="three">
+        <figure><img class="shot" src="img/film-knot.jpg" alt="" /><figcaption>three.js の物体が、地図と同じ太陽の光と影を受ける</figcaption></figure>
+        <figure><img class="shot" src="img/film-fireworks.jpg" alt="" /><figcaption>three.js で作ったレイヤー（花火）を、そのまま加える</figcaption></figure>
+      </div>
+      <div class="three-list">
+        <div class="card"><b>シーンに直接</b><code class="inline">viewer.scene</code> に自分のメッシュ・ライト・マテリアルを加えられる</div>
+        <div class="card"><b>three.js と同じ書き方</b>Raycaster・renderOrder・fog・後処理も three.js どおり</div>
+        <div class="card"><b>自分のレイヤー</b><code class="inline">Layer</code> を作って、<br />地図の一部として描ける</div>
+        <div class="card"><b>WebGPU で描く</b>使えない環境では WebGL2 で、同じ見た目に。依存するのは three.js だけ</div>
+      </div>
+      <div class="foot"><span>plateau-ui</span><span>12 / 14</span></div>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide">
+      <div class="head"><h2>PLATEAU を使う人を、増やす</h2></div>
+      <div class="ahead">
+        <p class="why">
+          Web のページは、いちばん多くの人の目に触れる場所。<br />
+          そこに PLATEAU を載せる手間を、<em>数行</em>にしました。<br />
+          不動産、観光、防災、自治体、お店。<br />
+          使う人が増えるほど、3D 都市モデルは<br />
+          暮らしの身近な道具になります。
+        </p>
+        <div class="steps">
+          <div class="card"><h3>いま</h3><p>アルファ版を公開中。npm（@plateau-ui/core）と GitHub、MIT ライセンス。</p></div>
+        </div>
+      </div>
+      <div class="strip">
+        <img src="img/page-estate.jpg" alt="" />
+        <img src="img/page-stay.jpg" alt="" />
+        <img src="img/page-hazard.jpg" alt="" />
+        <img src="img/page-outlets.jpg" alt="" />
+      </div>
+      <div class="foot"><span>plateau-ui</span><span>13 / 14</span></div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide close">
+      <div class="name">plateau-ui</div>
+      <div class="phrase">PLATEAU を、あなたのページに。アイデアの土台に。</div>
+      <div class="where">
+        <img src="../shots/outro/qr.png" alt="" />
+        <dl>
+          <dt>サイト</dt><dd>gtjeon.github.io/plateau-ui</dd>
+          <dt>GitHub</dt><dd>github.com/gtjeon/plateau-ui</dd>
+          <dt>npm</dt><dd>@plateau-ui/core</dd>
+          <dt>動画</dt><dd>youtu.be/QT1BsOuP9ag</dd>
+        </dl>
+      </div>
+      <p class="disclaimer">plateau-ui は個人が開発しているオープンソースのライブラリで、国土交通省・PLATEAU の公式なものではありません。</p>
+      <div class="foot"><span>plateau-ui</span><span>14 / 14</span></div>
+    </section>
+  </body>
+</html>

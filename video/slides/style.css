@@ -1,0 +1,638 @@
+/*
+ * The slides for the PLATEAU AWARD entry, one 1280x720 page each, printed to
+ * PDF by tools/pdf.mjs. The colours are the film's: the grey ink, and the one
+ * orange the first part lays on the tower.
+ */
+:root {
+  --ink: #1f2933;
+  --quiet: #5a6472;
+  --line: #dde1e6;
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --accent: #f08a4b;
+  --code: #1f2933;
+}
+
+@page {
+  size: 1280px 720px;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #888;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
+  color: var(--ink);
+  /* Japanese wraps between phrases, not inside a word (Chrome reads lang="ja") */
+  word-break: auto-phrase;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+p,
+h1,
+h2,
+h3,
+ul,
+ol,
+dl,
+dd,
+table {
+  margin: 0;
+}
+
+.slide {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  background: var(--bg);
+  page-break-after: always;
+  break-after: page;
+  padding: 52px 64px 0;
+}
+
+@media screen {
+  .slide {
+    margin: 0 auto 24px;
+  }
+}
+
+/* ── What every page carries ──────────────────────────── */
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.head h2 {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.lead {
+  margin-top: 10px;
+  font-size: 18px;
+  color: var(--quiet);
+  line-height: 1.6;
+}
+.foot {
+  position: absolute;
+  left: 64px;
+  right: 64px;
+  bottom: 22px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--quiet);
+  letter-spacing: 0.04em;
+}
+
+code,
+pre {
+  font-family: 'SF Mono', Menlo, ui-monospace, monospace;
+}
+pre {
+  background: var(--code);
+  color: #e9eef5;
+  border-radius: 12px;
+  padding: 18px 22px;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre;
+}
+pre .c {
+  color: #9aa6b4;
+}
+pre .k {
+  color: #f6b38a;
+}
+code.inline {
+  font-size: 0.86em;
+  background: #e8ebef;
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 18px rgba(20, 30, 45, 0.12);
+}
+
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(20, 30, 45, 0.06);
+  padding: 22px 24px;
+}
+
+/* ── Part slides: what comes next, and where it sits ───── */
+
+.divider {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  align-items: center;
+  gap: 64px;
+  padding: 0 96px;
+  background: var(--ink);
+  color: #fff;
+}
+.divider .num {
+  font-family: 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 96px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+}
+.divider h2 {
+  margin-top: 10px;
+  font-size: 60px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.divider .say {
+  margin-top: 22px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: #dfe5ec;
+}
+.divider .topics {
+  margin-top: 30px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  font-size: 18px;
+  color: #aab4c0;
+}
+.divider .topics li::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 2px;
+  margin-right: 12px;
+  vertical-align: middle;
+  background: var(--accent);
+}
+.divider .parts {
+  margin: 0;
+  padding: 0 0 0 24px;
+  list-style: none;
+  display: grid;
+  gap: 18px;
+  border-left: 1px solid #3a4652;
+  font-size: 18px;
+  color: #6f7b88;
+}
+.divider .parts span {
+  display: inline-block;
+  width: 36px;
+  font-family: 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif;
+  font-weight: 700;
+}
+.divider .parts .now {
+  font-weight: 800;
+  color: #fff;
+}
+.divider .parts .now span {
+  color: var(--accent);
+}
+.divider .foot {
+  color: #6f7b88;
+}
+/* Part 02 is where the name comes out */
+.reveal h2 {
+  font-family: 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 112px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* ── 1. Cover ─────────────────────────────────────────── */
+
+.cover {
+  padding: 0;
+  background: #fff url('img/film-title.jpg') center / cover no-repeat;
+}
+.cover .band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 128px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 56px;
+  border-top: 1px solid var(--line);
+}
+.cover .award {
+  font-size: 16px;
+  color: var(--quiet);
+  letter-spacing: 0.06em;
+}
+.cover .who {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.cover .try {
+  margin-left: auto;
+  text-align: right;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.cover .try b {
+  display: block;
+  font-size: 18px;
+}
+.cover .qr {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+}
+
+/* ── 2. The problem ───────────────────────────────────── */
+
+.who-for {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+.who-for .person {
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.75;
+}
+.who-for .person small {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+.hurdles {
+  display: grid;
+  gap: 18px;
+}
+.hurdles .card {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: center;
+  padding: 24px 26px;
+}
+.hurdles b {
+  font-size: 22px;
+}
+.hurdles p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--quiet);
+}
+.aim {
+  margin-top: 44px;
+  padding: 24px 30px;
+  border-left: 5px solid var(--accent);
+  background: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  border-radius: 0 12px 12px 0;
+}
+
+.strip {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.strip img {
+  display: block;
+  width: 100%;
+  height: 128px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(20, 30, 45, 0.1);
+}
+
+/* The page that looks ahead has the room to show the pages whole */
+.ahead + .strip {
+  margin-top: 40px;
+}
+.ahead + .strip img {
+  height: auto;
+  aspect-ratio: 1280 / 716;
+}
+
+/* ── 3. Open data, put together ───────────────────────── */
+
+.blend {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: 700px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.mix {
+  display: grid;
+  gap: 12px;
+}
+.mix .card {
+  padding: 14px 20px;
+}
+.mix small {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.mix b {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+}
+.mix .green {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.mix .green img {
+  width: 120px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.anywhere {
+  margin-top: 18px;
+  font-size: 16px;
+  color: var(--quiet);
+}
+
+/* ── 3. The answer ────────────────────────────────────── */
+
+.answer {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  gap: 32px;
+}
+.answer ul {
+  margin-top: 18px;
+  padding-left: 1.2em;
+  font-size: 17px;
+  line-height: 1.85;
+}
+.answer figcaption {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--quiet);
+}
+
+/* ── 4. Beside the others ─────────────────────────────── */
+
+.compare {
+  margin-top: 26px;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 17px;
+}
+.compare th,
+.compare td {
+  padding: 13px 18px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.compare thead th {
+  font-size: 14px;
+  color: var(--quiet);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.compare tbody th {
+  width: 250px;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.compare tr.ours th,
+.compare tr.ours td {
+  background: #fff;
+  font-weight: 700;
+}
+.compare tr.ours th {
+  border-left: 5px solid var(--accent);
+}
+.points {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.points .card b {
+  display: block;
+  font-size: 19px;
+}
+.points .card p {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--quiet);
+}
+.fair {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--quiet);
+}
+
+/* ── Picture grids ────────────────────────────────────── */
+
+.grid {
+  margin-top: 22px;
+  display: grid;
+  gap: 12px 14px;
+}
+.grid figure {
+  margin: 0;
+}
+.grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9.4;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(20, 30, 45, 0.1);
+}
+.grid figcaption {
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.grid figcaption code {
+  display: block;
+  margin-top: 3px;
+  font-family: 'SF Mono', Menlo, ui-monospace, monospace;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--quiet);
+  white-space: nowrap;
+}
+.grid figcaption span {
+  font-weight: 500;
+  color: var(--quiet);
+}
+.grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.grid-4 img {
+  aspect-ratio: 1280 / 633;
+}
+.pages img {
+  aspect-ratio: 1280 / 716;
+}
+.more-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 20px;
+  aspect-ratio: 1280 / 716;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.more-card b {
+  font-size: 30px;
+  color: var(--accent);
+}
+
+/* ── 7. three.js ──────────────────────────────────────── */
+
+.three {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.three figcaption {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.three-list {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.three-list .card {
+  padding: 16px 20px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.three-list b {
+  display: block;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+/* ── 9. Ahead ─────────────────────────────────────────── */
+
+.ahead {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 22px;
+}
+.ahead .why {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.8;
+}
+.ahead .why em {
+  font-style: normal;
+  color: var(--accent);
+}
+.steps {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+.steps .card h3 {
+  font-size: 15px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+.steps .card p {
+  margin-top: 6px;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* ── 10. Close ─────────────────────────────────────────── */
+
+.close {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 64px 40px;
+  text-align: center;
+  background: #fff;
+}
+.close .name {
+  font-family: 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 84px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.close .phrase {
+  margin-top: 6px;
+  font-size: 26px;
+  font-weight: 700;
+}
+.close .where {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  text-align: left;
+}
+.close .where img {
+  width: 150px;
+  height: 150px;
+  image-rendering: pixelated;
+}
+.close dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  font-size: 18px;
+}
+.close dt {
+  color: var(--quiet);
+}
+.close dd {
+  font-weight: 600;
+}
+.close .disclaimer {
+  margin-top: 32px;
+  font-size: 14px;
+  color: var(--quiet);
+}

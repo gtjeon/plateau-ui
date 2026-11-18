@@ -4,7 +4,7 @@
  * ending on a city cut down to what is needed, the miniature look, and two
  * things three.js brings with it.
  */
-import { Marker, Solid, Viewer, Viewshed, type Theme } from '@plateau-ui/core'
+import { Marker, Solid, Viewer, Viewshed, type ReplicaBuilding, type Theme } from '@plateau-ui/core'
 import { Mesh, MeshStandardMaterial, Raycaster, TorusKnotGeometry, Vector3 } from 'three'
 import { inOut, linear, mix, mixAngle, out, shot, shown, span } from '../../shared/shot.js'
 import { note, part, PART_IN } from '../../shared/overlay.js'
@@ -38,12 +38,18 @@ const OPENING = 7
 /** When the part's name starts to come in: once the title has gone. */
 const PART_FROM = 6.4
 const STEP = 3.6
-const STEP_COUNT = 14
+const STEP_COUNT = 20
+/** How long step 4, the windows going off and on, takes: less than the beat. */
+const WINDOWS_OFF_STEP = 2.8
+/** How long step 13 takes: Tokyo Tower coming up, standing a moment, and going. */
+const BRING_STEP = 4.6
 /**
- * Steps that take longer than the beat: the camera's sight (8), which goes in
- * close to the camera on the wall before it stands back to show what it sees.
+ * Steps that take other than the beat: the windows going off and on (4),
+ * Tokyo Tower brought in and sent back (13), and the camera's sight (14),
+ * which goes in close to the camera on the wall before it stands back to
+ * show what it sees.
  */
-const LONGER: Readonly<Record<number, number>> = { 8: 6.2 }
+const LONGER: Readonly<Record<number, number>> = { 4: WINDOWS_OFF_STEP, 13: BRING_STEP, 14: 6.2 }
 /** The steps begin once the part's name has settled at the top. */
 function stepAt(n: number): number {
   let t = PART_FROM + PART_IN
@@ -53,7 +59,7 @@ function stepAt(n: number): number {
 /** The last step, the fireworks, runs on a little past the others' length. */
 const SECONDS = stepAt(STEP_COUNT) + 5
 
-/** Step 11: how much of the city is kept, round the view's middle, in metres. */
+/** Step 17: how much of the city is kept, round the view's middle, in metres. */
 const ISLAND = 170
 const ISLAND_FADE = 30
 /** Where the cut starts from: wide enough that nothing on screen is cut yet. */
@@ -85,7 +91,7 @@ const CAMERA_SIZE = Number(q.get('size') ?? 0.6)
  */
 const EYE_LIFT = Number(q.get('lift') ?? 1)
 /**
- * The way the camera looks from in step 8: from the camera's side and a little
+ * The way the camera looks from in step 14: from the camera's side and a little
  * in front of it (up the screen is the bearing 100° short of the way it looks),
  * so the tower it hangs on is beside it and not in front of it.
  */
@@ -159,6 +165,10 @@ const ROOF_ZOOM = Number(q.get('roofz') ?? 19.5)
 const ROOF_NUDGE = [11.7, 15.8] as const
 const atMini = (t: number, h: number, dz = 0): Key => ({ t, z: dz, p: 70, h, k: 0, mini: true })
 
+/** Metres east and north the middle moves toward the clearing (step 12) and to take in Tokyo Tower (13). */
+const HIDE_NUDGE = (q.get('hn') ?? '28,28').split(',').map(Number) as unknown as readonly [number, number]
+const BRING_NUDGE = (q.get('bn') ?? '25,25').split(',').map(Number) as unknown as readonly [number, number]
+
 const KEYS: readonly Key[] = [
   { t: 0, z: 15.6, p: 40, h: 40, k: 0 },
   { t: 0.5, z: 15.6, p: 40, h: 40, k: 0 },
@@ -169,35 +179,48 @@ const KEYS: readonly Key[] = [
   arrive(3, 0, 18.0, 56, 98, 1),
   arrive(3, 0.8, 17.9, 62, 100, 1), // floors
   arrive(4, 0, 17.9, 62, 104, 1),
+  arrive(4, 0.8, 18.8, 60, 108, 1.3), // the windows off and on
+  arrive(5, 0, 18.8, 60, 110, 1.3), // their size
+  arrive(6, 0, 18.8, 60, 112, 1.3),
+  arrive(6, 0.8, 18.5, 58, 118, 1.1), // their colours
+  arrive(7, 0, 18.5, 58, 122, 1.1),
+  arrive(7, 0.8, 18.1, 56, 128, 1), // the city's fold lines
+  arrive(8, 0, 18.1, 56, 132, 1),
   // The roof, with the deck the picture goes on in the middle: the deck is off
   // the foot's middle (which counts the podium), so the middle is moved on to it
   // (measured: without it the deck stood 90 px below and 50 px right of the middle)
-  { ...arrive(4, 1.1, ROOF_ZOOM, 26, 112, 2), nudge: ROOF_NUDGE },
-  { ...arrive(5, 0, ROOF_ZOOM, 26, 118, 2), nudge: ROOF_NUDGE },
-  arrive(5, 1.0, 18.1, 50, 118, 1.4), // marker
-  arrive(6, 0, 18.1, 50, 124, 1.4),
-  arrive(6, 0.9, 17.6, 55, 110, 1.8), // stretch
-  arrive(7, 0, 17.6, 55, 104, 1.8),
-  arrive(7, 0.9, 17.4, 55, 84, 0.9), // move
-  arrive(8, 0, 17.4, 55, 80, 0.9),
+  { ...arrive(8, 1.1, ROOF_ZOOM, 26, 112, 2), nudge: ROOF_NUDGE },
+  { ...arrive(9, 0, ROOF_ZOOM, 26, 118, 2), nudge: ROOF_NUDGE },
+  arrive(9, 1.0, 18.1, 50, 118, 1.4), // marker
+  arrive(10, 0, 18.1, 50, 124, 1.4),
+  arrive(10, 0.9, 17.6, 55, 110, 1.8), // stretch
+  arrive(11, 0, 17.6, 55, 104, 1.8),
+  arrive(11, 0.9, 17.4, 55, 84, 0.9), // move
+  arrive(12, 0, 17.4, 55, 80, 0.9),
+  // In over the clearing as it is made, then back for Tokyo Tower beside the tower
+  { ...arrive(12, 0.9, 17.9, 55, 78, 0.9), nudge: HIDE_NUDGE }, // the buildings beside it taken out
+  { ...arrive(13, 0, 17.9, 55, 76, 0.9), nudge: HIDE_NUDGE },
+  { ...arrive(13, 1.0, 17.3, 52, 74, 1.6), nudge: BRING_NUDGE }, // Tokyo Tower brought in
+  { ...arrive(13, BRING_STEP - 0.8, 17.3, 52, 72, 1.6), nudge: BRING_NUDGE },
+  arrive(14, 0, 17.4, 55, 80, 0.9),
   // The sight: in close to the camera on the wall, from its side, so the
   // lens points across the screen; then standing back along the way it looks
   // for the ground it sees. (From behind it, the tower stands in front of it.)
-  { t: stepAt(8) + 1.3, ...EYE_SHOT.close, h: EYE_HEADING, k: 0 },
-  { t: stepAt(8) + 2.4, ...EYE_SHOT.close, eye: EYE_SHOT.close.eye + 2, h: EYE_HEADING, k: 0 },
-  { t: stepAt(8) + 4.6, ...EYE_SHOT.back, h: EYE_HEADING, k: 0 },
-  { t: stepAt(9), ...EYE_SHOT.back, z: EYE_SHOT.back.z - 0.05, eye: EYE_SHOT.back.eye + 2, h: EYE_HEADING + 3, k: 0 },
-  arrive(9, 0.8, 17.3, 56, 120, 0.6), // themes
-  arrive(10, 0, 17.3, 56, 124, 0.6),
-  arrive(10, 0.9, 17.3, 52, 110, 0.9), // a day
-  arrive(11, 0, 17.3, 52, 118, 0.9),
-  atMini(stepAt(11) + 1.2, 88), // the mask, at simple-map's own view
-  atMini(stepAt(12), 89), // the miniature, the same view
-  atMini(stepAt(13), 90), // the knot
-  atMini(stepAt(14), 93, 0.03), // drifting a little till the fireworks
+  { t: stepAt(14) + 1.3, ...EYE_SHOT.close, h: EYE_HEADING, k: 0 },
+  { t: stepAt(14) + 2.4, ...EYE_SHOT.close, eye: EYE_SHOT.close.eye + 2, h: EYE_HEADING, k: 0 },
+  { t: stepAt(14) + 4.6, ...EYE_SHOT.back, h: EYE_HEADING, k: 0 },
+  { t: stepAt(15), ...EYE_SHOT.back, z: EYE_SHOT.back.z - 0.05, eye: EYE_SHOT.back.eye + 2, h: EYE_HEADING + 3, k: 0 },
+  arrive(15, 0.8, 17.3, 56, 120, 0.6), // themes
+  arrive(16, 0, 17.3, 56, 124, 0.6),
+  arrive(16, 0.9, 17.3, 52, 110, 0.9), // a day
+  arrive(17, 0, 17.3, 52, 118, 0.9),
+  atMini(stepAt(17) + 1.2, 88), // the mask, at simple-map's own view
+  atMini(stepAt(18), 89), // the miniature, the same view
+  atMini(stepAt(19), 90), // the knot
+  atMini(stepAt(20), 93, 0.03), // drifting a little till the fireworks
   // Back and up a little for the fireworks: laid back to 70° the sky they
   // burst in is above the top of the screen
-  arrive(14, 1.2, 17.3, 60, 96, 0),
+  arrive(20, 1.2, 17.3, 60, 96, 0),
   { t: SECONDS, z: 17.25, p: 60, h: 100, k: 0 },
 ]
 
@@ -342,7 +365,7 @@ const DESERT: Theme = {
   shadow: '#6c6b69',
   edge: '#4a4741',
 }
-/** The palettes run through in step 9, a beat each, and back to the map's own. */
+/** The palettes run through in step 15, a beat each, and back to the map's own. */
 const THEMES: readonly { readonly name: string; readonly theme: Theme }[] = [
   { name: 'pastel', theme: PASTEL },
   { name: 'mono', theme: MONO },
@@ -358,10 +381,22 @@ const STEPS: readonly Step[] = [
   { say: '建物をひとつ選ぶ', code: `buildings.setStyle(id, { outline: true })` },
   { say: '色を塗る', code: `buildings.setStyle(id, { wallColor: '${WALL}' })` },
   { say: '階ごとに塗る', code: (t) => `floors: [{ at: ${floorAt(t)}, color: '${ACCENT}' }]` },
+  { say: '窓を消す・付ける', code: (t) => `buildings.windows.visible = ${windowsOnAt(t)}` },
+  {
+    say: '窓の大きさを変える',
+    code: (t) => {
+      const s = windowsAt(t)
+      return `windows.styles = { 業務施設: { width: ${s.width.toFixed(1)}, height: ${s.height.toFixed(1)} }, … }`
+    },
+  },
+  { say: '窓の色を変える', code: (t) => `buildings.windows.color = '${glassAt(t) ?? '…'}'` },
+  { say: '建物の輪郭に線を引く', code: `buildings.edges = true` },
   { say: '屋上に絵を貼る', code: `roofImage: { image: helipad, width: ${DECK.width} }` },
   { say: 'マーカーを付ける', code: `new Marker({ at: { building: id, offset: [0, 0, 163] } })` },
   { say: '動かす。マーカーもついてくる', code: `buildings.animate(id, [{ scale: [1, 1, 1.5] }], timing)` },
   { say: '別の場所へ移す', code: `buildings.place(id, { at, facing: 90 })` },
+  { say: 'まわりの建物を隠す', code: () => `buildings.hide({ shape: 'circle', center, radius: ${CLEARING.radius} })` },
+  { say: '東京タワーを取り寄せる', code: `buildings.bring({ id: tokyoTower, findAt, at: center })` },
   { say: 'カメラから見える範囲を塗る', code: `new Viewshed({ at: { solid: camera, offset }, facing })` },
   {
     say: '地図の色を変える',
@@ -388,10 +423,42 @@ function floorAt(t: number): number {
   return 1 + Math.min(storeys - 1, Math.floor(k * storeys))
 }
 
-/** Step 9: which palette is up, or null before the first and after the last. */
+/** Step 4: the windows taken off the whole city, and put back. */
+function windowsOnAt(t: number): boolean {
+  return !(t >= stepAt(4) + 0.6 && t < stepAt(4) + 1.8)
+}
+
+/**
+ * Step 5: every window in the city made smaller, then larger, then as it was,
+ * by the same factor on each usage's own size (the office's shown on screen).
+ */
+const WINDOWS_FROM = 0.5
+const WINDOWS_TO = 3.1
+const windowsAsIs = buildings.windows.styles
+function windowSize(t: number): { width: number; height: number } {
+  const k = span(t, stepAt(5) + WINDOWS_FROM, stepAt(5) + WINDOWS_TO, linear)
+  // down to a slit, up past where it began, and home: one smooth swing
+  const swing = Math.sin(k * Math.PI * 2) * (k < 0.5 ? 0.55 : 0.45)
+  return { width: 1 - swing * 0.9, height: 1 - swing }
+}
+function windowsAt(t: number): { width: number; height: number } {
+  const f = windowSize(t)
+  const office = windowsAsIs['業務施設']
+  return { width: office.width * f.width, height: office.height * f.height }
+}
+
+/** Step 6: the glass colours, a beat each, then the map's own again. */
+const GLASS_COLORS = ['#7fb7e6', '#f5c26b', '#79d2c0', '#c9a3e6'] as const
+const GLASS_BEAT = 0.7
+function glassAt(t: number): string | null {
+  const i = Math.floor((t - stepAt(6) - 0.3) / GLASS_BEAT)
+  return i >= 0 && i < GLASS_COLORS.length ? GLASS_COLORS[i]! : null
+}
+
+/** Step 15: which palette is up, or null before the first and after the last. */
 const THEME_BEAT = 0.65
 function themeAt(t: number): number | null {
-  const i = Math.floor((t - stepAt(9) - 0.3) / THEME_BEAT)
+  const i = Math.floor((t - stepAt(15) - 0.3) / THEME_BEAT)
   return i >= 0 && i < THEMES.length ? i : null
 }
 
@@ -404,11 +471,33 @@ function once(name: string, t: number, at: number, act: () => void): void {
 }
 
 let marker: Marker | null = null
-/** Where the tower goes in step 7, and how far round. */
+/**
+ * Steps 12 and 13: the low buildings just beside the tower taken out (in front
+ * of it and to its right as the camera sees it), and what
+ * is brought into it — Tokyo Tower, from 芝公園 (the id and the place to find
+ * it measured for the tallest example).
+ */
+const CLEARING = {
+  distance: Number(q.get('hd') ?? 80),
+  bearing: Number(q.get('hb') ?? 45),
+  radius: Number(q.get('hr') ?? 45),
+}
+const TOKYO_TOWER = { id: 'bldg_7aff4a51-be8b-405b-abe4-ac489697cbc8', findAt: [139.74547, 35.65858] as const }
+/** Its own colour, near enough: white, it is lost among the white city. */
+const TOKYO_RED = '#e2583a'
+const clearing = (): { shape: 'circle'; center: [number, number]; radius: number } => ({
+  shape: 'circle',
+  center: toward(home, CLEARING.distance, CLEARING.bearing),
+  radius: CLEARING.radius,
+})
+let brought: ReplicaBuilding | null = null
+let sentBack = false
+
+/** Where the tower goes in step 11, and how far round. */
 const AWAY = { east: -110, north: 50, facing: 90 }
 
 /**
- * Step 8's camera: the security-camera example's own housing and lens, hung on
+ * Step 14's camera: the security-camera example's own housing and lens, hung on
  * the tower's wall, and what it sees from just past the lens. Made before the
  * shot starts (and kept out of sight till then), so nothing is put together
  * in the middle of it. Where on the wall is found once the tower is there.
@@ -450,7 +539,7 @@ viewer.add(camera.housing)
 viewer.add(camera.lens)
 Object.assign(window, { camera })
 
-/** Step 10's knot: a three.js object of the page's own, beside the tower. */
+/** Step 19's knot: a three.js object of the page's own, beside the tower. */
 const stretch = 1 / Math.cos((home[1] * Math.PI) / 180)
 const knot = new Mesh(
   new TorusKnotGeometry(24 * stretch, 7 * stretch, 260, 36),
@@ -459,7 +548,7 @@ const knot = new Mesh(
 knot.castShadow = true
 knot.receiveShadow = true
 
-/** Step 13: the fireworks example's own layer, set off over the station instead of the harbour. */
+/** Step 20: the fireworks example's own layer, set off over the station instead of the harbour. */
 let fireworks: Fireworks | null = null
 
 interface Look {
@@ -502,11 +591,48 @@ function firstPart(t: number): void {
       outline: true,
       wall: t >= stepAt(2) + 0.4,
       floor: t >= s3 + FLOORS_FROM && t < s3 + FLOORS_TO + 0.4 ? floorAt(t) : undefined,
-      roof: t >= stepAt(4) + 0.6,
+      roof: t >= stepAt(8) + 0.6,
     })
   }
 
-  once('5', t, stepAt(5) + 0.5, () => {
+  // 4: the windows off, and on again (the walls they were cut in are kept,
+  // so on again is only drawing them)
+  const on = windowsOnAt(t)
+  if (on !== buildings.windows.visible) buildings.windows.visible = on
+
+  // 5: the windows' size
+  const s5 = stepAt(5)
+  if (t >= s5 + WINDOWS_FROM && t <= s5 + WINDOWS_TO + 0.2) {
+    const f = windowSize(t)
+    const key = `${f.width.toFixed(3)} ${f.height.toFixed(3)}`
+    if (key !== windowsShown) {
+      windowsShown = key
+      const styles: Record<string, object> = {}
+      for (const [usage, style] of Object.entries(windowsAsIs)) {
+        styles[usage] = { ...style, width: style.width * f.width, height: style.height * f.height }
+      }
+      buildings.windows.styles = styles as typeof windowsAsIs
+    }
+  }
+  once('windows as they were', t, s5 + WINDOWS_TO + 0.2, () => {
+    buildings.windows.styles = windowsAsIs
+  })
+
+  // 6: the glass, a beat each colour, then the map's own
+  if (t >= stepAt(6) && t < stepAt(7)) {
+    const glass = glassAt(t)
+    if (glass !== glassShown) {
+      glassShown = glass
+      buildings.windows.color = glass ?? undefined
+    }
+  }
+
+  // 7: the fold lines of the whole city, while the step is up (set only as it
+  // changes: turning them on stands them again)
+  const edges = t >= stepAt(7) + 0.4 && t < stepAt(8) + 0.3
+  if (edges !== buildings.edges) buildings.edges = edges
+
+  once('5', t, stepAt(9) + 0.5, () => {
     marker = new Marker({
       at: { building: TOWER, offset: [0, 0, tall] },
       symbol: 'pin',
@@ -515,7 +641,7 @@ function firstPart(t: number): void {
     })
     viewer.add(marker)
   })
-  once('6', t, stepAt(6) + 0.4, () => {
+  once('6', t, stepAt(10) + 0.4, () => {
     buildings.animate(TOWER, [{ scale: [1, 1, 1] }, { scale: [1, 1, 1.5] }], {
       duration: 850,
       direction: 'alternate',
@@ -524,8 +650,8 @@ function firstPart(t: number): void {
     })
   })
 
-  // 7: out and round, a moment there, and home again
-  const s7 = stepAt(7)
+  // 11: out and round, a moment there, and home again
+  const s7 = stepAt(11)
   if (t >= s7 + 0.3 && t <= s7 + 3.2) {
     const outward = span(t, s7 + 0.3, s7 + 1.4, inOut)
     const back = span(t, s7 + 1.9, s7 + 3.0, inOut)
@@ -534,16 +660,35 @@ function firstPart(t: number): void {
   }
   once('home', t, s7 + 3.2, () => buildings.place(TOWER, { at: home, facing: 0 }))
 
-  // 8: the camera on the wall, gone in close to, and then what it sees
-  const s8 = stepAt(8)
-  const hung = t >= s8 + 0.5 && t < stepAt(9) + 0.6
+  // 12: the buildings beside the tower go under
+  once('hide', t, stepAt(12) + 0.4, () => buildings.hide(clearing()))
+
+  // 13: Tokyo Tower comes up in the clearing, stands a moment, and goes, and
+  // the buildings come back
+  const s13 = stepAt(13)
+  once('bring', t, s13 + 0.3, () => {
+    void buildings.bring({ ...TOKYO_TOWER, at: clearing().center, style: { wallColor: TOKYO_RED } }).then((tower) => {
+      if (sentBack) tower?.remove()
+      else brought = tower
+    })
+  })
+  once('send back', t, s13 + BRING_STEP - 1.3, () => {
+    sentBack = true
+    brought?.remove()
+    brought = null
+    buildings.show()
+  })
+
+  // 14: the camera on the wall, gone in close to, and then what it sees
+  const s8 = stepAt(14)
+  const hung = t >= s8 + 0.5 && t < stepAt(15) + 0.6
   camera.housing.visible = hung
   camera.lens!.visible = hung
   camera.sight!.visible = hung
-  camera.sight!.opacity = 0.6 * span(t, s8 + 1.6, s8 + 2.3, linear) * (1 - span(t, stepAt(9) + 0.1, stepAt(9) + 0.6, linear))
+  camera.sight!.opacity = 0.6 * span(t, s8 + 1.6, s8 + 2.3, linear) * (1 - span(t, stepAt(15) + 0.1, stepAt(15) + 0.6, linear))
 
-  // 9: the palettes, a beat each, then the map's own again
-  if (t >= stepAt(9) && t < stepAt(10)) {
+  // 15: the palettes, a beat each, then the map's own again
+  if (t >= stepAt(15) && t < stepAt(16)) {
     const i = themeAt(t)
     const want = i === null ? -1 : i
     if (want !== themeShown) {
@@ -551,28 +696,28 @@ function firstPart(t: number): void {
       viewer.theme = want < 0 ? {} : THEMES[want]!.theme
     }
   }
-  once('own palette', t, stepAt(10), () => {
+  once('own palette', t, stepAt(16), () => {
     themeShown = -1
     viewer.theme = {}
   })
 
-  // 10: a day, from seven in the morning round to seven the next
-  const s10 = stepAt(10)
-  if (t >= s10 + 0.3 && t < stepAt(11)) {
+  // 16: a day, from seven in the morning round to seven the next
+  const s10 = stepAt(16)
+  if (t >= s10 + 0.3 && t < stepAt(17)) {
     const day = span(t, s10 + 0.3, s10 + 3.3, linear)
     viewer.sun = { by: 'time', at: new Date(MORNING + day * 24 * 3600_000) }
   }
-  once('morning', t, stepAt(11), () => {
+  once('morning', t, stepAt(17), () => {
     viewer.sun = { by: 'time', at: new Date(MORNING + 26 * 3600_000) }
   })
 
-  // 11: the city cut down to a round of it, closing in from past the screen's
+  // 17: the city cut down to a round of it, closing in from past the screen's
   // edges as the camera comes round to the miniature view; let go again as the
   // knot comes in
-  const s11 = stepAt(11)
-  if (t >= s11 + 0.4 && t < stepAt(13) + 0.6) {
+  const s11 = stepAt(17)
+  if (t >= s11 + 0.4 && t < stepAt(19) + 0.6) {
     const closing = span(t, s11 + 0.4, s11 + 2.0, inOut)
-    const opening = span(t, stepAt(13) + 0.1, stepAt(13) + 0.6, inOut)
+    const opening = span(t, stepAt(19) + 0.1, stepAt(19) + 0.6, inOut)
     const radius = Math.round(mix(ISLAND_FROM, ISLAND, closing - opening))
     if (radius !== islandShown) {
       islandShown = radius
@@ -583,19 +728,19 @@ function firstPart(t: number): void {
       }
     }
   }
-  once('whole city', t, stepAt(13) + 0.6, () => {
+  once('whole city', t, stepAt(19) + 0.6, () => {
     islandShown = -1
     viewer.mask = { shapes: [{ shape: 'view' }] }
   })
 
-  // 12: the miniature look, as simple-map has it, on the round of city
-  once('12', t, stepAt(12) + 0.2, () => {
+  // 18: the miniature look, as simple-map has it, on the round of city
+  once('12', t, stepAt(18) + 0.2, () => {
     viewer.tiltShift.focus = undefined
     viewer.tiltShift.enabled = true
   })
 
-  // 13: the knot comes in beside the tower and turns, in a clear picture again
-  once('13', t, stepAt(13) + 0.1, () => {
+  // 19: the knot comes in beside the tower and turns, in a clear picture again
+  once('13', t, stepAt(19) + 0.1, () => {
     viewer.tiltShift.enabled = false
     // Off to the left of the tower as the miniature view sees it (up the screen is west)
     const where = toward(home, 85, 182)
@@ -604,14 +749,14 @@ function firstPart(t: number): void {
     viewer.scene.add(knot)
   })
   if (knot.parent) {
-    const grow = span(t, stepAt(13) + 0.1, stepAt(13) + 0.7, out)
-    const gone = span(t, stepAt(14) + 0.1, stepAt(14) + 0.5, inOut)
+    const grow = span(t, stepAt(19) + 0.1, stepAt(19) + 0.7, out)
+    const gone = span(t, stepAt(20) + 0.1, stepAt(20) + 0.5, inOut)
     knot.scale.setScalar(Math.max(0.001, grow * (1 - gone)))
     knot.rotation.set(t * 0.5, t * 0.8, 0)
   }
 
-  // 14: the evening falls and the fireworks go up over the station
-  const s14 = stepAt(14)
+  // 20: the evening falls and the fireworks go up over the station
+  const s14 = stepAt(20)
   if (t >= s14 && t <= s14 + 0.9) {
     const dusk = span(t, s14, s14 + 0.9, inOut)
     viewer.sun = { by: 'time', at: new Date(EVENING + dusk * 2.2 * 3600_000) }
@@ -628,9 +773,11 @@ function firstPart(t: number): void {
 }
 let themeShown = -1
 let islandShown = -1
+let windowsShown = ''
+let glassShown: string | null = null
 
 /**
- * The round of city kept in step 11: between the miniature view's middle and
+ * The round of city kept in step 17: between the miniature view's middle and
  * the tower, so the tower stands well inside it and the near streets are kept.
  */
 function islandCenter(): [number, number] {
@@ -638,7 +785,7 @@ function islandCenter(): [number, number] {
 }
 
 const MORNING = Date.parse('2026-05-20T07:00:00+09:00')
-/** Where the dusk of step 13 starts from: the afternoon before the fireworks. */
+/** Where the dusk of step 20 starts from: the afternoon before the fireworks. */
 const EVENING = Date.parse('2026-05-21T17:30:00+09:00')
 
 /**
@@ -728,10 +875,15 @@ async function prepare(): Promise<void> {
   await settle()
 
   // The views of the first part, and the tower's other place
-  for (const at of [stepAt(4) + 2, stepAt(7) + 2, stepAt(8) + 2, stepAt(8) + 5, stepAt(9) + 2]) {
+  for (const at of [stepAt(8) + 2, stepAt(13) + 2, stepAt(11) + 2, stepAt(14) + 2, stepAt(14) + 5, stepAt(15) + 2]) {
     look(cameraAt(at))
     await settle()
   }
+  // Tokyo Tower fetched once beforehand, so that bringing it in the shot is
+  // only standing it up
+  const warm = await buildings.bring({ ...TOKYO_TOWER, at: clearing().center })
+  warm?.remove()
+  await settle()
   buildings.place(TOWER, { at: home, facing: 0 })
   await settle()
 

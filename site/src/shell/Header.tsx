@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router'
+import { REPOSITORY } from './links.js'
 
 /**
  * The bar over every page: the name, where the site goes, and that what it
@@ -19,7 +20,11 @@ export function Header({ wide = false }: { wide?: boolean }) {
           <NavLink to="/docs">Docs</NavLink>
           <NavLink to="/examples">Examples</NavLink>
         </nav>
-        <a className="header-out" href="https://www.mlit.go.jp/plateau/" target="_blank" rel="noreferrer">
+        <a className="header-out" href={REPOSITORY} target="_blank" rel="noreferrer">
+          GitHub
+          <span aria-hidden="true">↗</span>
+        </a>
+        <a className="header-out header-out-next" href="https://www.mlit.go.jp/plateau/" target="_blank" rel="noreferrer">
           PLATEAU
           <span aria-hidden="true">↗</span>
         </a>

@@ -221,6 +221,11 @@ td code,
   margin-left: 3px;
 }
 
+/* The second of the links out sits beside the first, which took the free space */
+.header-out-next {
+  margin-left: 16px;
+}
+
 /* Over an example, the bar runs edge to edge as the map under it does. */
 .header-wide .header-in {
   max-width: none;
@@ -370,6 +375,69 @@ td code,
   max-width: var(--wide);
   margin: 0 auto;
   padding: 56px var(--gutter) 80px;
+}
+
+/* The film: its still, and the player in its place once pressed */
+.film-section {
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding: 56px var(--gutter) 0;
+}
+
+.film {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--raised);
+  box-shadow: var(--lift);
+}
+
+.film iframe,
+.film-poster,
+.film-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.film-poster {
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.film-poster img {
+  object-fit: cover;
+}
+
+/* Under the still's own title, which stands across the middle of it */
+.film-play {
+  position: absolute;
+  left: 50%;
+  top: 76%;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  border-radius: 50%;
+  background: rgb(var(--ink-rgb) / 0.78);
+  transition: background 120ms ease;
+}
+
+.film-play::after {
+  content: '';
+  position: absolute;
+  left: 29px;
+  top: 22px;
+  border-style: solid;
+  border-width: 14px 0 14px 22px;
+  border-color: transparent transparent transparent #fff;
+}
+
+.film-poster:hover .film-play {
+  background: rgb(var(--ink-rgb) / 0.92);
 }
 
 .wall-head {

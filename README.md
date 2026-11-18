@@ -39,10 +39,6 @@ pnpm build        # ライブラリ
 Issue は歓迎します。プルリクエストは受け付けていません（[CONTRIBUTING.md](CONTRIBUTING.md)）。セキュリティの問題は
 [SECURITY.md](SECURITY.md) をご覧ください。
 
-## お問い合わせ
-
-導入やカスタマイズのご相談など、Issue ではないお問い合わせはメールでどうぞ: jeon.gwontaek.dev@gmail.com
-
 ## ライセンス
 
 MIT（[LICENSE](LICENSE)）。サンプルの次の二つは、それぞれのライセンスに従います。

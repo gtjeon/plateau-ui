@@ -4,7 +4,7 @@ import { REPOSITORY } from './links.js'
 /**
  * The foot of the reading pages: where the data comes from, which the maps
  * say themselves under every view, said once more for the site as a whole,
- * where to write to, that the library is not PLATEAU's own (the name says
+ * that the library is not PLATEAU's own (the name says
  * PLATEAU, and the bar links to the ministry), and the licence it is under.
  */
 export function Footer() {
@@ -31,8 +31,6 @@ export function Footer() {
           <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">
             国土地理院
           </a>
-          <br />
-          お問い合わせ: <a href="mailto:jeon.gwontaek.dev@gmail.com">jeon.gwontaek.dev@gmail.com</a>
           <br />
           plateau-ui は個人が開発しているオープンソースのライブラリで、国土交通省・PLATEAU の公式なものではありません。
           <br />

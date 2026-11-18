@@ -1,0 +1,681 @@
+html,
+body {
+  margin: 0;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  background: #e9ecf0;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
+  color: #222;
+}
+
+/* The page, whole, between the part's name above and the note below:
+   60 px over it and 24 px under it, so 636 of the 720 and centred across */
+#page {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 28px rgba(20, 30, 45, 0.14);
+  transform-origin: 0 0;
+  transform: translate(74.67px, 60px) scale(0.88333);
+}
+h1,
+h2,
+p,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+i {
+  display: block;
+}
+.g {
+  height: 12px;
+  border-radius: 4px;
+  background: #e3e6ea;
+}
+.w90 { width: 90px; }
+.w120 { width: 120px; }
+.w130 { width: 130px; }
+.w140 { width: 140px; }
+.w150 { width: 150px; }
+.w160 { width: 160px; }
+.w180 { width: 180px; }
+.w190 { width: 190px; }
+.w200 { width: 200px; }
+.w220 { width: 220px; }
+
+/* The example, wherever a page puts it */
+.frame {
+  position: absolute;
+  overflow: hidden;
+  background: #eef0f2;
+}
+.frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* What the example stands on, said once in code under the page */
+#api {
+  position: absolute;
+  right: 92px;
+  bottom: 40px;
+  z-index: 5;
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: rgba(20, 26, 34, 0.9);
+  color: #e9eef5;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 17px;
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.logo {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.teal { color: #138a8a; }
+.coral { color: #e0605a; }
+.ink { color: #1f2933; }
+.navy { color: #1d3a6e; }
+.icons {
+  display: flex;
+  gap: 18px;
+  margin-left: auto;
+}
+.icons i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #c5cbd3;
+}
+.cta {
+  display: inline-block;
+  text-align: center;
+  border-radius: 8px;
+  background: #3a4350;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 13px 0;
+}
+.cta.small {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+/* ---- A rental listing --------------------------------------------------- */
+.estate .tiny {
+  position: absolute;
+  left: 140px;
+  top: 10px;
+  font-size: 11px;
+  color: #666;
+}
+.estate .head {
+  position: absolute;
+  left: 140px;
+  right: 140px;
+  top: 28px;
+  height: 40px;
+}
+.estate .head nav {
+  display: flex;
+  gap: 34px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.estate .crumbs,
+.cityhall .crumbs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 82px;
+  height: 30px;
+  line-height: 30px;
+  padding-left: 140px;
+  background: #f1f2f3;
+  font-size: 12px;
+  color: #138a8a;
+}
+.estate .titlebar {
+  position: absolute;
+  left: 140px;
+  right: 140px;
+  top: 126px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.estate small {
+  font-size: 12px;
+  color: #555;
+}
+.estate h1 {
+  font-size: 24px;
+  letter-spacing: 0.06em;
+}
+.ghost {
+  border: 1px solid #aab2bb;
+  background: #fff;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 24px;
+  color: #444;
+}
+.estate .tabs {
+  position: absolute;
+  left: 140px;
+  right: 140px;
+  top: 192px;
+  display: flex;
+  border: 1px solid #dfe2e6;
+  border-bottom: 0;
+}
+.estate .tabs span {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 0;
+  border-right: 1px solid #dfe2e6;
+  color: #444;
+}
+.estate .tabs .on {
+  color: #138a8a;
+  box-shadow: inset 0 -3px 0 #138a8a;
+}
+.estate .gallery {
+  position: absolute;
+  left: 140px;
+  top: 248px;
+  width: 500px;
+  height: 450px;
+  border: 1px solid #dfe2e6;
+  border-radius: 6px;
+}
+.estate .gallery .frame {
+  left: 0;
+  top: 0;
+  width: 500px;
+  height: 400px;
+}
+.estate .count {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 2;
+  background: #666;
+  color: #fff;
+  font-size: 12px;
+  padding: 3px 14px;
+  border-radius: 4px;
+}
+.estate .caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 412px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.estate .facts {
+  position: absolute;
+  left: 680px;
+  top: 250px;
+  width: 460px;
+}
+.estate .rent {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.estate .rent b {
+  color: #d94a3a;
+  font-size: 26px;
+}
+.pill {
+  margin-left: auto;
+  background: #138a8a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 6px;
+}
+.estate .sub {
+  margin-top: 8px;
+  font-size: 13px;
+}
+.estate .buttons {
+  display: flex;
+  gap: 14px;
+  margin-top: 16px;
+}
+.estate .buttons .cta {
+  flex: 1;
+}
+.estate dl {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  row-gap: 12px;
+  align-items: center;
+  font-size: 14px;
+}
+.estate dt {
+  background: #f1f2f3;
+  text-align: center;
+  font-size: 12px;
+  color: #555;
+  padding: 5px 0;
+  border-radius: 4px;
+}
+.estate dd {
+  padding-left: 14px;
+}
+
+/* ---- A stay to book --------------------------------------------------- */
+.stay .head {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  top: 16px;
+  height: 52px;
+  border-bottom: 1px solid #ebebeb;
+  padding-bottom: 12px;
+}
+.stay .search {
+  display: flex;
+  margin: 0 auto;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-size: 14px;
+  font-weight: 600;
+}
+.stay .search span {
+  padding: 10px 22px;
+  border-right: 1px solid #ddd;
+}
+.stay .search span:last-child {
+  border-right: 0;
+}
+.stay .title {
+  position: absolute;
+  left: 40px;
+  top: 92px;
+}
+.stay h1 {
+  font-size: 26px;
+}
+.stay .sub {
+  font-size: 14px;
+  color: #555;
+  margin-top: 6px;
+}
+.stay .frame {
+  left: 40px;
+  top: 172px;
+  width: 800px;
+  height: 520px;
+  border-radius: 14px;
+}
+.stay .book {
+  position: absolute;
+  left: 880px;
+  top: 172px;
+  width: 360px;
+  padding: 26px 24px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+.stay .price b {
+  font-size: 24px;
+}
+.stay .dates {
+  display: flex;
+  margin: 18px 0;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  font-size: 11px;
+}
+.stay .dates span {
+  flex: 1;
+  padding: 10px 12px;
+}
+.stay .dates span + span {
+  border-left: 1px solid #bbb;
+}
+.stay .dates b {
+  font-size: 14px;
+}
+.stay .book .cta {
+  display: block;
+  background: #e0605a;
+  margin-bottom: 22px;
+}
+.stay .book .g {
+  margin-top: 12px;
+}
+
+/* ---- An outlet mall's area map ------------------------------------- */
+.outlets .head {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  top: 18px;
+  height: 48px;
+  border-bottom: 1px solid #ebebeb;
+  padding-bottom: 10px;
+}
+.outlets .head nav {
+  display: flex;
+  gap: 32px;
+  margin-left: 40px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.outlets .head nav .on {
+  border-bottom: 2px solid #1f2933;
+}
+.outlets .hours {
+  margin-left: auto;
+  font-size: 13px;
+  color: #555;
+}
+.outlets h1 {
+  position: absolute;
+  left: 48px;
+  top: 100px;
+  font-size: 30px;
+  letter-spacing: 0.06em;
+}
+.outlets .lead {
+  position: absolute;
+  left: 48px;
+  top: 148px;
+  font-size: 14px;
+  color: #555;
+}
+.outlets .frame {
+  left: 48px;
+  top: 186px;
+  width: 820px;
+  height: 506px;
+  border-radius: 14px;
+}
+.outlets .zones {
+  position: absolute;
+  left: 900px;
+  top: 186px;
+  width: 332px;
+  padding: 24px;
+  box-sizing: border-box;
+  border: 1px solid #e3e6ea;
+  border-radius: 14px;
+}
+.outlets h2 {
+  font-size: 18px;
+}
+.outlets ul {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 22px;
+}
+.outlets li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  column-gap: 10px;
+  row-gap: 8px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #eef0f2;
+  font-size: 16px;
+}
+.outlets li .g {
+  grid-column: 2;
+}
+.outlets .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+.outlets .zones .cta {
+  display: block;
+}
+
+/* ---- A company's offices -------------------------------------------- */
+.office .head {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  top: 18px;
+  height: 48px;
+}
+.office .head nav {
+  display: flex;
+  gap: 30px;
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 600;
+}
+.office .head nav .on {
+  border-bottom: 2px solid #1f2933;
+}
+.office h1 {
+  position: absolute;
+  left: 48px;
+  top: 112px;
+  font-size: 34px;
+  letter-spacing: 0.06em;
+}
+.office .lead {
+  position: absolute;
+  left: 48px;
+  top: 166px;
+  font-size: 15px;
+  color: #555;
+}
+.office .sites {
+  position: absolute;
+  left: 48px;
+  top: 226px;
+  width: 380px;
+  list-style: none;
+  padding: 0;
+}
+.office .sites li {
+  padding: 16px 18px;
+  border: 1px solid #e3e6ea;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.office .sites li.on {
+  border-color: #1f2933;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+.office .sites b {
+  font-size: 18px;
+}
+.office .sites .g {
+  margin-top: 10px;
+}
+.office .frame {
+  left: 460px;
+  top: 112px;
+  width: 780px;
+  height: 580px;
+  border-radius: 16px;
+}
+
+/* ---- A city office's way there ------------------------------------- */
+.cityhall .head {
+  position: absolute;
+  left: 60px;
+  right: 60px;
+  top: 14px;
+  height: 40px;
+}
+.cityhall .tools {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  font-size: 12px;
+}
+.cityhall .tools span {
+  border: 1px solid #c5cbd3;
+  border-radius: 4px;
+  padding: 4px 10px;
+}
+.cityhall .bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 64px;
+  height: 44px;
+  background: #1d3a6e;
+  display: flex;
+  justify-content: center;
+  gap: 54px;
+  align-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+.cityhall .bar .on {
+  border-bottom: 3px solid #fff;
+  padding-bottom: 4px;
+}
+.cityhall .crumbs {
+  top: 108px;
+  color: #1d3a6e;
+  padding-left: 60px;
+}
+.cityhall h1 {
+  position: absolute;
+  left: 60px;
+  top: 158px;
+  font-size: 26px;
+  border-left: 6px solid #1d3a6e;
+  padding-left: 14px;
+}
+.cityhall .frame {
+  left: 60px;
+  top: 214px;
+  width: 780px;
+  height: 480px;
+  border: 1px solid #c5cbd3;
+}
+.cityhall .how {
+  position: absolute;
+  left: 880px;
+  top: 214px;
+  width: 340px;
+}
+.cityhall h2 {
+  font-size: 18px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1d3a6e;
+}
+.cityhall ol {
+  padding-left: 22px;
+  margin: 16px 0 20px;
+  font-size: 15px;
+  line-height: 2.1;
+}
+.cityhall .how .g {
+  margin-top: 12px;
+}
+
+/* ---- A disaster-prevention portal ----------------------------------- */
+.hazard .head {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 62px;
+  padding: 0 40px;
+  background: #fff;
+  border-bottom: 4px solid #1d3a6e;
+}
+.hazard .head nav {
+  display: flex;
+  margin-left: auto;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.hazard .head nav span {
+  padding: 10px 22px;
+  border-radius: 6px 6px 0 0;
+  color: #1d3a6e;
+}
+.hazard .head nav .on {
+  background: #1d3a6e;
+  color: #fff;
+}
+.hazard h1 {
+  position: absolute;
+  left: 40px;
+  top: 88px;
+  font-size: 24px;
+}
+.hazard .note {
+  position: absolute;
+  left: 40px;
+  top: 126px;
+  font-size: 14px;
+  color: #555;
+}
+.hazard .frame {
+  left: 40px;
+  top: 164px;
+  width: 860px;
+  height: 530px;
+  border-radius: 8px;
+}
+.hazard .side {
+  position: absolute;
+  left: 930px;
+  top: 164px;
+  width: 310px;
+  padding: 22px;
+  box-sizing: border-box;
+  background: #f3f5f8;
+  border-radius: 8px;
+}
+.hazard h2 {
+  font-size: 17px;
+  margin-bottom: 14px;
+}
+.hazard .side .g {
+  margin-bottom: 12px;
+}
+.hazard .side .cta {
+  display: block;
+  margin-top: 22px;
+  background: #1d3a6e;
+}

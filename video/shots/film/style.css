@@ -1,0 +1,619 @@
+html,
+body {
+  margin: 0;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  background: #fff;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
+  color: #1f2933;
+}
+
+#map {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* ---- First part: the title and the step cards --------------------------- */
+
+#title {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 46% 30% at 50% 50%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 100%);
+}
+#title .name {
+  font-family: 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 84px;
+  letter-spacing: -0.02em;
+}
+#title .phrase {
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.04em;
+}
+
+#step {
+  position: absolute;
+  left: 40px;
+  bottom: 40px;
+  z-index: 3;
+  opacity: 0;
+  padding: 16px 20px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 24px rgba(20, 30, 45, 0.18);
+}
+#step .say {
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.03em;
+}
+#step code {
+  display: block;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #1f2933;
+  color: #e9eef5;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 16px;
+  white-space: pre;
+}
+
+#subtitle {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  z-index: 4;
+  transform: translateX(-50%);
+  opacity: 0;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(20, 26, 34, 0.86);
+  color: #fff;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* ---- Second part: pages as grey blocks -------------------------------------
+
+   The layout of each page is followed and nothing else: text is a light bar,
+   a heading a darker one, a button a darker block. No names, no logos, no
+   brand colours — the only colour on screen is the map. */
+
+.skin {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: #fff;
+}
+.skin.on {
+  display: block;
+}
+.skin i {
+  display: block;
+}
+.g {
+  background: #e4e7eb;
+  border-radius: 4px;
+}
+.d {
+  background: #c5cbd3;
+  border-radius: 4px;
+}
+.w40 { width: 40px; }
+.w60 { width: 60px; }
+.w70 { width: 70px; }
+.w100 { width: 100px; }
+.w110 { width: 110px; }
+.w120 { width: 120px; }
+.w130 { width: 130px; }
+.w140 { width: 140px; }
+.w150 { width: 150px; }
+.w160 { width: 160px; }
+.w170 { width: 170px; }
+.w180 { width: 180px; }
+.w200 { width: 200px; }
+.w220 { width: 220px; }
+.w230 { width: 230px; }
+.h16 { height: 16px; }
+.h20 { height: 20px; }
+
+/* A listing on a property portal, scrolled to its photos (the map is the photo) */
+.topbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 36px;
+  background: #d3d8de;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.estate-tabs {
+  position: absolute;
+  left: 180px;
+  top: 50px;
+  display: flex;
+  gap: 8px;
+}
+.estate-tabs i {
+  width: 82px;
+  height: 40px;
+  border: 1px solid #d6dbe0;
+  box-sizing: border-box;
+}
+.estate-rule {
+  position: absolute;
+  left: 180px;
+  width: 920px;
+  top: 94px;
+  height: 4px;
+  background: #b9c0c8;
+}
+.estate-frame {
+  position: absolute;
+  left: 180px;
+  top: 112px;
+  width: 920px;
+  height: 496px;
+  background: #1c1d1f;
+}
+.estate-frame .arrow {
+  position: absolute;
+  right: 18px;
+  top: 230px;
+  width: 22px;
+  height: 22px;
+  border-right: 4px solid #fff;
+  border-top: 4px solid #fff;
+  transform: rotate(45deg);
+  z-index: 2;
+}
+.estate-thumbs {
+  position: absolute;
+  left: 180px;
+  top: 620px;
+  display: flex;
+  gap: 10px;
+}
+.estate-thumbs i {
+  width: 92px;
+  height: 66px;
+  background: #e4e7eb;
+}
+.estate-thumbs i.on {
+  outline: 3px solid #9aa3ad;
+}
+.estate-sticky {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.92);
+  border-top: 1px solid #e3e6ea;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-right: 180px;
+  z-index: 2;
+}
+.estate-sticky .cta {
+  width: 204px;
+  height: 38px;
+  border-radius: 4px;
+  background: #aab2bb;
+}
+
+/* A company's access page: a title, a grey band, chips, and a card with the map */
+.company-head {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  gap: 40px;
+}
+.company-head .logo {
+  width: 150px;
+  height: 26px;
+}
+.company-head .nav {
+  display: flex;
+  gap: 28px;
+  flex: 1;
+}
+.company-head .nav i {
+  width: 64px;
+  height: 14px;
+}
+.company-head .ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.company-title {
+  position: absolute;
+  left: 580px;
+  top: 108px;
+  width: 120px;
+  height: 30px;
+}
+.company-underline {
+  position: absolute;
+  left: 622px;
+  top: 158px;
+  width: 36px;
+  height: 3px;
+  background: #1f2933;
+}
+.company-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 196px;
+  bottom: 0;
+  background: #f0f1f2;
+}
+.chips {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 26px 0 0 140px;
+}
+.chips + .chips {
+  margin-top: 14px;
+}
+.chips .g {
+  height: 14px;
+}
+.chip {
+  width: 90px;
+  height: 30px;
+  border-radius: 999px;
+  background: #fff;
+}
+.company-card {
+  position: absolute;
+  left: 140px;
+  right: 120px;
+  top: 128px;
+  bottom: -20px;
+  border-radius: 20px;
+  background: #fff;
+  padding: 40px 0 0 44px;
+  box-sizing: border-box;
+}
+.company-card .head {
+  width: 70px;
+  height: 22px;
+}
+.company-card .underline {
+  width: 26px;
+  height: 3px;
+  background: #1f2933;
+  margin: 14px 0 26px;
+}
+.company-card .line {
+  height: 14px;
+  margin-bottom: 18px;
+}
+
+/* A city guide's area page: a header, a crumb bar and the big picture */
+.walk-head {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 70px;
+}
+.walk-head .logo {
+  position: absolute;
+  left: 18px;
+  top: 14px;
+  width: 150px;
+  height: 40px;
+}
+.walk-head .util {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  display: flex;
+  gap: 18px;
+}
+.walk-head .util i {
+  width: 90px;
+  height: 10px;
+}
+.walk-head .nav {
+  position: absolute;
+  right: 80px;
+  top: 40px;
+  display: flex;
+  gap: 26px;
+}
+.walk-head .nav i {
+  width: 72px;
+  height: 14px;
+}
+.walk-crumbs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 70px;
+  height: 28px;
+  background: #eef2f5;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-left: 40px;
+}
+.walk-crumbs i {
+  width: 56px;
+  height: 10px;
+}
+.walk-hero {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 98px;
+  bottom: 0;
+  background: repeating-linear-gradient(135deg, #eef3f7 0 14px, #e6edf2 14px 28px);
+}
+.walk-round {
+  position: absolute;
+  right: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #c5cbd3;
+  z-index: 2;
+}
+.walk-round.one {
+  top: 230px;
+  background: #c5cbd3;
+}
+.walk-round.two {
+  top: 300px;
+}
+
+/* A hazard map: the map is the page, with a panel and tools laid over it */
+.safety-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 40px;
+  background: #fff;
+  border-bottom: 1px solid #d6dbe0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px;
+  z-index: 2;
+}
+.safety-top .title {
+  width: 210px;
+  height: 14px;
+}
+.safety-top .search {
+  width: 300px;
+  height: 24px;
+  border: 1px solid #c5cbd3;
+  border-radius: 4px;
+}
+.safety-top .tools {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.safety-top .tools i {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  background: #c5cbd3;
+}
+.safety-panel {
+  position: absolute;
+  left: 6px;
+  top: 48px;
+  width: 268px;
+  height: 450px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #c5cbd3;
+  padding: 14px;
+  box-sizing: border-box;
+  z-index: 2;
+}
+.safety-panel .line {
+  height: 12px;
+  margin-bottom: 12px;
+}
+.safety-panel .tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  gap: 14px 16px;
+  margin: 8px 0 18px;
+}
+.safety-panel .tiles i {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  background: #aab2bb;
+}
+.safety-panel .box {
+  margin-top: 6px;
+  height: 110px;
+  border: 1px solid #d6dbe0;
+}
+.safety-tools {
+  position: absolute;
+  right: 8px;
+  top: 52px;
+  display: grid;
+  gap: 8px;
+  z-index: 2;
+}
+.safety-tools i {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #c5cbd3;
+}
+.safety-zoom {
+  position: absolute;
+  left: 10px;
+  top: 520px;
+  display: grid;
+  gap: 4px;
+  z-index: 2;
+}
+.safety-zoom i {
+  width: 26px;
+  height: 26px;
+  background: #fff;
+  border: 1px solid #c5cbd3;
+}
+
+/* A shop finder: a search on the left, the map on the right */
+.stores-head {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 94px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 36px;
+  border-bottom: 1px solid #e3e6ea;
+}
+.stores-head .dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.stores-head .nav {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+}
+.stores-head .nav i {
+  width: 56px;
+  height: 12px;
+}
+.stores-head .icons {
+  display: flex;
+  gap: 26px;
+}
+.stores-head .icons i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #c5cbd3;
+}
+.stores-head .brand {
+  width: 80px;
+  height: 32px;
+}
+.stores-crumbs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 95px;
+  height: 30px;
+  background: #ececec;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 130px;
+}
+.stores-crumbs i {
+  width: 40px;
+  height: 8px;
+  background: #d6d6d6;
+}
+.stores-title {
+  position: absolute;
+  left: 48px;
+  top: 168px;
+  width: 104px;
+  height: 22px;
+}
+.stores-note {
+  position: absolute;
+  left: 1110px;
+  top: 172px;
+  width: 110px;
+  height: 10px;
+}
+.stores-search {
+  position: absolute;
+  left: 48px;
+  top: 240px;
+  width: 380px;
+  height: 34px;
+  border-bottom: 1px solid #c5cbd3;
+}
+.stores-filter {
+  position: absolute;
+  left: 460px;
+  top: 252px;
+  width: 110px;
+  height: 10px;
+}
+.stores-select {
+  position: absolute;
+  left: 48px;
+  top: 300px;
+  width: 552px;
+  height: 40px;
+  border: 1px solid #c5cbd3;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.stores-list {
+  position: absolute;
+  left: 48px;
+  top: 370px;
+  width: 552px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stores-list li {
+  padding: 16px 0;
+  border-bottom: 1px solid #e3e6ea;
+}
+.stores-list li i {
+  height: 12px;
+  margin-bottom: 10px;
+}
+.stores-list li i.d {
+  height: 15px;
+}

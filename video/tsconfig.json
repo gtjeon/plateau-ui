@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["@webgpu/types"],
+    "noEmit": true,
+    "paths": {
+      "@plateau-ui/core": ["../packages/core/src/index.ts"]
+    }
+  },
+  "include": ["shots", "shared"]
+}

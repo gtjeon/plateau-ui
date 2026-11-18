@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>site</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!--
+      The second part: pages of the kinds a map like this goes into, each with
+      one of the site's examples running where the page's picture or map goes.
+      The layouts follow real kinds of pages; the names are made up (〇〇), and
+      there are no logos or brand colours. The words a reader takes in at a
+      glance are there; the body text is grey bars. One page per recording,
+      chosen by `?page=`.
+    -->
+
+    <template id="estate">
+      <div class="estate">
+        <div class="tiny">不動産情報サイト 〇〇不動産</div>
+        <header class="head">
+          <b class="logo teal">〇〇不動産</b>
+          <nav><span>借りる</span><span>買う</span><span>建てる</span><span>売る</span><span>調べる</span></nav>
+          <span class="icons"><i></i><i></i><i></i></span>
+        </header>
+        <div class="crumbs">不動産トップ ＞ 賃貸 ＞ 神奈川県 ＞ 鎌倉市 ＞ 七里ヶ浜駅 ＞ 七里ヶ浜の家 3LDK 物件詳細</div>
+        <div class="titlebar">
+          <div><small>賃貸一戸建て</small><h1>七里ヶ浜の家　3LDK</h1></div>
+          <button class="ghost">♡ お気に入り登録</button>
+        </div>
+        <nav class="tabs"><span class="on">物件画像</span><span>設備・特徴</span><span>費用</span><span>周辺情報</span><span>掲載不動産会社</span></nav>
+        <div class="gallery">
+          <div class="frame"></div>
+          <span class="count">1/22</span>
+          <div class="caption">日当たり（時刻ごとの影）</div>
+        </div>
+        <div class="facts">
+          <div class="rent">賃料 <b>12.8万円</b> <span class="pill">初期費用を確認する</span></div>
+          <div class="sub">敷金 1ヶ月　礼金 なし　管理費 3,000円</div>
+          <div class="buttons"><span class="cta">メールでお問合せ</span><span class="cta">見学予約</span></div>
+          <dl>
+            <dt>間取り</dt><dd>3LDK</dd>
+            <dt>面積</dt><dd>92.40m²</dd>
+            <dt>築年月</dt><dd><i class="g w120"></i></dd>
+            <dt>住所</dt><dd>神奈川県鎌倉市七里ガ浜</dd>
+            <dt>交通</dt><dd>江ノ電 七里ヶ浜駅 徒歩6分</dd>
+            <dt>現況</dt><dd><i class="g w90"></i></dd>
+          </dl>
+        </div>
+      </div>
+    </template>
+
+    <template id="stay">
+      <div class="stay">
+        <header class="head">
+          <b class="logo coral">〇〇トラベル</b>
+          <div class="search"><span>七里ヶ浜</span><span>5月20日〜21日</span><span>大人2名</span></div>
+          <span class="icons"><i></i><i></i></span>
+        </header>
+        <div class="title">
+          <h1>海の見える坂に、泊まる。</h1>
+          <div class="sub">★ 4.9 ・ 七里ヶ浜（鎌倉市）・ 一棟貸し 5棟</div>
+        </div>
+        <div class="frame"></div>
+        <aside class="book">
+          <div class="price"><b>¥38,000</b> / 泊</div>
+          <div class="dates"><span>チェックイン<br /><b>5/20</b></span><span>チェックアウト<br /><b>5/21</b></span></div>
+          <span class="cta">予約する</span>
+          <i class="g w220"></i><i class="g w180"></i><i class="g w200"></i>
+        </aside>
+      </div>
+    </template>
+
+    <template id="outlets">
+      <div class="outlets">
+        <header class="head">
+          <b class="logo ink">〇〇アウトレット</b>
+          <nav><span>ショップ</span><span class="on">エリアマップ</span><span>アクセス</span><span>イベント</span></nav>
+          <span class="hours">本日の営業 10:00–20:00</span>
+        </header>
+        <h1>エリアマップ</h1>
+        <p class="lead">ゾーンごとに色分けしています。</p>
+        <div class="frame"></div>
+        <aside class="zones">
+          <h2>ゾーンから探す</h2>
+          <ul>
+            <li><i class="dot" style="background:#ff7d35"></i><b>ウエストゾーン</b><i class="g w120"></i></li>
+            <li><i class="dot" style="background:#fb2b74"></i><b>イーストゾーン</b><i class="g w140"></i></li>
+            <li><i class="dot" style="background:#6c348f"></i><b>ヒルサイド</b><i class="g w90"></i></li>
+          </ul>
+          <span class="cta">ショップを検索する</span>
+        </aside>
+      </div>
+    </template>
+
+    <template id="office">
+      <div class="office">
+        <header class="head">
+          <b class="logo ink">〇〇ワークス</b>
+          <nav><span>サービス</span><span class="on">拠点</span><span>料金</span><span>会社情報</span></nav>
+          <span class="cta small">お問い合わせ</span>
+        </header>
+        <h1>拠点紹介</h1>
+        <p class="lead">駅のそばの、働ける場所。</p>
+        <ul class="sites">
+          <li class="on"><b>新宿</b><i class="g w160"></i></li>
+          <li><b>渋谷</b><i class="g w140"></i></li>
+          <li><b>品川</b><i class="g w150"></i></li>
+          <li><b>東京</b><i class="g w130"></i></li>
+        </ul>
+        <div class="frame"></div>
+      </div>
+    </template>
+
+    <template id="cityhall">
+      <div class="cityhall">
+        <header class="head">
+          <b class="logo navy">〇〇区</b>
+          <span class="tools"><span>文字サイズ</span><span>色の変更</span><span>Language</span></span>
+        </header>
+        <nav class="bar"><span>くらし・手続き</span><span>子育て・教育</span><span>健康・福祉</span><span>まちづくり</span><span class="on">区政情報</span></nav>
+        <div class="crumbs">トップページ ＞ 区政情報 ＞ 区役所のご案内 ＞ 区役所へのアクセス</div>
+        <h1>区役所へのアクセス</h1>
+        <div class="frame"></div>
+        <aside class="how">
+          <h2>駅からの道順</h2>
+          <ol><li>駅の北口を出る</li><li>大きな通りを北へ</li><li>二つ目の角を左へ</li><li>区役所 4階 福祉課</li></ol>
+          <i class="g w200"></i><i class="g w160"></i>
+        </aside>
+      </div>
+    </template>
+
+    <template id="hazard">
+      <div class="hazard">
+        <header class="head">
+          <b class="logo navy">〇〇市 防災ポータル</b>
+          <nav><span>地震</span><span class="on">水害</span><span>土砂災害</span><span>避難所</span></nav>
+        </header>
+        <h1>川があふれたとき、水が引くまでの時間</h1>
+        <p class="note">想定最大規模の洪水で、浸水が続く時間の目安です。</p>
+        <div class="frame"></div>
+        <aside class="side">
+          <h2>この地図について</h2>
+          <i class="g w200"></i><i class="g w180"></i><i class="g w190"></i>
+          <span class="cta">避難所を確認する</span>
+        </aside>
+      </div>
+    </template>
+
+    <template id="quake">
+      <div class="hazard">
+        <header class="head">
+          <b class="logo navy">〇〇市 防災ポータル</b>
+          <nav><span class="on">地震</span><span>水害</span><span>土砂災害</span><span>避難所</span></nav>
+        </header>
+        <h1>地震の揺れのイメージ</h1>
+        <p class="note">揺れの広がり方を、街の建物で表したイメージです（実際の揺れ方とは異なります）。</p>
+        <div class="frame"></div>
+        <aside class="side">
+          <h2>家具の固定をしましょう</h2>
+          <i class="g w200"></i><i class="g w180"></i><i class="g w190"></i>
+          <span class="cta">備えのチェックリスト</span>
+        </aside>
+      </div>
+    </template>
+
+    <div id="page"></div>
+    <div id="api"></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

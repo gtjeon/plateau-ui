@@ -32,7 +32,7 @@ export function Footer() {
             国土地理院
           </a>
           <br />
-          plateau-ui は個人が開発しているオープンソースのライブラリで、国土交通省・PLATEAU の公式なものではありません。
+          plateau-ui は国土交通省・PLATEAU の公式なものではありません。
           <br />
           MIT License
         </p>

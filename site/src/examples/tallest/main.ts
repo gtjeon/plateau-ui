@@ -97,8 +97,8 @@ const viewer = new Viewer({
   // runs away under them, which says how far apart they are as well as how
   // high.
   heading: 38,
-  // Nothing cut away: what stands is the five this page stands itself.
-  mask: { shapes: [{ shape: 'view' }] },
+  // No mask, so nothing is cut away: what stands is the five this page stands
+  // itself.
   // The air behind the sheet and the wall in the paper's colour, and the sun
   // that draws the sheet in it (`data.ts`)
   theme: { backdrop: PAPER },

@@ -8,7 +8,6 @@ const viewer = new Viewer({
   zoom: 18.2,
   pitch: 55,
   heading: 40,
-  mask: { shapes: [{ shape: 'view' }] },
   buildings: { minZoom: false },
 })
 ;(window as any).viewer = viewer

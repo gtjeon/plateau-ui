@@ -94,7 +94,7 @@ export const MEETING = [139.7701, 35.7054] as [number, number]
 export const REACH = 900
 
 /** The circle itself, which the viewer is cut to and the fetching is judged against. */
-export const MASK: Mask = { shapes: [{ shape: 'circle', center: MEETING, radius: REACH }] }
+export const MASK: Mask = { shape: { type: 'circle', center: MEETING, radius: REACH } }
 
 /**
  * Three colours for the inside of a ward, and one ink for every line over them.

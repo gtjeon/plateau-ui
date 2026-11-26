@@ -26,7 +26,7 @@ const viewer = new Viewer({
   container: 'map',
   pitch: VIEW.pitch,
   heading: VIEW.heading,
-  mask: { shapes: [{ shape: 'polygon', points: AREA }] },
+  mask: { shape: { type: 'polygon', points: AREA } },
   // The guard is for a wide view asking for half a prefecture of tiles. The
   // rectangle is about 100 m a side, so there is nothing left for it to guard.
   buildings: { minZoom: false },

@@ -34,12 +34,12 @@ export const DOC_PAGES: readonly DocPage[] = [
       {
         heading: '最初の地図',
         paragraphs: [
-          '`new Viewer()` に、置く要素と視点、それに `mask` を渡します。下の例は、東京駅のあたりを斜めから見下ろします。`Viewer` は作った時点で描画を始めるので、別に呼ぶ開始用のメソッドはありません。',
+          '`new Viewer()` に、置く要素と視点を渡します。下の例は、東京駅のあたりを斜めから見下ろします。`Viewer` は作った時点で描画を始めるので、別に呼ぶ開始用のメソッドはありません。',
           '`center` は視点の中心で、`[経度, 緯度]` の順に書きます。`zoom` は地図タイルと同じ尺度のズームで、小数も使えます。`pitch` は傾きの角度で、0 のとき真上から見下ろし、70 度まで倒せます。`heading` は向きの角度で、0 のとき北が上です。',
-          "`mask` は必ず指定します。地図をどの形で切り取るかを決める値で、描くものと読み込むものの両方がその形の中に限られます。`{ shapes: [{ shape: 'view' }] }` は画面が届く範囲すべてを表し、何も切り取りません。ほかに `'circle'`・`'rect'`・`'polygon'` の形があります。",
+          "`mask` は地図をどの形で切り取るかを決める値で、描くものと読み込むものの両方がその形の中に限られます。書かなければ何も切り取らず、画面が届く範囲すべてを表示します。形には `'circle'`・`'rect'`・`'polygon'` があります。",
           'このビューワには、地形・水面・道路・鉄道・公園と木、その上に立つ建物が表示されます。地形と建物、モデルを置くレイヤーはビューワが自分で用意し、`viewer.ground`・`viewer.buildings`・`viewer.models` として持っています。地形の高低差は既定では付きません。付けるときは `ground: { elevation: true }` を渡します。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 60,\n  heading: 30,\n  mask: { shapes: [{ shape: 'view' }] },\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 60,\n  heading: 30,\n})",
       },
       {
         heading: 'WebGPU と WebGL2',
@@ -49,7 +49,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           "実際にどちらで描画しているかは `viewer.backend` で読めます。値は `'WebGPU'`・`'WebGL2'`・`'unknown'` のいずれかで、描画が始まるまでは `'unknown'` です。最初の `frame` イベントが届いた時点では、どちらかに決まっています。",
           "どちらにも対応していないブラウザでは、地図を描けません。そのときは `error` イベントが `what: 'start'` で一度届きます。受け取る関数がなければ、コンソールに出力されます。`Viewer` を作った直後に `on('error')` を登録すれば、この失敗を受け取れます。",
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.on('error', (event) => {\n  if (event.what === 'start') console.error('この環境では地図を描画できません', event.cause)\n})\n\nconst stop = viewer.on('frame', () => {\n  stop()\n  console.log(`描画に使っているのは ${viewer.backend} です`)\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n})\n\nviewer.on('error', (event) => {\n  if (event.what === 'start') console.error('この環境では地図を描画できません', event.cause)\n})\n\nconst stop = viewer.on('frame', () => {\n  stop()\n  console.log(`描画に使っているのは ${viewer.backend} です`)\n})",
       },
       {
         heading: '出典の表示',
@@ -59,7 +59,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           'ページが追加したレイヤーの出典も、そのレイヤーの `credit` に書けば同じ行に並びます。',
           'いまの出典は `viewer.credits` で読め、変わったときは `credits` イベントが届きます。出典の行の要素には `plateau-credits` というクラスが付いています。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n  creditsAt: 'bottom-left',\n})\n\nviewer.on('credits', ({ credits }) => {\n  console.log(credits.map((credit) => credit.text).join(' / '))\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  creditsAt: 'bottom-left',\n})\n\nviewer.on('credits', ({ credits }) => {\n  console.log(credits.map((credit) => credit.text).join(' / '))\n})",
       },
       {
         heading: '片付け',
@@ -68,7 +68,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`dispose()` は同期で終わるので、React の後片付けの関数や、ページを離れるときの処理の中で呼べます。2 回呼んでも、描画が始まる前に呼んでも問題ありません。',
           'ビューワが持っているレイヤーも一緒に解放されます。残しておきたいレイヤーは、先に `viewer.remove()` で外しておきます。解放したあとのビューワは、レイヤーを渡されても何もしません。解放したかどうかは `viewer.disposed` で読めます。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nwindow.addEventListener('pagehide', () => {\n  viewer.dispose()\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n})\n\nwindow.addEventListener('pagehide', () => {\n  viewer.dispose()\n})",
       },
     ],
   },
@@ -194,7 +194,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'ライブラリが送るリクエストを書き換える関数。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.0778, 35.1036],\n  zoom: 16.5,\n  pitch: 55,\n  heading: 300,\n  minZoom: 14,\n  maxPitch: 60,\n  mask: { shapes: [{ shape: 'circle', center: [139.0778, 35.1036], radius: 800 }], fade: 100 },\n  ground: { elevation: true },\n  creditsAt: 'bottom-left',\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.0778, 35.1036],\n  zoom: 16.5,\n  pitch: 55,\n  heading: 300,\n  minZoom: 14,\n  maxPitch: 60,\n  mask: { shape: { type: 'circle', center: [139.0778, 35.1036], radius: 800 }, fade: 100 },\n  ground: { elevation: true },\n  creditsAt: 'bottom-left',\n})",
       },
       {
         heading: '視点を読む・書く',
@@ -204,7 +204,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`minZoom`・`maxZoom`・`maxPitch` は、視点が動ける範囲です。既定はそれぞれ 2・22・70 で、これより狭くはできますが、広くはできません。範囲を狭めたときに今の視点が外にあれば、内側に戻ります。`minZoom` が `maxZoom` を超える指定は例外になります。',
           '`viewer.threeCamera` は three の `OrthographicCamera` で、`viewer.camera` とは別のものです。`zoom` の意味も違います。three のカメラは毎フレーム視点から計算し直されるため、書いても次のフレームで上書きされます。視点を動かすときは `viewer.camera` を使います。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.camera.center = [139.7638, 35.6806]\nviewer.camera.zoom = 18\nviewer.camera.pitch = 60\nviewer.camera.heading = 45\nviewer.camera.minZoom = 15\n\nconst { center, zoom, pitch, heading } = viewer.camera.view\nconsole.log(center[0], center[1], zoom, pitch, heading)",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n})\n\nviewer.camera.center = [139.7638, 35.6806]\nviewer.camera.zoom = 18\nviewer.camera.pitch = 60\nviewer.camera.heading = 45\nviewer.camera.minZoom = 15\n\nconst { center, zoom, pitch, heading } = viewer.camera.view\nconsole.log(center[0], center[1], zoom, pitch, heading)",
       },
       {
         heading: '視点を動かす',
@@ -215,7 +215,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           "`animate()` は、キーフレームで視点を動かします。タイミングは `element.animate` と同じ書き方で、`duration`・`delay`・`iterations`・`direction`・`fill`・`easing` を受け取ります。戻り値は `play()`・`pause()`・`reverse()`・`finish()`・`cancel()` と `currentTime`・`playbackRate`・`finished` を持ちます。`fill` を省略すると `'both'` になり、終わったあとも最後の視点にとどまります。`heading` は書いた値のとおりに回るので、0 から 360 で一周します。短い向きに回すときは、350 から 370 のように書きます。",
           '`fitBounds()` は、経緯度の四角形が画面に収まるように、今の向きと傾きのまま中心とズームを決めます。四角形は `southWest`（南西の角）と `northEast`（北東の角）を `[経度, 緯度]` で書いた `MapBounds` です。`padding` は四角形のまわりに空ける余白で、CSS ピクセルで指定し、既定は 0 です。動いていた視点は止まります。キャンバスの大きさが決まる前に呼んだ場合は、決まった時点で合わせます。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.camera.fitBounds(\n  { southWest: [139.7445, 35.6745], northEast: [139.7705, 35.6935] },\n  { padding: 40 },\n)\n\nconst stop = viewer.on('loaded', () => {\n  stop()\n  viewer.camera\n    .flyTo({ center: [139.7454, 35.6586], zoom: 18, pitch: 60 }, { duration: 4000, easing: 'ease-in-out' })\n    .then((arrived) => {\n      if (!arrived) return\n      viewer.camera.animate([{ heading: 0 }, { heading: 360 }], {\n        duration: 60000,\n        iterations: Infinity,\n      })\n    })\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n})\n\nviewer.camera.fitBounds(\n  { southWest: [139.7445, 35.6745], northEast: [139.7705, 35.6935] },\n  { padding: 40 },\n)\n\nconst stop = viewer.on('loaded', () => {\n  stop()\n  viewer.camera\n    .flyTo({ center: [139.7454, 35.6586], zoom: 18, pitch: 60 }, { duration: 4000, easing: 'ease-in-out' })\n    .then((arrived) => {\n      if (!arrived) return\n      viewer.camera.animate([{ heading: 0 }, { heading: 360 }], {\n        duration: 60000,\n        iterations: Infinity,\n      })\n    })\n})",
       },
       {
         heading: '操作の切り替え',
@@ -257,7 +257,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '2 本指をそろえて上下に動かし、傾きを変える。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n  dragRotate: { enabled: false },\n  touchPitch: { enabled: false },\n  scrollZoom: { enabled: false },\n})\n\nviewer.canvas.addEventListener('pointerdown', () => {\n  viewer.scrollZoom.enabled = true\n})\nviewer.canvas.addEventListener('pointerleave', () => {\n  viewer.scrollZoom.enabled = false\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  dragRotate: { enabled: false },\n  touchPitch: { enabled: false },\n  scrollZoom: { enabled: false },\n})\n\nviewer.canvas.addEventListener('pointerdown', () => {\n  viewer.scrollZoom.enabled = true\n})\nviewer.canvas.addEventListener('pointerleave', () => {\n  viewer.scrollZoom.enabled = false\n})",
       },
       {
         heading: 'イベント',
@@ -265,7 +265,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           'ビューワからの知らせは `viewer.on(種類, 関数)` で受け取ります。`on` は受け取りをやめる関数を返します。`viewer.off(種類, 関数)` でもやめられます。',
           '`move` は視点が動いたときに、1 フレームに 1 回まで届きます。キャンバスの大きさが変わったときにも届きます。',
           '`click` は、どのレイヤーも受け取らなかったクリックです。何もない場所のクリックと、受け取る関数が登録されていないレイヤーの物（建物など）のクリックが届きます。`position` は地図上の位置で、`height` は地面からの高さ（m）です。何もない場所では `null` になります。`x`・`y` はキャンバスの左上からの CSS ピクセルです。',
-          "`loaded` は、すべてのレイヤーが待っていたものを受け取り、読み込み中のものがなくなったときに届きます。視点が動いて新しく読み込むたびに、また届きます。`mask` が `'view'` のときは画面に見えている範囲が、地図上に置いた円などのときは既定で形の中すべてがそろった時点です。",
+          '`loaded` は、すべてのレイヤーが待っていたものを受け取り、読み込み中のものがなくなったときに届きます。視点が動いて新しく読み込むたびに、また届きます。`mask` を書いていないときは画面に見えている範囲が、地図上に置いた円などのときは既定で形の中すべてがそろった時点です。',
           '`frame` は、各フレームを描く直前に届きます。`delta` は前のフレームからの経過秒数で、0.1 秒を上限にします。`time` は秒で表した時刻です。ここで動かしたものは、そのフレームの絵に反映されます。受け取っている間は描画の負荷が上がるので、要らなくなったらやめます。',
           "`error` の `what` は 2 種類です。`'start'` は描画を始められなかったときで、一度届きます。`'effect'` は `effects` に渡した後処理が描画中に例外を投げたときで、`effect` にその後処理が入り、地図の描画は続きます。受け取る関数がなければ、どちらもコンソールに出力されます。",
           '`colors` は、`viewer.theme` に新しいテーマを代入したときと、太陽が地平線を越えて昼と夜の配色が切り替わったときに届きます。いまの配色は `viewer.colors` で読めます。`credits` は表示中の出典が変わったときに届き、いまの出典は `viewer.credits` で読めます。',
@@ -307,7 +307,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '表示中の出典が変わった。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.on('move', ({ view }) => {\n  const [lng, lat] = view.center\n  history.replaceState(null, '', `#${lng.toFixed(5)},${lat.toFixed(5)},${view.zoom.toFixed(2)}`)\n})\n\nviewer.on('click', ({ position, x, y }) => {\n  if (position) console.log(position.lng, position.lat, position.height)\n  else console.log('何もない場所です', x, y)\n})\n\nconst stopLoaded = viewer.on('loaded', () => {\n  stopLoaded()\n  console.log('見えている範囲のデータがそろいました')\n})\n\nviewer.on('colors', ({ colors }) => {\n  document.body.style.background = colors.backdrop\n})\n\nviewer.on('error', (event) => {\n  if (event.what === 'start') console.error('地図を描画できません', event.cause)\n  else console.error('後処理でエラーが起きました', event.effect, event.cause)\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n})\n\nviewer.on('move', ({ view }) => {\n  const [lng, lat] = view.center\n  history.replaceState(null, '', `#${lng.toFixed(5)},${lat.toFixed(5)},${view.zoom.toFixed(2)}`)\n})\n\nviewer.on('click', ({ position, x, y }) => {\n  if (position) console.log(position.lng, position.lat, position.height)\n  else console.log('何もない場所です', x, y)\n})\n\nconst stopLoaded = viewer.on('loaded', () => {\n  stopLoaded()\n  console.log('見えている範囲のデータがそろいました')\n})\n\nviewer.on('colors', ({ colors }) => {\n  document.body.style.background = colors.backdrop\n})\n\nviewer.on('error', (event) => {\n  if (event.what === 'start') console.error('地図を描画できません', event.cause)\n  else console.error('後処理でエラーが起きました', event.effect, event.cause)\n})",
       },
       {
         heading: '描画の細かさとリクエスト',
@@ -317,7 +317,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           "種類は `'elevation'`（標高タイル）、`'mapTile'`（国土地理院のベクトルタイル）、`'cities'`（PLATEAU の都市の一覧）、`'catalog'`（PLATEAU のカタログ）、`'building'`（建物のタイル）、`'landUse'`（土地利用のタイル）、`'tile'`（ページが追加した `ImageTileLayer`・`VectorTileLayer` のタイル）、`'image'`（`ImageLayer` の画像）、`'model'`（モデルのファイル）です。",
           '返した `headers` は、ライブラリが付けるヘッダーに加えて送られます。モデルのデコーダー（Draco と KTX2）はここを通らないので、場所を変えるときは `models` の `dracoPath`・`ktx2Path` に書きます。作ったあとに `viewer.transformRequest` へ書けば、次のリクエストから使われます。同じページにビューワが複数あるとき、標高と PLATEAU の都市の一覧・カタログはページ全体で一度読み込まれ、最初に頼んだビューワの関数を通ります。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n  pixelRatio: 1,\n  transformRequest: (url, kind) => {\n    if (kind !== 'tile') return undefined\n    return { url: url.replace('https://tiles.example.com/', '/tiles/'), credentials: 'include' }\n  },\n})\n\ndocument.getElementById('sharp')?.addEventListener('click', () => {\n  viewer.pixelRatio = undefined\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pixelRatio: 1,\n  transformRequest: (url, kind) => {\n    if (kind !== 'tile') return undefined\n    return { url: url.replace('https://tiles.example.com/', '/tiles/'), credentials: 'include' }\n  },\n})\n\ndocument.getElementById('sharp')?.addEventListener('click', () => {\n  viewer.pixelRatio = undefined\n})",
       },
     ],
   },
@@ -329,31 +329,33 @@ export const DOC_PAGES: readonly DocPage[] = [
       {
         heading: 'マスクを指定する',
         paragraphs: [
-          "`Viewer` は必ず `mask` を受け取ります。何も切り抜かない地図にするときは、画面の届く範囲を表す `{ shapes: [{ shape: 'view' }] }` を渡します。",
+          "`Viewer` の `mask` に形を渡すと、その形で地図を切り抜きます。`mask` を書かなければ何も切り抜かず、画面の届く範囲すべてを表示します。これは `{ shape: { type: 'view' } }` と書くのと同じです。",
           '形の外側にあるものは描かれません。地面も建物も、ページが置いたマーカーや図形、モデルも同じです。外側の地図タイルや建物のデータは要求されないので、小さなマスクは読み込む量も小さくなります。マスクの外側はクリックにも反応しません。',
           '次の例は、東京駅を中心とした半径 400 m の円の内側を表示し、縁から内側 80 m を背景の色へなじませます。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nnew Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  mask: {\n    shapes: [{ shape: 'circle', center: [139.7671, 35.6812], radius: 400 }],\n    fade: 80,\n  },\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nnew Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  mask: {\n    shape: { type: 'circle', center: [139.7671, 35.6812], radius: 400 },\n    fade: 80,\n  },\n})",
       },
       {
         heading: '形の種類',
         paragraphs: [
-          '`shapes` には形を一つ以上並べます。表示されるのは、どれか一つの形の内側に入る場所です。離れた場所を並べると、その間の地図は描かれず、読み込まれもしません。',
-          "`shape` は `'view'`・`'circle'`・`'rect'`・`'polygon'` の四つです。`'view'` は画面の届く範囲、`'circle'` は円、`'rect'` は角を丸められる四角形、`'polygon'` は点を並べた多角形です。長さの単位はすべてメートルです。",
-          "`'polygon'` の `points` は `[経度, 緯度]` の配列です。最後の点は最初の点につながり、並べる向きは問いません。点が三つ未満の多角形は何も表示しません。建物の壁に沿ってなぞった多角形は、壁から 1〜2 m 外側へ広げておきます。境界の上にかかった壁が縞模様に見えるのを避けられます。",
-          '`shapes` を空の配列にすると、何も表示されない地図になります。',
+          '`shape` には形を一つ渡すか、配列で一つ以上並べます。表示されるのは、どれか一つの形の内側に入る場所です。離れた場所を並べると、その間の地図は描かれず、読み込まれもしません。',
+          "形の種類は `type` で、`'view'`・`'circle'`・`'rect'`・`'polygon'` の四つです。`'view'` は画面そのままの形で、何も切り抜きません。ほかの項目は書けません。`'circle'` は円、`'rect'` は角を丸められる四角形、`'polygon'` は点を並べた多角形です。長さの単位はすべてメートルです。",
+          "`'polygon'` の `points` は `[経度, 緯度]` の配列です。最後の点は最初の点につながり、並べる向きは問いません。`'polygon'` には `center` がなく、`points` の場所に固定されます。点が三つ未満の多角形は何も表示しません。建物の壁に沿ってなぞった多角形は、壁から 1〜2 m 外側へ広げておきます。境界の上にかかった壁が縞模様に見えるのを避けられます。",
+          "配列に入れられるのは、地図に固定された形（`StandingShape`）だけです。`'view'` と、`center` が `'view'` か書かれていない `'circle'`・`'rect'` は配列に入れられません。カメラと一緒に動く形は、一つだけで渡します。",
+          '`shape` を空の配列にすると、何も表示されない地図になります。',
         ],
         options: [
           {
-            name: 'shape',
+            name: 'type',
             type: "'view' | 'circle' | 'rect' | 'polygon'",
-            meaning: '形の種類。',
+            meaning: "形の種類。`'view'` は画面そのままで、ほかの項目を持たない。",
           },
           {
             name: 'center',
             type: "readonly [number, number] | 'view'",
-            default: "'view'（`'polygon'` では `points` の位置）",
-            meaning: "形を置く場所。`'view'` はカメラと一緒に動く。",
+            default: "'view'",
+            meaning:
+              "`'circle'`・`'rect'` を置く場所。`'view'` はカメラと一緒に動く。配列の中では場所が必須。",
           },
           {
             name: 'radius',
@@ -383,21 +385,23 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: "`'polygon'` の角。`[経度, 緯度]` で並べる。",
           },
         ],
-        code: "import { Viewer, type Mask } from '@plateau-ui/core'\n\nconst mask: Mask = {\n  shapes: [\n    // 新宿駅のまわりの円\n    { shape: 'circle', center: [139.7003, 35.6896], radius: 300 },\n    // 渋谷駅のまわりの、角を丸めた四角形\n    { shape: 'rect', center: [139.7016, 35.658], width: 600, height: 400, corner: 50 },\n    // 上野公園を囲む多角形\n    {\n      shape: 'polygon',\n      points: [\n        [139.7705, 35.7185],\n        [139.7765, 35.7185],\n        [139.7765, 35.7115],\n        [139.7705, 35.7115],\n      ],\n    },\n  ],\n  // 離れた三か所なので、画面に入った部分から読み込む\n  fetch: 'onScreen',\n}\n\nnew Viewer({ container: 'map', center: [139.7003, 35.6896], zoom: 16.5, pitch: 50, mask })",
+        code: "import { Viewer, type Mask } from '@plateau-ui/core'\n\nconst mask: Mask = {\n  shape: [\n    // 新宿駅のまわりの円\n    { type: 'circle', center: [139.7003, 35.6896], radius: 300 },\n    // 渋谷駅のまわりの、角を丸めた四角形\n    { type: 'rect', center: [139.7016, 35.658], width: 600, height: 400, corner: 50 },\n    // 上野公園を囲む多角形\n    {\n      type: 'polygon',\n      points: [\n        [139.7705, 35.7185],\n        [139.7765, 35.7185],\n        [139.7765, 35.7115],\n        [139.7705, 35.7115],\n      ],\n    },\n  ],\n  // 離れた三か所なので、画面に入った部分から読み込む\n  fetch: 'onScreen',\n}\n\nnew Viewer({ container: 'map', center: [139.7003, 35.6896], zoom: 16.5, pitch: 50, mask })",
       },
       {
         heading: 'マスク全体の設定',
         paragraphs: [
-          '`fade`・`margin`・`fetch` はマスクに一度だけ書きます。`shapes` のすべての形に同じように効きます。',
+          '`fade`・`margin`・`fetch` はマスクに一度だけ書きます。`shape` のすべての形に同じように効きます。',
           '`fade` は、それぞれの形がある場所の緯度でメートルを測ります。東京でも沖縄でも、同じ数字は地面の上で同じ幅になります。',
-          '`margin` は、カメラと一緒に動く形のための設定です。形がこれから届く場所を先に読み込んでおくので、動かしたときに縁へ何もない帯が残りません。描く範囲は変わりません。',
-          "画面の届く範囲を表す `'view'` だけのマスクには縁がないので、`fade` は効きません。このときはコンソールに一度警告が出ます。",
+          "`margin` は、カメラと一緒に動く形のための設定です。形がこれから届く場所を先に読み込んでおくので、動かしたときに縁へ何もない帯が残りません。描く範囲は変わりません。`shape` を書かないか `{ type: 'view' }` のマスクでは、画面の外のどこまで先に読み込むかになります。",
+          "`shape` を書かないか `{ type: 'view' }` のマスクには縁がないので、`fade` は効きません。このときはコンソールに一度警告が出ます。",
         ],
         options: [
           {
-            name: 'shapes',
-            type: 'readonly MaskShape[]',
-            meaning: '切り抜く形の一覧。どれか一つの内側に入る場所を表示する。',
+            name: 'shape',
+            type: 'MaskShape | readonly StandingShape[]',
+            default: "`{ type: 'view' }`（何も切り抜かない）",
+            meaning:
+              '切り抜く形。一つ、または地図に固定した形を配列で並べる。どれか一つの内側に入る場所を表示する。',
           },
           {
             name: 'fade',
@@ -418,19 +422,19 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '内側をまとめて読み込むか、画面に入った部分から読み込むか。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nnew Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 17,\n  // center のない円は、カメラと一緒に動く\n  mask: {\n    shapes: [{ shape: 'circle', radius: 500 }],\n    fade: 100,\n    margin: 200,\n  },\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nnew Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 17,\n  // center のない円は、カメラと一緒に動く\n  mask: {\n    shape: { type: 'circle', radius: 500 },\n    fade: 100,\n    margin: 200,\n  },\n})",
       },
       {
         heading: '地図に固定する形と、カメラと動く形',
         paragraphs: [
-          "`center` に場所を書いた形は、地図の上に固定されます。`center` を書かないか `'view'` を書いた形は、画面の中央と一緒に動きます。`'polygon'` は `points` が場所を表すので、`center` を書かなければその場所に固定されます。`'view'` の形に場所を書くと、そのときの画面の広さの円として固定されます。",
-          '一つのマスクの形は、すべて固定するか、すべてカメラと動くかのどちらかです。混ざっていると、すべての形がマスクを設定した時点の位置に固定され、コンソールに一度警告が出ます。',
+          "`'circle'`・`'rect'` は、`center` に場所を書くと地図の上に固定され、`center` を書かないか `'view'` を書くと画面の中央と一緒に動きます。`'polygon'` はいつも `points` の場所に固定されます。",
+          '配列で並べる形は、すべて地図に固定された形です。カメラと動く形は一つだけで渡します。型の届かない JavaScript のページが配列にカメラと動く形を入れると、その形は外され、コンソールに一度警告が出ます。',
           "地図に固定した形で `fetch` が `'all'` のときは、カメラがどこを向いていても形の内側全体を読み込みます。`viewer.buildings` の `loaded` イベントは、形の内側の建物がすべてそろったときに届きます。内側にあるものを数えるページは、この設定のままにします。",
           "`'onScreen'` にすると、切り抜く形も内側の見た目も変わらず、画面に入った部分から読み込みます。離れた駅を四つ並べて一つずつ見るページなら、見ていない三か所を読み込まずに済みます。このとき `loaded` は、画面が求めた分がそろったことを表します。カメラと動く形は、いつも画面に入った部分から読み込みます。",
           '建物は、初期設定ではズーム 18 より引くと表示されません。小さなマスクの内側を引いた画面でも見せたいときは、`buildings: { minZoom: false }` を指定します。',
           'カメラと動く形のメートルは、マスクを設定したときのカメラの緯度で換算されます。南北へ大きく移動したあとは、`viewer.mask` を設定し直すと今いる場所で測り直します。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6649, 35.7056],\n  zoom: 16.5,\n  pitch: 50,\n  mask: { shapes: [{ shape: 'circle', center: [139.6649, 35.7056], radius: 400 }] },\n  buildings: { minZoom: false },\n})\n\nviewer.buildings.on('loaded', ({ tiles }) => {\n  console.log(`円の中の建物がそろいました（${tiles} タイル）`)\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6649, 35.7056],\n  zoom: 16.5,\n  pitch: 50,\n  mask: { shape: { type: 'circle', center: [139.6649, 35.7056], radius: 400 } },\n  buildings: { minZoom: false },\n})\n\nviewer.buildings.on('loaded', ({ tiles }) => {\n  console.log(`円の中の建物がそろいました（${tiles} タイル）`)\n})",
       },
       {
         heading: '実行中にマスクを変える',
@@ -439,16 +443,16 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`viewer.mask` で読み出したマスクは書き換えられないコピーで、書き換えようとすると例外になります。変えるときは新しいオブジェクトを作って代入します。',
           '次の例は、クリックした場所へ円を移します。マスクの外側をクリックしても位置は届かないので、円の内側をクリックして少しずつ動かします。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6649, 35.7056],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'circle', center: [139.6649, 35.7056], radius: 300 }], fade: 60 },\n})\n\nviewer.on('click', ({ position }) => {\n  if (!position) return\n  viewer.mask = {\n    ...viewer.mask,\n    shapes: [{ shape: 'circle', center: [position.lng, position.lat], radius: 300 }],\n  }\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6649, 35.7056],\n  zoom: 17,\n  mask: { shape: { type: 'circle', center: [139.6649, 35.7056], radius: 300 }, fade: 60 },\n})\n\nviewer.on('click', ({ position }) => {\n  if (!position) return\n  viewer.mask = {\n    ...viewer.mask,\n    shape: { type: 'circle', center: [position.lng, position.lat], radius: 300 },\n  }\n})",
       },
       {
         heading: '形を場所の指定に使う・マスクの外に描く',
         paragraphs: [
-          'マスクと同じ `MaskShape` は、地図の一部を指す場所としても使えます。`viewer.buildings.hide(形)` はその内側の建物を消し、`viewer.ground.hide(形)` は地面に描かれた建物の形を消します。`viewer.buildings.setStyle(形, スタイル)` はその内側の建物を塗ります。',
-          "場所として使う形には `fade`・`margin`・`fetch` はありません。また、地図のどこかに固定されている必要があるので、`'circle'` と `'rect'` には `center` を書きます。`center` のない形を `viewer.ground.hide` に渡すと例外になります。",
+          'マスクの配列に入る地図に固定した形（`StandingShape`）は、地図の一部を指す場所としても使えます。`viewer.buildings.hide(形)` はその内側の建物を消し、`viewer.ground.hide(形)` は地面に描かれた建物の形を消します。`viewer.buildings.setStyle(形, スタイル)` はその内側の建物を塗ります。',
+          "場所として使う形には `fade`・`margin`・`fetch` はありません。また、地図のどこかに固定されている必要があるので、`'view'` は使えず、`'circle'` と `'rect'` には `center` を書きます。型の届かない JavaScript のページがカメラと動く形を渡すと例外になります。",
           'マスクに切り抜かれたくないものもあります。地図を載せる台にする `Solid` や、マスクの外まで広げたい `ImageTileLayer`・`ImageLayer`・`VectorTileLayer` は、`masked: false` を指定するとマスクの外にも描かれます。地面は `ground: { masked: false }` です。',
         ],
-        code: "import { Viewer, type MaskShape } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6629, 35.7089],\n  zoom: 18,\n  pitch: 50,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\n// 中野区役所のまわりの建物を消し、地面に描かれた建物の形も消す\nconst site: MaskShape = { shape: 'rect', center: [139.6629, 35.7089], width: 120, height: 80 }\nviewer.buildings.hide(site)\nviewer.ground.hide(site)\n\n// 少し南の円の中の建物を赤く塗る\nconst plaza: MaskShape = { shape: 'circle', center: [139.6635, 35.7068], radius: 80 }\nviewer.buildings.setStyle(plaza, { wallColor: '#d94f2a' })",
+        code: "import { Viewer, type StandingShape } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6629, 35.7089],\n  zoom: 18,\n  pitch: 50,\n})\n\n// 中野区役所のまわりの建物を消し、地面に描かれた建物の形も消す\nconst site: StandingShape = { type: 'rect', center: [139.6629, 35.7089], width: 120, height: 80 }\nviewer.buildings.hide(site)\nviewer.ground.hide(site)\n\n// 少し南の円の中の建物を赤く塗る\nconst plaza: StandingShape = { type: 'circle', center: [139.6635, 35.7068], radius: 80 }\nviewer.buildings.setStyle(plaza, { wallColor: '#d94f2a' })",
       },
     ],
   },
@@ -534,7 +538,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '地面を描くか。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 17.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n  ground: {\n    road: { color: '#ffffff', widthScale: 1.5 },\n    boundary: { visible: false },\n    river: { color: { light: '#9cc3f0', dark: '#1d3557' } },\n  },\n})\n\nviewer.ground.footprint.color = '#d9dde3'\nviewer.ground.rail.ballastColor = '#c2b8a3'",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 17.5,\n  pitch: 60,\n  ground: {\n    road: { color: '#ffffff', widthScale: 1.5 },\n    boundary: { visible: false },\n    river: { color: { light: '#9cc3f0', dark: '#1d3557' } },\n  },\n})\n\nviewer.ground.footprint.color = '#d9dde3'\nviewer.ground.rail.ballastColor = '#c2b8a3'",
       },
       {
         heading: 'パーツの色・表示・太さ',
@@ -583,7 +587,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '水面の岸の内側に陰を付けるか。`river`。',
           },
         ],
-        code: "import { GROUND_PIECES, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\n// 土地の面と道路のほかは描かない\nfor (const piece of GROUND_PIECES) {\n  viewer.ground[piece].visible = piece === 'surface' || piece === 'road'\n}\n// 道路の色をテーマの色に戻す\nviewer.ground.road.color = undefined",
+        code: "import { GROUND_PIECES, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 17,\n})\n\n// 土地の面と道路のほかは描かない\nfor (const piece of GROUND_PIECES) {\n  viewer.ground[piece].visible = piece === 'surface' || piece === 'road'\n}\n// 道路の色をテーマの色に戻す\nviewer.ground.road.color = undefined",
       },
       {
         heading: '木',
@@ -630,7 +634,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '輪郭線の色。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7101, 35.6852],\n  zoom: 17.5,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  ground: { trees: { spacing: 8, line: true } },\n})\n\nconst { trees } = viewer.ground\ntrees.leafColor = '#7fae6a'\ntrees.trunkColor = '#6b5a48'\ntrees.lineColor = '#4d6b43'",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7101, 35.6852],\n  zoom: 17.5,\n  pitch: 55,\n  ground: { trees: { spacing: 8, line: true } },\n})\n\nconst { trees } = viewer.ground\ntrees.leafColor = '#7fae6a'\ntrees.trunkColor = '#6b5a48'\ntrees.lineColor = '#4d6b43'",
       },
       {
         heading: '地形の高さ',
@@ -640,16 +644,16 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`viewer.queryTerrainElevation([経度, 緯度])` は、その場所の地面の海抜をメートルで返します。地面が平らなときは `0`、標高がまだ届いていないときは `null` です。ライブラリが返す位置の `height` は地面からの高さなので、海抜が必要なときはこの値を足します。',
           "`viewer.ground.on('click', …)` は、前に建物などがない地面がクリックされたときに、その位置を渡します。ほかに `hover`・`pointing`・`loaded`・`changed`・`error` のイベントがあります。",
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.0773, 35.1037],\n  zoom: 16.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n  ground: { elevation: true },\n})\n\nviewer.ground.on('click', ({ position }) => {\n  const elevation = viewer.queryTerrainElevation([position.lng, position.lat])\n  console.log(elevation === null ? '標高はまだ届いていません' : `海抜 ${elevation.toFixed(1)} m`)\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.0773, 35.1037],\n  zoom: 16.5,\n  pitch: 60,\n  ground: { elevation: true },\n})\n\nviewer.ground.on('click', ({ position }) => {\n  const elevation = viewer.queryTerrainElevation([position.lng, position.lat])\n  console.log(elevation === null ? '標高はまだ届いていません' : `海抜 ${elevation.toFixed(1)} m`)\n})",
       },
       {
         heading: '建物の跡を消す',
         paragraphs: [
           '`viewer.buildings.hide(形)` で建物を消しても、地面に描かれた建物の形（`footprint`）は残ります。`viewer.ground.hide(形)` は、その形の内側にある建物の形を地面から消します。二つは別々に呼びます。',
-          "形はマスクと同じ `MaskShape` です。地図のどこかに固定されている必要があるので、`'circle'` と `'rect'` には `center` を書きます。建物の形は、それぞれの中心が内側にあるかどうかで、まるごと消えるか残ります。場所はいくつでも指定できます。",
+          "形はマスクの配列に入るのと同じ、地図に固定した形（`StandingShape`）です。`'view'` は使えず、`'circle'` と `'rect'` には `center` を書きます。建物の形は、それぞれの中心が内側にあるかどうかで、まるごと消えるか残ります。場所はいくつでも指定できます。",
           '`viewer.ground.show(形)` に `hide` へ渡したのと同じオブジェクトを渡すと、元に戻ります。引数なしで呼ぶと、すべて元に戻ります。',
         ],
-        code: "import { Viewer, type MaskShape } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6629, 35.7089],\n  zoom: 18,\n  pitch: 50,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nconst site: MaskShape = { shape: 'rect', center: [139.6629, 35.7089], width: 120, height: 80 }\nviewer.buildings.hide(site)\nviewer.ground.hide(site)\n\ndocument.querySelector('button')?.addEventListener('click', () => {\n  viewer.buildings.show(site)\n  viewer.ground.show(site)\n})",
+        code: "import { Viewer, type StandingShape } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6629, 35.7089],\n  zoom: 18,\n  pitch: 50,\n})\n\nconst site: StandingShape = { type: 'rect', center: [139.6629, 35.7089], width: 120, height: 80 }\nviewer.buildings.hide(site)\nviewer.ground.hide(site)\n\ndocument.querySelector('button')?.addEventListener('click', () => {\n  viewer.buildings.show(site)\n  viewer.ground.show(site)\n})",
       },
       {
         heading: '地面を表示しない・マスクの外まで描く',
@@ -659,7 +663,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`masked` を `false` にすると、地面はマスクに切り抜かれず、画面全体に描かれて読み込まれます。建物はマスクに切り抜かれたままです。',
           '`glows` を `true` にすると、地面に影が落ちず、斜面の陰影もなく、指定した色のまま描かれます。作るときにだけ指定でき、あとからは読み取りだけができます。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 16.5,\n  mask: { shapes: [{ shape: 'circle', center: [139.7671, 35.6812], radius: 300 }] },\n  ground: { visible: false },\n})\n\n// ボタンで地面を表示し、マスクの外まで広げる\ndocument.querySelector('button')?.addEventListener('click', () => {\n  viewer.ground.visible = true\n  viewer.ground.masked = false\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 16.5,\n  mask: { shape: { type: 'circle', center: [139.7671, 35.6812], radius: 300 } },\n  ground: { visible: false },\n})\n\n// ボタンで地面を表示し、マスクの外まで広げる\ndocument.querySelector('button')?.addEventListener('click', () => {\n  viewer.ground.visible = true\n  viewer.ground.masked = false\n})",
       },
     ],
   },
@@ -759,7 +763,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '建物を表示するか。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  buildings: {\n    wallColor: '#f2efe9',\n    roofColor: '#d9d4cc',\n    edges: true,\n    edgeColor: '#8a8f99',\n  },\n})\n\nconst buildings = viewer.buildings\n// 昼と夜で別の色にする\nbuildings.wallColor = { light: '#f2efe9', dark: '#3a3f4a' }\n// 折れ目の線を太くし、街の影を消す\nbuildings.edgeWidth = 2\nbuildings.castShadow = false",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  buildings: {\n    wallColor: '#f2efe9',\n    roofColor: '#d9d4cc',\n    edges: true,\n    edgeColor: '#8a8f99',\n  },\n})\n\nconst buildings = viewer.buildings\n// 昼と夜で別の色にする\nbuildings.wallColor = { light: '#f2efe9', dark: '#3a3f4a' }\n// 折れ目の線を太くし、街の影を消す\nbuildings.edgeWidth = 2\nbuildings.castShadow = false",
       },
       {
         heading: '窓とパラペット',
@@ -859,12 +863,12 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'これより狭い屋根（m²）にはパラペットを作りません。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.76253, 35.68325],\n  zoom: 18.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n  buildings: {\n    windows: { color: '#9fb4cc', mullionColor: '#e0e4ea' },\n    parapet: { depth: 1.5 },\n  },\n})\n\nconst buildings = viewer.buildings\nbuildings.windows.highRiseStoreys = 15\nbuildings.windows.melt = false\nbuildings.parapet.visible = false\n// 消しても他の設定は残り、もう一度 true にすると同じ窓に戻る\nbuildings.windows.visible = false",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.76253, 35.68325],\n  zoom: 18.5,\n  pitch: 60,\n  buildings: {\n    windows: { color: '#9fb4cc', mullionColor: '#e0e4ea' },\n    parapet: { depth: 1.5 },\n  },\n})\n\nconst buildings = viewer.buildings\nbuildings.windows.highRiseStoreys = 15\nbuildings.windows.melt = false\nbuildings.parapet.visible = false\n// 消しても他の設定は残り、もう一度 true にすると同じ窓に戻る\nbuildings.windows.visible = false",
       },
       {
         heading: '建物ごとのスタイル',
         paragraphs: [
-          '`setStyle` は一部の建物を別の見た目にします。対象の選び方は三つです。建物の名前（PLATEAU の gml:id、`Building.id`）、建物を一棟ずつ受け取って `true` か `false` を返す規則の関数、そして地図上の形です。形はマスクと同じ `MaskShape` に `center` を付けて渡し、足元がすべて形の中に入る建物が対象になります。',
+          '`setStyle` は一部の建物を別の見た目にします。対象の選び方は三つです。建物の名前（PLATEAU の gml:id、`Building.id`）、建物を一棟ずつ受け取って `true` か `false` を返す規則の関数、そして地図上の形です。形はマスクの配列に入るのと同じ、地図に固定した形（`StandingShape`）で渡し、足元がすべて形の中に入る建物が対象になります。',
           'スタイルは丸ごと置き換わります。省いた項目は前の値ではなく、レイヤー全体の見た目に戻ります。一項目だけ変えるときは、`getStyle(id)` で今のスタイルを読み、広げて渡します。`getStyle` が答えるのは名前で付けたスタイルで、返す値は書き換えられない写しです。',
           '名前で付けたスタイルは、その建物のタイルがまだ届いていなくても保たれ、届いたときにはもう付いています。規則は届いた建物ごとに改めて呼ばれます。規則がページ側の値を読んでいるときは、その値を変えたあとに `restyle()` を呼ぶと、すべての建物に聞き直します。',
           '`null` を渡すとそのスタイルを外します。規則と形は、渡したときと同じ関数・オブジェクトで外します。すべて外すときは `clearStyles()` です。ポインターが通るたびに塗り替えることもできます。',
@@ -934,7 +938,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '壁に描く画像。次の節で説明します。',
           },
         ],
-        code: "import { Viewer, type Building } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n})\nconst buildings = viewer.buildings\n\n// 中野区役所を赤く塗り、4 階に帯を巻く\nconst office = 'bldg_e6536b45-c699-401e-97ad-e4471847bdb5'\nbuildings.setStyle(office, {\n  wallColor: '#e5484d',\n  strength: 0.6,\n  floors: [{ at: 4, color: '#1f2933' }],\n})\n\n// 一部だけ変えるときは、今のスタイルを広げて渡す\nbuildings.setStyle(office, { ...buildings.getStyle(office), outline: true })\n\n// 20 階以上の建物すべてに輪郭線を引く\nlet marking = true\nconst tall = (building: Building): boolean => marking && building.storeys >= 20\nbuildings.setStyle(tall, { outline: true, outlineColor: '#2b3038', outlineWidth: 2 })\n\n// 規則が読む値を変えたら、restyle で知らせる\nmarking = false\nbuildings.restyle()\n\n// 中野駅の北、半径 150 m の円の上に建つ建物を青くする\nbuildings.setStyle({ shape: 'circle', center: [139.6658, 35.7064], radius: 150 }, { wallColor: '#2c4a78' })\n\n// 塗りを外す\nbuildings.setStyle(office, null)\nbuildings.setStyle(tall, null)",
+        code: "import { Viewer, type Building } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n})\nconst buildings = viewer.buildings\n\n// 中野区役所を赤く塗り、4 階に帯を巻く\nconst office = 'bldg_e6536b45-c699-401e-97ad-e4471847bdb5'\nbuildings.setStyle(office, {\n  wallColor: '#e5484d',\n  strength: 0.6,\n  floors: [{ at: 4, color: '#1f2933' }],\n})\n\n// 一部だけ変えるときは、今のスタイルを広げて渡す\nbuildings.setStyle(office, { ...buildings.getStyle(office), outline: true })\n\n// 20 階以上の建物すべてに輪郭線を引く\nlet marking = true\nconst tall = (building: Building): boolean => marking && building.storeys >= 20\nbuildings.setStyle(tall, { outline: true, outlineColor: '#2b3038', outlineWidth: 2 })\n\n// 規則が読む値を変えたら、restyle で知らせる\nmarking = false\nbuildings.restyle()\n\n// 中野駅の北、半径 150 m の円の上に建つ建物を青くする\nbuildings.setStyle({ type: 'circle', center: [139.6658, 35.7064], radius: 150 }, { wallColor: '#2c4a78' })\n\n// 塗りを外す\nbuildings.setStyle(office, null)\nbuildings.setStyle(tall, null)",
       },
       {
         heading: '屋根と壁に描く画像',
@@ -981,7 +985,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '画像を回す角度（度、時計回り）。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.76253, 35.68325],\n  zoom: 19.3,\n  pitch: 47,\n  mask: { shapes: [{ shape: 'view' }] },\n})\nconst buildings = viewer.buildings\n\n// 屋根に描く絵。キャンバスでも画像でもよい\nconst marking = document.createElement('canvas')\nmarking.width = 256\nmarking.height = 256\nconst ink = marking.getContext('2d')\nif (ink) {\n  ink.fillStyle = '#ffffff'\n  ink.font = 'bold 200px sans-serif'\n  ink.textAlign = 'center'\n  ink.textBaseline = 'middle'\n  ink.fillText('H', 128, 128)\n}\n\n// 丸の内のビルの屋根の真ん中に、幅 20 m で描く\nbuildings.setStyle('bldg_3de83faa-99f4-488f-86e1-3e2d4bcdbc9d', {\n  roofImage: { image: marking, width: 20, rotate: 15 },\n})\n\n// クリックした所を中心に、屋根なら屋根へ、壁なら壁へ描く\nbuildings.on('click', ({ building, face, anchor }) => {\n  if (face === 'roof') {\n    buildings.setStyle(building.id, {\n      roofImage: { image: marking, width: 20, offset: anchor.offset, depth: 1 },\n    })\n  } else {\n    buildings.setStyle(building.id, {\n      wallImage: { image: marking, width: 12, offset: anchor.offset },\n    })\n  }\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.76253, 35.68325],\n  zoom: 19.3,\n  pitch: 47,\n})\nconst buildings = viewer.buildings\n\n// 屋根に描く絵。キャンバスでも画像でもよい\nconst marking = document.createElement('canvas')\nmarking.width = 256\nmarking.height = 256\nconst ink = marking.getContext('2d')\nif (ink) {\n  ink.fillStyle = '#ffffff'\n  ink.font = 'bold 200px sans-serif'\n  ink.textAlign = 'center'\n  ink.textBaseline = 'middle'\n  ink.fillText('H', 128, 128)\n}\n\n// 丸の内のビルの屋根の真ん中に、幅 20 m で描く\nbuildings.setStyle('bldg_3de83faa-99f4-488f-86e1-3e2d4bcdbc9d', {\n  roofImage: { image: marking, width: 20, rotate: 15 },\n})\n\n// クリックした所を中心に、屋根なら屋根へ、壁なら壁へ描く\nbuildings.on('click', ({ building, face, anchor }) => {\n  if (face === 'roof') {\n    buildings.setStyle(building.id, {\n      roofImage: { image: marking, width: 20, offset: anchor.offset, depth: 1 },\n    })\n  } else {\n    buildings.setStyle(building.id, {\n      wallImage: { image: marking, width: 12, offset: anchor.offset },\n    })\n  }\n})",
       },
       {
         heading: '建物を隠す・数える',
@@ -992,7 +996,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`each` は手元にある建物を一棟ずつ渡します。隠した建物も含みます。タイルはマスクより広い範囲を持つので、マスクの外で描かれていない建物も渡されます。数えるときは `loaded` を待ち、範囲は必要に応じて `Building.position` で確かめます。',
           '`Building` には `id`・`name`・`usage`・`storeys`・`tall`・`position`・`corners`・`attributes` があります。`tall` は形の高さ（m）、`position` は足元の中心、`corners` は足元の角、`attributes` は測量データにあるそのほかの項目です。',
         ],
-        code: "import { Viewer, type Building, type MaskShape } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'circle', center: [139.66403, 35.70795], radius: 300 }] },\n  buildings: {\n    // 最初から出さない建物。消えていく様子は見せない\n    hide: [(building: Building) => building.usage === '工場'],\n  },\n})\nconst buildings = viewer.buildings\n\n// 地図上の長方形に建つ建物を隠す。沈むように消える\nconst site: MaskShape = { shape: 'rect', center: [139.664, 35.708], width: 80, height: 60 }\nbuildings.hide(site)\n// 隠したときと同じオブジェクトを渡して戻す。引数なしならすべて戻る\ndocument.querySelector('#show')?.addEventListener('click', () => buildings.show(site))\n\n// 届いた建物を数える\nbuildings.on('loaded', () => {\n  let high = 0\n  buildings.each((building) => {\n    if (building.storeys >= 10) high += 1\n  })\n  console.log(`10 階以上: ${high} 棟`)\n})",
+        code: "import { Viewer, type Building, type StandingShape } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  mask: { shape: { type: 'circle', center: [139.66403, 35.70795], radius: 300 } },\n  buildings: {\n    // 最初から出さない建物。消えていく様子は見せない\n    hide: [(building: Building) => building.usage === '工場'],\n  },\n})\nconst buildings = viewer.buildings\n\n// 地図上の長方形に建つ建物を隠す。沈むように消える\nconst site: StandingShape = { type: 'rect', center: [139.664, 35.708], width: 80, height: 60 }\nbuildings.hide(site)\n// 隠したときと同じオブジェクトを渡して戻す。引数なしならすべて戻る\ndocument.querySelector('#show')?.addEventListener('click', () => buildings.show(site))\n\n// 届いた建物を数える\nbuildings.on('loaded', () => {\n  let high = 0\n  buildings.each((building) => {\n    if (building.storeys >= 10) high += 1\n  })\n  console.log(`10 階以上: ${high} 棟`)\n})",
       },
       {
         heading: 'イベント',
@@ -1004,7 +1008,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`loaded` は待っていた建物がすべて届いたときに届きます。表示がさらに建物を求めるたびに、また届きます。マスクが地図上に固定されているときは、形の中の建物がすべてそろったという意味になります。`idle` はその後、建物が地面から上がりきって止まったときに届きます。建物の上に何かを置くときは `idle` を待ちます。`changed` は建物のタイルが加わったり外れたりしたときに届きます。',
           '`error` は建物のデータを取れなかったときに `LoadFailure` を渡します。受け取る関数がないときは、コンソールに一行出ます。',
         ],
-        code: "import { Marker, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n})\nconst buildings = viewer.buildings\n\nbuildings.on('click', ({ building, face, storey, facing, anchor }) => {\n  console.log(building.id, building.name, building.usage, face, storey, facing)\n  // 建物に付けたマーカーは、建物と一緒に動く\n  viewer.add(new Marker({ at: anchor }))\n})\n\n// ポインターが乗っている建物に輪郭線を引く\nlet hovered: string | null = null\nbuildings.on('hover', (event) => {\n  if (hovered) buildings.setStyle(hovered, null)\n  hovered = event ? event.building.id : null\n  if (hovered) buildings.setStyle(hovered, { outline: true })\n})\n\nbuildings.on('idle', ({ tiles }) => console.log('建物が立ちそろいました', tiles))\nbuildings.on('error', ({ what, key, retrying }) => console.warn(what, key, retrying))",
+        code: "import { Marker, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n})\nconst buildings = viewer.buildings\n\nbuildings.on('click', ({ building, face, storey, facing, anchor }) => {\n  console.log(building.id, building.name, building.usage, face, storey, facing)\n  // 建物に付けたマーカーは、建物と一緒に動く\n  viewer.add(new Marker({ at: anchor }))\n})\n\n// ポインターが乗っている建物に輪郭線を引く\nlet hovered: string | null = null\nbuildings.on('hover', (event) => {\n  if (hovered) buildings.setStyle(hovered, null)\n  hovered = event ? event.building.id : null\n  if (hovered) buildings.setStyle(hovered, { outline: true })\n})\n\nbuildings.on('idle', ({ tiles }) => console.log('建物が立ちそろいました', tiles))\nbuildings.on('error', ({ what, key, retrying }) => console.warn(what, key, retrying))",
       },
     ],
   },
@@ -1051,7 +1055,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '届いたときから付けておくスタイル。`setStyle` に渡すものと同じです。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 15.8,\n  pitch: 65,\n  mask: { shapes: [{ shape: 'view' }] },\n  // 街の建物は取りに行かず、ページが挙げた建物を立てる\n  buildings: { load: 'brought' },\n})\n\n// 押上の東京スカイツリーを、東京駅の前に 45° 回して立てる\nconst tower = await viewer.buildings.bring({\n  id: 'bldg_58ab8c46-8369-49c4-86cf-6912bbc4efe1',\n  findAt: [139.81092, 35.71024],\n  at: [139.7671, 35.6812],\n  facing: 45,\n  style: { wallColor: '#2c4a78' },\n})\n\nif (tower) {\n  console.log(`${tower.tall} m`)\n  // 塗る・隠す・移すは、街の建物と同じくレイヤーに tower.id を渡す\n  viewer.buildings.setStyle(tower.id, { wallColor: '#2c4a78', outline: true })\n  // 取り除くのは取り寄せた建物そのものの remove()\n  document.querySelector('#remove')?.addEventListener('click', () => tower.remove())\n}",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 15.8,\n  pitch: 65,\n  // 街の建物は取りに行かず、ページが挙げた建物を立てる\n  buildings: { load: 'brought' },\n})\n\n// 押上の東京スカイツリーを、東京駅の前に 45° 回して立てる\nconst tower = await viewer.buildings.bring({\n  id: 'bldg_58ab8c46-8369-49c4-86cf-6912bbc4efe1',\n  findAt: [139.81092, 35.71024],\n  at: [139.7671, 35.6812],\n  facing: 45,\n  style: { wallColor: '#2c4a78' },\n})\n\nif (tower) {\n  console.log(`${tower.tall} m`)\n  // 塗る・隠す・移すは、街の建物と同じくレイヤーに tower.id を渡す\n  viewer.buildings.setStyle(tower.id, { wallColor: '#2c4a78', outline: true })\n  // 取り除くのは取り寄せた建物そのものの remove()\n  document.querySelector('#remove')?.addEventListener('click', () => tower.remove())\n}",
       },
       {
         heading: '取り寄せた建物 `ReplicaBuilding`',
@@ -1083,7 +1087,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '向き（度、北が 0）。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18.6,\n  pitch: 45,\n  mask: { shapes: [{ shape: 'view' }] },\n})\nconst buildings = viewer.buildings\n\n// 建物をクリックして選び、地面をクリックするとそこへ移して 45° 回す\nlet picked: string | null = null\nbuildings.on('click', ({ building }) => {\n  picked = building.id\n})\nviewer.ground.on('click', ({ position }) => {\n  if (picked) buildings.place(picked, { at: [position.lng, position.lat], facing: 45 })\n})\n\n// null を渡すと、測量された元の場所と向きに戻る\ndocument.querySelector('#reset')?.addEventListener('click', () => {\n  if (picked) buildings.place(picked, null)\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18.6,\n  pitch: 45,\n})\nconst buildings = viewer.buildings\n\n// 建物をクリックして選び、地面をクリックするとそこへ移して 45° 回す\nlet picked: string | null = null\nbuildings.on('click', ({ building }) => {\n  picked = building.id\n})\nviewer.ground.on('click', ({ position }) => {\n  if (picked) buildings.place(picked, { at: [position.lng, position.lat], facing: 45 })\n})\n\n// null を渡すと、測量された元の場所と向きに戻る\ndocument.querySelector('#reset')?.addEventListener('click', () => {\n  if (picked) buildings.place(picked, null)\n})",
       },
       {
         heading: '一棟を動かす `animate`',
@@ -1155,7 +1159,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: "タイミング。再生の前後に見せる姿。`'forwards'` なら終わった姿のまま止まります。",
           },
         ],
-        code: "import { Viewer, type Animation } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n})\nconst buildings = viewer.buildings\n\n// クリックした建物を 30 m 持ち上げて高さを 1.5 倍にし、元に戻す\nbuildings.on('click', ({ building }) => {\n  const lift = buildings.animate(\n    building.id,\n    [{}, { translate: [0, 0, 30], scale: [1, 1, 1.5], easing: 'ease-out' }, {}],\n    { duration: 1200 },\n  )\n  void lift.finished.then((ended) => console.log(ended ? '最後まで動いた' : '途中で止まった'))\n})\n\n// ポインターが乗っている間は大きくなり、離れると今の大きさから縮んで戻る\nlet grown: Animation | undefined\nlet over: string | null = null\nbuildings.on('hover', (event) => {\n  const id = event ? event.building.id : null\n  if (id === over) return\n  over = id\n  grown?.reverse()\n  grown = id ? buildings.animate(id, [{}, { scale: 1.3 }], { duration: 300, fill: 'forwards' }) : undefined\n})",
+        code: "import { Viewer, type Animation } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n})\nconst buildings = viewer.buildings\n\n// クリックした建物を 30 m 持ち上げて高さを 1.5 倍にし、元に戻す\nbuildings.on('click', ({ building }) => {\n  const lift = buildings.animate(\n    building.id,\n    [{}, { translate: [0, 0, 30], scale: [1, 1, 1.5], easing: 'ease-out' }, {}],\n    { duration: 1200 },\n  )\n  void lift.finished.then((ended) => console.log(ended ? '最後まで動いた' : '途中で止まった'))\n})\n\n// ポインターが乗っている間は大きくなり、離れると今の大きさから縮んで戻る\nlet grown: Animation | undefined\nlet over: string | null = null\nbuildings.on('hover', (event) => {\n  const id = event ? event.building.id : null\n  if (id === over) return\n  over = id\n  grown?.reverse()\n  grown = id ? buildings.animate(id, [{}, { scale: 1.3 }], { duration: 300, fill: 'forwards' }) : undefined\n})",
       },
       {
         heading: '街全体を動かす `animateAll`',
@@ -1219,7 +1223,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'その場所の建物が受ける動きの割合（0〜1）。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 17.5,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n})\nconst buildings = viewer.buildings\n\n// 街全体がいっせいに沈んで戻る\nbuildings.animateAll([{}, { translate: [0, 0, -12] }, {}], { duration: 700 })\n\n// クリックした地点から、輪が広がるように建物が跳ねる\nviewer.ground.on('click', ({ position }) => {\n  buildings.animateAll([{}, { translate: [0, 0, 20], rise: 1.2 }, {}], {\n    from: [position.lng, position.lat],\n    duration: 900,\n    field: {\n      radius: 400,\n      // 中心から 1 m 離れるごとに 4 ミリ秒遅れて始まる\n      delay: ([east, north]) => Math.hypot(east, north) * 4,\n      // 遠くほど小さく動く\n      strength: ([east, north]) => Math.max(0, 1 - Math.hypot(east, north) / 400),\n    },\n  })\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 17.5,\n  pitch: 55,\n})\nconst buildings = viewer.buildings\n\n// 街全体がいっせいに沈んで戻る\nbuildings.animateAll([{}, { translate: [0, 0, -12] }, {}], { duration: 700 })\n\n// クリックした地点から、輪が広がるように建物が跳ねる\nviewer.ground.on('click', ({ position }) => {\n  buildings.animateAll([{}, { translate: [0, 0, 20], rise: 1.2 }, {}], {\n    from: [position.lng, position.lat],\n    duration: 900,\n    field: {\n      radius: 400,\n      // 中心から 1 m 離れるごとに 4 ミリ秒遅れて始まる\n      delay: ([east, north]) => Math.hypot(east, north) * 4,\n      // 遠くほど小さく動く\n      strength: ([east, north]) => Math.max(0, 1 - Math.hypot(east, north) / 400),\n    },\n  })\n})",
       },
       {
         heading: '建物が現れる動き `viewer.appear`',
@@ -1250,7 +1254,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '同じタイルの建物が動き出す時刻のずれの最大（秒）。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  // 1 棟が 1.5 秒かけて上がり、同じタイルの建物は最大 1 秒ずれて動き出す\n  appear: { duration: 1.5, stagger: 1 },\n})\n\n// 立ち上がるのを待ってから何かをするとき\nviewer.buildings.on('idle', () => console.log('街が立ち上がった'))\n\n// 動きを止めて、届いた建物をすぐに立てる\nviewer.appear.enabled = false",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  // 1 棟が 1.5 秒かけて上がり、同じタイルの建物は最大 1 秒ずれて動き出す\n  appear: { duration: 1.5, stagger: 1 },\n})\n\n// 立ち上がるのを待ってから何かをするとき\nviewer.buildings.on('idle', () => console.log('街が立ち上がった'))\n\n// 動きを止めて、届いた建物をすぐに立てる\nviewer.appear.enabled = false",
       },
     ],
   },
@@ -1286,7 +1290,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'グループ全体を表示するか',
           },
         ],
-        code: "import { AnnotationLayer, Label, Marker, Viewer } from '@plateau-ui/core'\n\nconst markers = new AnnotationLayer()\nmarkers.add(new Marker({ at: [139.7671, 35.6812], label: '東京駅 丸の内口', color: '#e5484d' }))\nmarkers.add(new Label({ at: { lng: 139.7639, lat: 35.6845, height: 40 }, text: '丸の内' }))\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.766, 35.6825],\n  zoom: 17,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [markers],\n})",
+        code: "import { AnnotationLayer, Label, Marker, Viewer } from '@plateau-ui/core'\n\nconst markers = new AnnotationLayer()\nmarkers.add(new Marker({ at: [139.7671, 35.6812], label: '東京駅 丸の内口', color: '#e5484d' }))\nmarkers.add(new Label({ at: { lng: 139.7639, lat: 35.6845, height: 40 }, text: '丸の内' }))\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.766, 35.6825],\n  zoom: 17,\n  pitch: 55,\n  layers: [markers],\n})",
       },
       {
         heading: '`Marker` の記号と文字',
@@ -1370,7 +1374,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '表示するか',
           },
         ],
-        code: "import { Marker, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7025, 35.69],\n  zoom: 17,\n  pitch: 50,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.add(\n  new Marker({\n    at: [139.7006, 35.6896],\n    symbol: 'tag',\n    direction: 'right',\n    label: '新宿駅',\n    color: '#2b6cb0',\n  }),\n)\nviewer.add(\n  new Marker({\n    at: [139.7046, 35.6905],\n    symbol: 'dot',\n    size: 16,\n    pixelOffset: [0, -8],\n    label: '新宿三丁目駅',\n  }),\n)",
+        code: "import { Marker, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7025, 35.69],\n  zoom: 17,\n  pitch: 50,\n})\n\nviewer.add(\n  new Marker({\n    at: [139.7006, 35.6896],\n    symbol: 'tag',\n    direction: 'right',\n    label: '新宿駅',\n    color: '#2b6cb0',\n  }),\n)\nviewer.add(\n  new Marker({\n    at: [139.7046, 35.6905],\n    symbol: 'dot',\n    size: 16,\n    pixelOffset: [0, -8],\n    label: '新宿三丁目駅',\n  }),\n)",
       },
       {
         heading: '`Label` と文字の見た目',
@@ -1467,7 +1471,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '影を下へずらす量（CSS ピクセル）',
           },
         ],
-        code: "import { Label, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7454, 35.6586],\n  zoom: 16.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nawait document.fonts.ready\n\nconst tower = new Label({\n  at: { lng: 139.7454, lat: 35.6586, height: 340 },\n  text: '東京タワー\\n333m',\n  font: '600 15px \"Noto Sans JP\", sans-serif',\n  color: '#ffffff',\n  background: true,\n  backgroundColor: '#1f2933',\n})\nviewer.add(tower)\n\ntower.dropShadow = true\ntower.text = '東京タワー\\n高さ 333m'",
+        code: "import { Label, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7454, 35.6586],\n  zoom: 16.5,\n  pitch: 60,\n})\n\nawait document.fonts.ready\n\nconst tower = new Label({\n  at: { lng: 139.7454, lat: 35.6586, height: 340 },\n  text: '東京タワー\\n333m',\n  font: '600 15px \"Noto Sans JP\", sans-serif',\n  color: '#ffffff',\n  background: true,\n  backgroundColor: '#1f2933',\n})\nviewer.add(tower)\n\ntower.dropShadow = true\ntower.text = '東京タワー\\n高さ 333m'",
       },
       {
         heading: 'ページの HTML を置く `Html`',
@@ -1503,7 +1507,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '表示するか',
           },
         ],
-        code: "import { Html, Viewer } from '@plateau-ui/core'\n\nconst card = document.createElement('button')\ncard.className = 'price'\ncard.textContent = '¥18,000 / 泊'\ncard.addEventListener('click', () => {\n  console.log('予約画面を開く')\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7016, 35.658],\n  zoom: 17,\n  pitch: 50,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.add(new Html({ at: [139.7016, 35.658], height: 30, element: card }))",
+        code: "import { Html, Viewer } from '@plateau-ui/core'\n\nconst card = document.createElement('button')\ncard.className = 'price'\ncard.textContent = '¥18,000 / 泊'\ncard.addEventListener('click', () => {\n  console.log('予約画面を開く')\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7016, 35.658],\n  zoom: 17,\n  pitch: 50,\n})\n\nviewer.add(new Html({ at: [139.7016, 35.658], height: 30, element: card }))",
       },
       {
         heading: '置く場所 — 地図上の一点と、物に付けた場所',
@@ -1516,7 +1520,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           'クリックした場所は、そのまま `at` に入れられます。建物・モデル・ソリッドの `click` は、地図上の一点としての `position` と、その物に付けた場所としての `anchor` を渡します。`anchor` を入れると、印はクリックした場所に付き、その後も物と一緒に動きます。`position` を入れると、その場所にとどまります。一緒に渡される `building` は読まれません。地面の `click` は `position` を渡します。',
           '`at`・`height`・`pixelOffset` は作った後に書き換えられ、次のフレームで新しい場所に表示されます。',
         ],
-        code: "import { AnnotationLayer, Marker, Viewer } from '@plateau-ui/core'\n\nconst markers = new AnnotationLayer()\nmarkers.add(\n  new Marker({\n    at: { building: 'bldg_4be39579-61d4-4aac-9c3d-a63da0712aab', offset: [0, 0, 93.7] },\n    symbol: 'dot',\n    label: '中野サンプラザ',\n  }),\n)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  heading: 225,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [markers],\n})\n\nviewer.buildings.on('click', ({ anchor }) => {\n  markers.add(new Marker({ at: anchor, symbol: 'tag', label: 'ここ' }))\n})\n\nviewer.ground.on('click', ({ position }) => {\n  markers.add(new Marker({ at: position, symbol: 'dot' }))\n})",
+        code: "import { AnnotationLayer, Marker, Viewer } from '@plateau-ui/core'\n\nconst markers = new AnnotationLayer()\nmarkers.add(\n  new Marker({\n    at: { building: 'bldg_4be39579-61d4-4aac-9c3d-a63da0712aab', offset: [0, 0, 93.7] },\n    symbol: 'dot',\n    label: '中野サンプラザ',\n  }),\n)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.66403, 35.70795],\n  zoom: 18,\n  pitch: 55,\n  heading: 225,\n  layers: [markers],\n})\n\nviewer.buildings.on('click', ({ anchor }) => {\n  markers.add(new Marker({ at: anchor, symbol: 'tag', label: 'ここ' }))\n})\n\nviewer.ground.on('click', ({ position }) => {\n  markers.add(new Marker({ at: position, symbol: 'dot' }))\n})",
       },
       {
         heading: '隠れたとき・イベント',
@@ -1525,7 +1529,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`click` と `hover` は印そのものが知らせます。`on()` は、聞くのをやめる関数を返します。`click` は印（`annotation`）と、キャンバス上の位置 `x`・`y`、元の `PointerEvent`（`original`）を渡します。地図上の位置は渡しません。印の場所は `marker.at` で読めるからです。`hover` はポインタが印に乗ったときと離れたときに一度ずつ知らせ、離れたときは `null` です。',
           '`pickable: false` の印はポインタに見つからず、クリックは後ろの地面や建物に届きます。`visible: false` の印は表示されず、ポインタの邪魔もしません。three の `Raycaster` は印に当たりません。',
         ],
-        code: "import { AnnotationLayer, Marker, Viewer } from '@plateau-ui/core'\n\nconst stops = new AnnotationLayer({ behind: 'hide' })\nconst station = new Marker({ at: [139.6659, 35.7064], label: '中野駅 北口', behind: 'dim' })\nstops.add(station)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6659, 35.7064],\n  zoom: 17.5,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [stops],\n})\n\nstation.on('click', () => {\n  void viewer.camera.flyTo({ center: [139.6659, 35.7064], zoom: 19 })\n})\nstation.on('hover', (event) => {\n  station.color = event ? '#e5484d' : undefined\n})",
+        code: "import { AnnotationLayer, Marker, Viewer } from '@plateau-ui/core'\n\nconst stops = new AnnotationLayer({ behind: 'hide' })\nconst station = new Marker({ at: [139.6659, 35.7064], label: '中野駅 北口', behind: 'dim' })\nstops.add(station)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6659, 35.7064],\n  zoom: 17.5,\n  pitch: 55,\n  layers: [stops],\n})\n\nstation.on('click', () => {\n  void viewer.camera.flyTo({ center: [139.6659, 35.7064], zoom: 19 })\n})\nstation.on('hover', (event) => {\n  station.color = event ? '#e5484d' : undefined\n})",
       },
     ],
   },
@@ -1563,7 +1567,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'グループ全体を表示するか',
           },
         ],
-        code: "import { Circle, Polygon, Polyline, ShapeLayer, Viewer } from '@plateau-ui/core'\n\nconst shapes = new ShapeLayer()\nshapes.add(\n  new Polygon({\n    points: [\n      [139.7635, 35.6838],\n      [139.7668, 35.6838],\n      [139.7668, 35.6815],\n      [139.7635, 35.6815],\n    ],\n    fillColor: '#3155ff',\n  }),\n)\nshapes.add(\n  new Polyline({\n    points: [\n      [139.7671, 35.6812],\n      [139.766, 35.683],\n      [139.764, 35.6852],\n    ],\n    lineColor: '#e5484d',\n    lineWidth: 8,\n  }),\n)\nshapes.add(new Circle({ at: [139.7671, 35.6812], radius: 10, fillColor: '#ffffff', lineColor: '#e5484d' }))\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7655, 35.683],\n  zoom: 17,\n  pitch: 50,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [shapes],\n})",
+        code: "import { Circle, Polygon, Polyline, ShapeLayer, Viewer } from '@plateau-ui/core'\n\nconst shapes = new ShapeLayer()\nshapes.add(\n  new Polygon({\n    points: [\n      [139.7635, 35.6838],\n      [139.7668, 35.6838],\n      [139.7668, 35.6815],\n      [139.7635, 35.6815],\n    ],\n    fillColor: '#3155ff',\n  }),\n)\nshapes.add(\n  new Polyline({\n    points: [\n      [139.7671, 35.6812],\n      [139.766, 35.683],\n      [139.764, 35.6852],\n    ],\n    lineColor: '#e5484d',\n    lineWidth: 8,\n  }),\n)\nshapes.add(new Circle({ at: [139.7671, 35.6812], radius: 10, fillColor: '#ffffff', lineColor: '#e5484d' }))\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7655, 35.683],\n  zoom: 17,\n  pitch: 50,\n  layers: [shapes],\n})",
       },
       {
         heading: '線・面・円のオプション',
@@ -1655,7 +1659,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '`Polyline`・`Circle` の幅を視点に向けるか',
           },
         ],
-        code: "import { Circle, Polygon, Polyline, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7006, 35.6896],\n  zoom: 17,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nconst plot = new Polygon({\n  points: [\n    [139.6995, 35.6905],\n    [139.7015, 35.6905],\n    [139.7015, 35.689],\n    [139.6995, 35.689],\n  ],\n  holes: [\n    [\n      [139.7, 35.6901],\n      [139.701, 35.6901],\n      [139.701, 35.6894],\n      [139.7, 35.6894],\n    ],\n  ],\n  fill: false,\n  lineColor: '#2b3038',\n  lineWidth: 2,\n})\nconst flight = new Polyline({\n  points: [\n    [139.6985, 35.6885, 0],\n    [139.7006, 35.6896, 120],\n    [139.7027, 35.6907, 0],\n  ],\n  lineColor: '#e5484d',\n})\nconst stop = new Circle({ at: [139.7006, 35.6896], radius: 8, fillOpacity: 1, line: false })\n\nviewer.add(plot).add(flight).add(stop)\n\nstop.radius = 12\nplot.fill = true",
+        code: "import { Circle, Polygon, Polyline, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7006, 35.6896],\n  zoom: 17,\n  pitch: 55,\n})\n\nconst plot = new Polygon({\n  points: [\n    [139.6995, 35.6905],\n    [139.7015, 35.6905],\n    [139.7015, 35.689],\n    [139.6995, 35.689],\n  ],\n  holes: [\n    [\n      [139.7, 35.6901],\n      [139.701, 35.6901],\n      [139.701, 35.6894],\n      [139.7, 35.6894],\n    ],\n  ],\n  fill: false,\n  lineColor: '#2b3038',\n  lineWidth: 2,\n})\nconst flight = new Polyline({\n  points: [\n    [139.6985, 35.6885, 0],\n    [139.7006, 35.6896, 120],\n    [139.7027, 35.6907, 0],\n  ],\n  lineColor: '#e5484d',\n})\nconst stop = new Circle({ at: [139.7006, 35.6896], radius: 8, fillOpacity: 1, line: false })\n\nviewer.add(plot).add(flight).add(stop)\n\nstop.radius = 12\nplot.fill = true",
       },
       {
         heading: '地面に塗るか、その場所に描くか',
@@ -1705,7 +1709,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: "描き上がった地図に塗るときの塗り先。`'ground'`・`'buildings'`・`'all'`",
           },
         ],
-        code: "import { Polygon, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nconst block = new Polygon({\n  points: [\n    [139.764, 35.683],\n    [139.7668, 35.683],\n    [139.7668, 35.6808],\n    [139.764, 35.6808],\n  ],\n  fillColor: '#ff4fa3',\n  fillOpacity: 0.45,\n  paints: 'all',\n})\nviewer.add(block)\n\nblock.on('click', ({ position }) => {\n  console.log(position.lng, position.lat)\n  block.paints = block.paints === 'all' ? 'ground' : 'all'\n})",
+        code: "import { Polygon, Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 60,\n})\n\nconst block = new Polygon({\n  points: [\n    [139.764, 35.683],\n    [139.7668, 35.683],\n    [139.7668, 35.6808],\n    [139.764, 35.6808],\n  ],\n  fillColor: '#ff4fa3',\n  fillOpacity: 0.45,\n  paints: 'all',\n})\nviewer.add(block)\n\nblock.on('click', ({ position }) => {\n  console.log(position.lng, position.lat)\n  block.paints = block.paints === 'all' ? 'ground' : 'all'\n})",
       },
       {
         heading: '`GeoJSON` を描く `GeoJsonLayer`',
@@ -1760,7 +1764,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: "`'dim'` で隠れた部分の濃さ（0〜1）",
           },
         ],
-        code: "import { GeoJsonLayer, Viewer, type GeoJsonFeatureCollection } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7536, 35.694],\n  zoom: 14,\n  pitch: 45,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nconst response = await fetch('https://geolonia.github.io/japanese-admins/13/13101.json')\nconst ward = new GeoJsonLayer({\n  data: (await response.json()) as GeoJsonFeatureCollection,\n  credit: {\n    text: '「国土数値情報（行政区域データ）」（国土交通省）を加工して作成',\n    url: 'https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html',\n  },\n  style: () => ({ fillColor: '#3155ff', fillOpacity: 0.3, lineColor: '#2b3038', lineWidth: 2, paints: 'all' }),\n})\nviewer.add(ward)\nviewer.camera.fitBounds(ward.bounds, { padding: 40 })\n\nward.on('click', ({ feature, position }) => {\n  console.log(feature.properties, position.lng, position.lat)\n})",
+        code: "import { GeoJsonLayer, Viewer, type GeoJsonFeatureCollection } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7536, 35.694],\n  zoom: 14,\n  pitch: 45,\n})\n\nconst response = await fetch('https://geolonia.github.io/japanese-admins/13/13101.json')\nconst ward = new GeoJsonLayer({\n  data: (await response.json()) as GeoJsonFeatureCollection,\n  credit: {\n    text: '「国土数値情報（行政区域データ）」（国土交通省）を加工して作成',\n    url: 'https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html',\n  },\n  style: () => ({ fillColor: '#3155ff', fillOpacity: 0.3, lineColor: '#2b3038', lineWidth: 2, paints: 'all' }),\n})\nviewer.add(ward)\nviewer.camera.fitBounds(ward.bounds, { padding: 40 })\n\nward.on('click', ({ feature, position }) => {\n  console.log(feature.properties, position.lng, position.lat)\n})",
       },
       {
         heading: '地物ごとの描き方 `FeatureStyle`',
@@ -1862,7 +1866,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'その場所に描くとき、手前に何かあるときの描き方',
           },
         ],
-        code: "import { GeoJsonLayer, Marker, Viewer } from '@plateau-ui/core'\n\nconst walk = new GeoJsonLayer({\n  data: {\n    type: 'FeatureCollection',\n    features: [\n      {\n        type: 'Feature',\n        properties: { kind: 'walk' },\n        geometry: {\n          type: 'LineString',\n          coordinates: [\n            [139.7671, 35.6812],\n            [139.765, 35.676],\n            [139.7638, 35.6717],\n          ],\n        },\n      },\n      { type: 'Feature', properties: { name: '東京駅' }, geometry: { type: 'Point', coordinates: [139.7671, 35.6812] } },\n      { type: 'Feature', properties: { name: '銀座駅' }, geometry: { type: 'Point', coordinates: [139.7638, 35.6717] } },\n    ],\n  },\n  style: (feature) =>\n    feature.geometry?.type === 'Point' ? { point: false } : { lineColor: '#e5484d', lineWidth: 6 },\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7655, 35.6765],\n  zoom: 15.5,\n  pitch: 45,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [walk],\n})\n\nfor (const { at, feature } of walk.points) {\n  viewer.add(new Marker({ at, label: String(feature.properties?.['name'] ?? '') }))\n}",
+        code: "import { GeoJsonLayer, Marker, Viewer } from '@plateau-ui/core'\n\nconst walk = new GeoJsonLayer({\n  data: {\n    type: 'FeatureCollection',\n    features: [\n      {\n        type: 'Feature',\n        properties: { kind: 'walk' },\n        geometry: {\n          type: 'LineString',\n          coordinates: [\n            [139.7671, 35.6812],\n            [139.765, 35.676],\n            [139.7638, 35.6717],\n          ],\n        },\n      },\n      { type: 'Feature', properties: { name: '東京駅' }, geometry: { type: 'Point', coordinates: [139.7671, 35.6812] } },\n      { type: 'Feature', properties: { name: '銀座駅' }, geometry: { type: 'Point', coordinates: [139.7638, 35.6717] } },\n    ],\n  },\n  style: (feature) =>\n    feature.geometry?.type === 'Point' ? { point: false } : { lineColor: '#e5484d', lineWidth: 6 },\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7655, 35.6765],\n  zoom: 15.5,\n  pitch: 45,\n  layers: [walk],\n})\n\nfor (const { at, feature } of walk.points) {\n  viewer.add(new Marker({ at, label: String(feature.properties?.['name'] ?? '') }))\n}",
       },
       {
         heading: 'ベクトルタイルを描く `VectorTileLayer`',
@@ -1935,7 +1939,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: "`'dim'` で隠れた部分の濃さ（0〜1）",
           },
         ],
-        code: "import { VectorTileLayer, Viewer } from '@plateau-ui/core'\n\nconst roads = new VectorTileLayer({\n  url: 'https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf',\n  credit: { text: '国土地理院 最適化ベクトルタイル', url: 'https://maps.gsi.go.jp/development/ichiran.html' },\n  minZoom: 4,\n  maxZoom: 16,\n  filter: (_feature, layer) => layer === 'RdCL',\n  style: (feature) => ({\n    lineColor: feature.properties['vt_rdctg'] === '国道' ? '#e5484d' : '#2b3038',\n    lineWidth: 3,\n  }),\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6659, 35.7064],\n  zoom: 16,\n  pitch: 45,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [roads],\n})\n\nroads.on('click', ({ feature, layer }) => {\n  console.log(layer, feature.properties['vt_rdctg'])\n})",
+        code: "import { VectorTileLayer, Viewer } from '@plateau-ui/core'\n\nconst roads = new VectorTileLayer({\n  url: 'https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf',\n  credit: { text: '国土地理院 最適化ベクトルタイル', url: 'https://maps.gsi.go.jp/development/ichiran.html' },\n  minZoom: 4,\n  maxZoom: 16,\n  filter: (_feature, layer) => layer === 'RdCL',\n  style: (feature) => ({\n    lineColor: feature.properties['vt_rdctg'] === '国道' ? '#e5484d' : '#2b3038',\n    lineWidth: 3,\n  }),\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6659, 35.7064],\n  zoom: 16,\n  pitch: 45,\n  layers: [roads],\n})\n\nroads.on('click', ({ feature, layer }) => {\n  console.log(layer, feature.properties['vt_rdctg'])\n})",
       },
     ],
   },
@@ -2013,7 +2017,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '描くかどうか。',
           },
         ],
-        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst NAKANO = [139.6657, 35.7056] as const\n\nconst photo = new ImageTileLayer({\n  url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',\n  credit: { text: '地理院タイル', url: 'https://maps.gsi.go.jp/development/ichiran.html' },\n  minZoom: 2,\n  maxZoom: 18,\n})\n\nnew Viewer({\n  container: 'map',\n  center: NAKANO,\n  zoom: 17.5,\n  pitch: 45,\n  mask: { shapes: [{ shape: 'circle', center: NAKANO, radius: 400 }] },\n  layers: [photo],\n})",
+        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst NAKANO = [139.6657, 35.7056] as const\n\nconst photo = new ImageTileLayer({\n  url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',\n  credit: { text: '地理院タイル', url: 'https://maps.gsi.go.jp/development/ichiran.html' },\n  minZoom: 2,\n  maxZoom: 18,\n})\n\nnew Viewer({\n  container: 'map',\n  center: NAKANO,\n  zoom: 17.5,\n  pitch: 45,\n  mask: { shape: { type: 'circle', center: NAKANO, radius: 400 } },\n  layers: [photo],\n})",
       },
       {
         heading: '透明度と色',
@@ -2023,7 +2027,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`color` には色を一つ、または `{ light, dark }` の組を渡せます。組を渡すと、太陽が出ている間は `light`、沈んだあとは `dark` の色で描きます。昼の明るい地図で選んだ色が、夜の暗い地図で見えなくなるのを防げます。',
           '`visible` を `false` にすると画像を描かなくなります。その間はタイルを読み込まず、出典表示からも名前が消えます。',
         ],
-        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  opacity: 0.7,\n  color: { light: '#2f6fd6', dark: '#8ab8ff' },\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 18,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'circle', center: YUIGAHAMA, radius: 600 }] },\n  layers: [tsunami],\n})\n\nconst fade = document.querySelector<HTMLInputElement>('#fade')\nfade?.addEventListener('input', () => {\n  tsunami.opacity = Number(fade.value)\n})\n\nconst own = document.querySelector<HTMLInputElement>('#own-colors')\nown?.addEventListener('change', () => {\n  tsunami.color = own.checked ? undefined : { light: '#2f6fd6', dark: '#8ab8ff' }\n})",
+        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  opacity: 0.7,\n  color: { light: '#2f6fd6', dark: '#8ab8ff' },\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 18,\n  pitch: 60,\n  mask: { shape: { type: 'circle', center: YUIGAHAMA, radius: 600 } },\n  layers: [tsunami],\n})\n\nconst fade = document.querySelector<HTMLInputElement>('#fade')\nfade?.addEventListener('input', () => {\n  tsunami.opacity = Number(fade.value)\n})\n\nconst own = document.querySelector<HTMLInputElement>('#own-colors')\nown?.addEventListener('change', () => {\n  tsunami.color = own.checked ? undefined : { light: '#2f6fd6', dark: '#8ab8ff' }\n})",
       },
       {
         heading: '建物の壁にも塗る',
@@ -2035,7 +2039,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '画像レイヤーを複数載せると、あとから追加したものが上に重なります。地面でも、壁や木に塗られる色でも同じ順番です。',
           '`masked` を `false` にすると、画像はマスクで切り抜かれず、画面に見えている範囲全体に張られます。画像の下の地面はマスクのとおり切り抜かれたままなので、地面も切り抜かずに表示するには `ground: { masked: false }` も指定します。',
         ],
-        code: "import { ImageTileLayer, Viewer, type Paints } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  paints: 'all',\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 19,\n  pitch: 65,\n  heading: 50,\n  ground: { elevation: true },\n  mask: { shapes: [{ shape: 'circle', center: YUIGAHAMA, radius: 600 }] },\n  layers: [tsunami],\n})\n\nconst menu = document.querySelector<HTMLSelectElement>('#paints')\nmenu?.addEventListener('change', () => {\n  tsunami.paints = menu.value as Paints\n})",
+        code: "import { ImageTileLayer, Viewer, type Paints } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  paints: 'all',\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 19,\n  pitch: 65,\n  heading: 50,\n  ground: { elevation: true },\n  mask: { shape: { type: 'circle', center: YUIGAHAMA, radius: 600 } },\n  layers: [tsunami],\n})\n\nconst menu = document.querySelector<HTMLSelectElement>('#paints')\nmenu?.addEventListener('change', () => {\n  tsunami.paints = menu.value as Paints\n})",
       },
       {
         heading: '一枚の画像を置く',
@@ -2093,7 +2097,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '描くかどうか。',
           },
         ],
-        code: "import { ImageLayer, Viewer } from '@plateau-ui/core'\n\nconst KAMAKURA = [139.5535, 35.3195] as const\n\nconst plan = new ImageLayer({\n  url: '/images/plan.png',\n  bounds: {\n    southWest: [139.549, 35.316],\n    northEast: [139.558, 35.323],\n  },\n  credit: { text: '計画図の出典' },\n  opacity: 0.8,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KAMAKURA,\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [plan],\n})",
+        code: "import { ImageLayer, Viewer } from '@plateau-ui/core'\n\nconst KAMAKURA = [139.5535, 35.3195] as const\n\nconst plan = new ImageLayer({\n  url: '/images/plan.png',\n  bounds: {\n    southWest: [139.549, 35.316],\n    northEast: [139.558, 35.323],\n  },\n  credit: { text: '計画図の出典' },\n  opacity: 0.8,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KAMAKURA,\n  zoom: 17,\n  layers: [plan],\n})",
       },
       {
         heading: '画像の色を読む',
@@ -2125,7 +2129,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '不透明度（0〜255）。`0` は画像がその地点を透明にしていることを表します。',
           },
         ],
-        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 18,\n  mask: { shapes: [{ shape: 'circle', center: YUIGAHAMA, radius: 600 }] },\n  layers: [tsunami],\n})\n\ntsunami.on('changed', () => {\n  const texel = tsunami.colorAt(YUIGAHAMA)\n  if (texel === null) console.log('この場所はまだ答えられません')\n  else if (texel.a === 0) console.log('この場所に色の帯はありません')\n  else console.log(`rgb(${texel.r}, ${texel.g}, ${texel.b})`)\n})",
+        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 18,\n  mask: { shape: { type: 'circle', center: YUIGAHAMA, radius: 600 } },\n  layers: [tsunami],\n})\n\ntsunami.on('changed', () => {\n  const texel = tsunami.colorAt(YUIGAHAMA)\n  if (texel === null) console.log('この場所はまだ答えられません')\n  else if (texel.a === 0) console.log('この場所に色の帯はありません')\n  else console.log(`rgb(${texel.r}, ${texel.g}, ${texel.b})`)\n})",
       },
       {
         heading: 'イベント',
@@ -2154,7 +2158,7 @@ export const DOC_PAGES: readonly DocPage[] = [
               '手元の画像が変わったとき。タイルが届いたとき、表示範囲の移動で画像が入れ替わったとき、`ImageLayer` では画像が届いたときと手放したときです。1 フレームに何枚届いても 1 回です。',
           },
         ],
-        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 18,\n  mask: { shapes: [{ shape: 'circle', center: YUIGAHAMA, radius: 600 }] },\n  layers: [tsunami],\n})\n\ntsunami.on('error', ({ key, retrying }) => {\n  console.warn(`${key} を読み込めませんでした`, retrying ? 'あとで読み込み直します' : '')\n})\n\nconst stop = tsunami.on('loaded', ({ tiles }) => {\n  console.log(`${tiles} 枚のタイルがそろいました`)\n  stop()\n})",
+        code: "import { ImageTileLayer, Viewer } from '@plateau-ui/core'\n\nconst YUIGAHAMA = [139.545, 35.3085] as const\n\nconst tsunami = new ImageTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n})\n\nnew Viewer({\n  container: 'map',\n  center: YUIGAHAMA,\n  zoom: 18,\n  mask: { shape: { type: 'circle', center: YUIGAHAMA, radius: 600 } },\n  layers: [tsunami],\n})\n\ntsunami.on('error', ({ key, retrying }) => {\n  console.warn(`${key} を読み込めませんでした`, retrying ? 'あとで読み込み直します' : '')\n})\n\nconst stop = tsunami.on('loaded', ({ tiles }) => {\n  console.log(`${tiles} 枚のタイルがそろいました`)\n  stop()\n})",
       },
     ],
   },
@@ -2184,7 +2188,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'その帯の高さ（メートル）。',
           },
         ],
-        code: "import { ImageExtrusionTileLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend: [\n    { color: '#a0d2ff', height: 2 },\n    { color: '#0041ff', height: 4 },\n  ],\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'rect', center: KOMAGATA, width: 800, height: 400 }] },\n  layers: [steps],\n})\n\n// 帯の高さを倍にします。読み込み済みのタイルはそのまま読み直されます\nsteps.legend = steps.legend.map(({ color, height }) => ({ color, height: height * 2 }))",
+        code: "import { ImageExtrusionTileLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend: [\n    { color: '#a0d2ff', height: 2 },\n    { color: '#0041ff', height: 4 },\n  ],\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19,\n  pitch: 60,\n  mask: { shape: { type: 'rect', center: KOMAGATA, width: 800, height: 400 } },\n  layers: [steps],\n})\n\n// 帯の高さを倍にします。読み込み済みのタイルはそのまま読み直されます\nsteps.legend = steps.legend.map(({ color, height }) => ({ color, height: height * 2 }))",
       },
       {
         heading: 'タイルで配信される画像を立ち上げる',
@@ -2264,7 +2268,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'ビューアのマスクで切り抜くかどうか。',
           },
         ],
-        code: "import { ImageExtrusionTileLayer, Viewer, type LegendEntry } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\n// 浸水継続時間の 7 色を短い順に。短い帯ほど低い段にします\nconst legend: LegendEntry[] = [\n  { color: '#a0d2ff', height: 2 },\n  { color: '#0041ff', height: 4 },\n  { color: '#faf500', height: 6 },\n  { color: '#ff9900', height: 8 },\n  { color: '#ff2800', height: 10 },\n  { color: '#b40068', height: 12 },\n  { color: '#600060', height: 14 },\n]\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend,\n  opacity: 0.9,\n  castShadow: false,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19.8,\n  pitch: 70,\n  heading: 37,\n  // 地形の起伏を表示し、段をその場所の地面から数えます\n  ground: { elevation: true },\n  // 少し引いても建物を表示します\n  buildings: { minZoom: 16 },\n  mask: { shapes: [{ shape: 'rect', center: KOMAGATA, width: 800, height: 400 }] },\n  layers: [steps],\n})",
+        code: "import { ImageExtrusionTileLayer, Viewer, type LegendEntry } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\n// 浸水継続時間の 7 色を短い順に。短い帯ほど低い段にします\nconst legend: LegendEntry[] = [\n  { color: '#a0d2ff', height: 2 },\n  { color: '#0041ff', height: 4 },\n  { color: '#faf500', height: 6 },\n  { color: '#ff9900', height: 8 },\n  { color: '#ff2800', height: 10 },\n  { color: '#b40068', height: 12 },\n  { color: '#600060', height: 14 },\n]\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend,\n  opacity: 0.9,\n  castShadow: false,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19.8,\n  pitch: 70,\n  heading: 37,\n  // 地形の起伏を表示し、段をその場所の地面から数えます\n  ground: { elevation: true },\n  // 少し引いても建物を表示します\n  buildings: { minZoom: 16 },\n  mask: { shape: { type: 'rect', center: KOMAGATA, width: 800, height: 400 } },\n  layers: [steps],\n})",
       },
       {
         heading: '高さをどこから数えるか',
@@ -2283,7 +2287,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`castShadow` は段が太陽の影を落とすかどうかです。指定しなければ `true` です。通りの上に立つ水の段では、影が見たい地面を暗くしてしまうので `false` にします。',
           '`visible` は描くかどうか、`masked` はビューアのマスクで切り抜くかどうかです。どのオプションも同じ名前のプロパティとして、あとから書き換えられます。',
         ],
-        code: "import { ImageExtrusionTileLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend: [\n    { color: '#a0d2ff', height: 2 },\n    { color: '#0041ff', height: 4 },\n    { color: '#faf500', height: 6 },\n  ],\n  opacity: 0.6,\n  color: { light: '#4a90d9', dark: '#7fb2ec' },\n  castShadow: false,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'rect', center: KOMAGATA, width: 800, height: 400 }] },\n  layers: [steps],\n})\n\nconst oneColor = document.querySelector<HTMLInputElement>('#one-color')\noneColor?.addEventListener('change', () => {\n  steps.color = oneColor.checked ? { light: '#4a90d9', dark: '#7fb2ec' } : undefined\n})",
+        code: "import { ImageExtrusionTileLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend: [\n    { color: '#a0d2ff', height: 2 },\n    { color: '#0041ff', height: 4 },\n    { color: '#faf500', height: 6 },\n  ],\n  opacity: 0.6,\n  color: { light: '#4a90d9', dark: '#7fb2ec' },\n  castShadow: false,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19,\n  pitch: 60,\n  mask: { shape: { type: 'rect', center: KOMAGATA, width: 800, height: 400 } },\n  layers: [steps],\n})\n\nconst oneColor = document.querySelector<HTMLInputElement>('#one-color')\noneColor?.addEventListener('change', () => {\n  steps.color = oneColor.checked ? { light: '#4a90d9', dark: '#7fb2ec' } : undefined\n})",
       },
       {
         heading: '一枚の画像を立ち上げる',
@@ -2313,7 +2317,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '色と高さの組の一覧。必須です。',
           },
         ],
-        code: "import { ImageExtrusionLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst hazard = new ImageExtrusionLayer({\n  url: '/images/hazard.png',\n  bounds: {\n    southWest: [139.789, 35.703],\n    northEast: [139.799, 35.708],\n  },\n  credit: { text: 'ハザードマップの出典' },\n  legend: [\n    { color: '#f7f5a9', height: 0.5 },\n    { color: '#ffd8c0', height: 3 },\n    { color: '#ffb7b7', height: 5 },\n  ],\n  opacity: 0.8,\n  castShadow: false,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 18.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'rect', center: KOMAGATA, width: 800, height: 400 }] },\n  layers: [hazard],\n})",
+        code: "import { ImageExtrusionLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst hazard = new ImageExtrusionLayer({\n  url: '/images/hazard.png',\n  bounds: {\n    southWest: [139.789, 35.703],\n    northEast: [139.799, 35.708],\n  },\n  credit: { text: 'ハザードマップの出典' },\n  legend: [\n    { color: '#f7f5a9', height: 0.5 },\n    { color: '#ffd8c0', height: 3 },\n    { color: '#ffb7b7', height: 5 },\n  ],\n  opacity: 0.8,\n  castShadow: false,\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 18.5,\n  pitch: 60,\n  mask: { shape: { type: 'rect', center: KOMAGATA, width: 800, height: 400 } },\n  layers: [hazard],\n})",
       },
       {
         heading: '画像の色を読む・イベント',
@@ -2322,7 +2326,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '答えられないときは `null` です。タイルの場合は、その地点のタイルが届いていないときや、タイルセットにその地点のタイルがないときなどです。一枚の画像の場合は、地点が `bounds` の外にあるときと、画像がまだ届いていないときです。`a` が `0` なら、画像がその地点を透明にしている、つまり色の帯がない場所です。',
           'イベントは `error`・`loaded`・`changed` の 3 つで、意味は `ImageTileLayer`・`ImageLayer` と同じです。`changed` は手元の画像が変わったときに届くので、`colorAt` はそのあとに読み直します。',
         ],
-        code: "import { ImageExtrusionTileLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend: [\n    { color: '#a0d2ff', height: 2 },\n    { color: '#0041ff', height: 4 },\n    { color: '#faf500', height: 6 },\n  ],\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'rect', center: KOMAGATA, width: 800, height: 400 }] },\n  layers: [steps],\n})\n\nsteps.on('changed', () => {\n  const texel = steps.colorAt(KOMAGATA)\n  if (texel === null) console.log('この場所はまだ答えられません')\n  else if (texel.a === 0) console.log('この場所に色の帯はありません')\n  else console.log(`rgb(${texel.r}, ${texel.g}, ${texel.b})`)\n})\n\nsteps.on('error', ({ key, retrying }) => {\n  console.warn(`${key} を読み込めませんでした`, retrying ? 'あとで読み込み直します' : '')\n})",
+        code: "import { ImageExtrusionTileLayer, Viewer } from '@plateau-ui/core'\n\nconst KOMAGATA = [139.7942, 35.70518] as const\n\nconst steps = new ImageExtrusionTileLayer({\n  url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png',\n  credit: { text: 'ハザードマップポータルサイト', url: 'https://disaportal.gsi.go.jp/' },\n  minZoom: 2,\n  maxZoom: 17,\n  legend: [\n    { color: '#a0d2ff', height: 2 },\n    { color: '#0041ff', height: 4 },\n    { color: '#faf500', height: 6 },\n  ],\n})\n\nnew Viewer({\n  container: 'map',\n  center: KOMAGATA,\n  zoom: 19,\n  pitch: 60,\n  mask: { shape: { type: 'rect', center: KOMAGATA, width: 800, height: 400 } },\n  layers: [steps],\n})\n\nsteps.on('changed', () => {\n  const texel = steps.colorAt(KOMAGATA)\n  if (texel === null) console.log('この場所はまだ答えられません')\n  else if (texel.a === 0) console.log('この場所に色の帯はありません')\n  else console.log(`rgb(${texel.r}, ${texel.g}, ${texel.b})`)\n})\n\nsteps.on('error', ({ key, retrying }) => {\n  console.warn(`${key} を読み込めませんでした`, retrying ? 'あとで読み込み直します' : '')\n})",
       },
     ],
   },
@@ -2380,7 +2384,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '表示するか。',
           },
         ],
-        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry } from 'three'\n\nconst tower = new Solid({\n  geometry: new BoxGeometry(20, 60, 20).translate(0, 30, 0),\n  at: [139.7671, 35.6812],\n  facing: 30,\n  fillColor: '#d9480f',\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'circle', center: [139.7671, 35.6812], radius: 400 }] },\n  layers: [tower],\n})\n\ntower.facing = 60",
+        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry } from 'three'\n\nconst tower = new Solid({\n  geometry: new BoxGeometry(20, 60, 20).translate(0, 30, 0),\n  at: [139.7671, 35.6812],\n  facing: 30,\n  fillColor: '#d9480f',\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 60,\n  mask: { shape: { type: 'circle', center: [139.7671, 35.6812], radius: 400 } },\n  layers: [tower],\n})\n\ntower.facing = 60",
       },
       {
         heading: '色と線',
@@ -2442,7 +2446,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '色の代わりに貼る絵。',
           },
         ],
-        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry } from 'three'\n\nconst plan = new Solid({\n  geometry: new BoxGeometry(40, 120, 40).translate(0, 60, 0),\n  at: [139.7005, 35.6905],\n  fillColor: { light: '#4a90d9', dark: '#9cc3f0' },\n  fillOpacity: 0.4,\n  line: true,\n  lineColor: '#1f2933',\n  castShadow: false,\n  pickable: false,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7005, 35.6905],\n  zoom: 17,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.add(plan)",
+        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry } from 'three'\n\nconst plan = new Solid({\n  geometry: new BoxGeometry(40, 120, 40).translate(0, 60, 0),\n  at: [139.7005, 35.6905],\n  fillColor: { light: '#4a90d9', dark: '#9cc3f0' },\n  fillOpacity: 0.4,\n  line: true,\n  lineColor: '#1f2933',\n  castShadow: false,\n  pickable: false,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7005, 35.6905],\n  zoom: 17,\n  pitch: 60,\n})\n\nviewer.add(plan)",
       },
       {
         heading: '影・陰影・マスク',
@@ -2473,7 +2477,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'マスクに従うか。',
           },
         ],
-        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { PlaneGeometry } from 'three'\n\nconst floor = new Solid({\n  geometry: new PlaneGeometry(1, 1).rotateX(-Math.PI / 2),\n  at: 'view',\n  fillColor: '#c8c8c8',\n  masked: false,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7499, 35.6664],\n  zoom: 17,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'circle', center: [139.7499, 35.6664], radius: 500 }] },\n  ground: { visible: false },\n  layers: [floor],\n})",
+        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { PlaneGeometry } from 'three'\n\nconst floor = new Solid({\n  geometry: new PlaneGeometry(1, 1).rotateX(-Math.PI / 2),\n  at: 'view',\n  fillColor: '#c8c8c8',\n  masked: false,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7499, 35.6664],\n  zoom: 17,\n  pitch: 60,\n  mask: { shape: { type: 'circle', center: [139.7499, 35.6664], radius: 500 } },\n  ground: { visible: false },\n  layers: [floor],\n})",
       },
       {
         heading: 'クリックとドラッグ',
@@ -2498,7 +2502,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'ポインターでつかんで動かせるか。',
           },
         ],
-        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { CylinderGeometry } from 'three'\n\nconst pole = new Solid({\n  geometry: new CylinderGeometry(2, 2, 30).translate(0, 15, 0),\n  at: [139.6993, 35.6595],\n  fillColor: '#2b8a3e',\n  draggable: true,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6993, 35.6595],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [pole],\n})\n\npole.on('click', ({ position }) => {\n  console.log(position.lng, position.lat, position.height)\n})\npole.on('hover', (event) => {\n  pole.fillColor = event ? '#40c057' : '#2b8a3e'\n})\npole.on('drag', ({ east, north }) => {\n  console.log(`東へ ${east.toFixed(1)} m、北へ ${north.toFixed(1)} m`)\n})\npole.on('dragend', () => {\n  console.log(pole.at)\n})",
+        code: "import { Solid, Viewer } from '@plateau-ui/core'\nimport { CylinderGeometry } from 'three'\n\nconst pole = new Solid({\n  geometry: new CylinderGeometry(2, 2, 30).translate(0, 15, 0),\n  at: [139.6993, 35.6595],\n  fillColor: '#2b8a3e',\n  draggable: true,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6993, 35.6595],\n  zoom: 18,\n  pitch: 55,\n  layers: [pole],\n})\n\npole.on('click', ({ position }) => {\n  console.log(position.lng, position.lat, position.height)\n})\npole.on('hover', (event) => {\n  pole.fillColor = event ? '#40c057' : '#2b8a3e'\n})\npole.on('drag', ({ east, north }) => {\n  console.log(`東へ ${east.toFixed(1)} m、北へ ${north.toFixed(1)} m`)\n})\npole.on('dragend', () => {\n  console.log(pole.at)\n})",
       },
       {
         heading: 'glTF モデル',
@@ -2596,7 +2600,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '出典表示に並べる作者名。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7454, 35.6586],\n  zoom: 18,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nviewer.models.on('error', ({ cause }) => {\n  console.warn(cause)\n})\n\nconst walker = await viewer.models.bring({\n  url: './models/walker.glb',\n  at: [139.7454, 35.6586],\n  facing: 90,\n  scale: 2,\n  clip: 'Walk',\n  credit: { text: 'モデル：作者名', url: 'https://example.com' },\n})\n\nif (walker) {\n  console.log(walker.clipNames, walker.clipDuration)\n  viewer.on('frame', ({ delta }) => {\n    walker.clipTime += delta\n  })\n}",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7454, 35.6586],\n  zoom: 18,\n  pitch: 60,\n})\n\nviewer.models.on('error', ({ cause }) => {\n  console.warn(cause)\n})\n\nconst walker = await viewer.models.bring({\n  url: './models/walker.glb',\n  at: [139.7454, 35.6586],\n  facing: 90,\n  scale: 2,\n  clip: 'Walk',\n  credit: { text: 'モデル：作者名', url: 'https://example.com' },\n})\n\nif (walker) {\n  console.log(walker.clipNames, walker.clipDuration)\n  viewer.on('frame', ({ delta }) => {\n    walker.clipTime += delta\n  })\n}",
       },
       {
         heading: '置ける場所',
@@ -2607,7 +2611,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '立体やモデルの `click` が渡す `anchor` は、クリックした点をその物に結びつけた場所です。`at: anchor` と書けば、クリックした点に別の物を置けます。',
           '立体をまとめて出し入れしたいときは、`SolidLayer` に入れて、そのレイヤーを地図に載せます。`visible` で中の立体をまとめて隠せます。`viewer.add(solid)` で直接載せた立体は、地図が持つ共通の `SolidLayer` に入ります。',
         ],
-        code: "import { Solid, SolidLayer, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry, SphereGeometry } from 'three'\n\nconst base = new Solid({\n  geometry: new BoxGeometry(10, 10, 10).translate(0, 5, 0),\n  at: [139.7671, 35.6812],\n})\n\nconst ball = new Solid({\n  geometry: new SphereGeometry(3),\n  at: { solid: base, offset: [0, 0, 13] },\n  fillColor: '#f08c00',\n})\n\nconst solids = new SolidLayer()\nsolids.add(base).add(ball)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 19,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [solids],\n})\n\nbase.on('click', ({ anchor }) => {\n  solids.add(new Solid({ geometry: new SphereGeometry(1), at: anchor, fillColor: '#1f2933' }))\n})",
+        code: "import { Solid, SolidLayer, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry, SphereGeometry } from 'three'\n\nconst base = new Solid({\n  geometry: new BoxGeometry(10, 10, 10).translate(0, 5, 0),\n  at: [139.7671, 35.6812],\n})\n\nconst ball = new Solid({\n  geometry: new SphereGeometry(3),\n  at: { solid: base, offset: [0, 0, 13] },\n  fillColor: '#f08c00',\n})\n\nconst solids = new SolidLayer()\nsolids.add(base).add(ball)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 19,\n  pitch: 55,\n  layers: [solids],\n})\n\nbase.on('click', ({ anchor }) => {\n  solids.add(new Solid({ geometry: new SphereGeometry(1), at: anchor, fillColor: '#1f2933' }))\n})",
       },
     ],
   },
@@ -2675,7 +2679,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '表示するか。',
           },
         ],
-        code: "import { Viewer, Viewshed } from '@plateau-ui/core'\n\nconst sight = new Viewshed({\n  at: { lng: 139.70565, lat: 35.689029, height: 15 },\n  facing: 173,\n  fov: { horizontal: 90, vertical: 90 },\n  range: 120,\n  color: '#d9480f',\n  opacity: 0.5,\n  fade: 20,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7057, 35.68867],\n  zoom: 18.5,\n  pitch: 60,\n  heading: 45,\n  mask: { shapes: [{ shape: 'rect', center: [139.7057, 35.68867], width: 260, height: 260 }] },\n  layers: [sight],\n})",
+        code: "import { Viewer, Viewshed } from '@plateau-ui/core'\n\nconst sight = new Viewshed({\n  at: { lng: 139.70565, lat: 35.689029, height: 15 },\n  facing: 173,\n  fov: { horizontal: 90, vertical: 90 },\n  range: 120,\n  color: '#d9480f',\n  opacity: 0.5,\n  fade: 20,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7057, 35.68867],\n  zoom: 18.5,\n  pitch: 60,\n  heading: 45,\n  mask: { shape: { type: 'rect', center: [139.7057, 35.68867], width: 260, height: 260 } },\n  layers: [sight],\n})",
       },
       {
         heading: '塗り方を選ぶ',
@@ -2706,7 +2710,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: "`behind: 'dim'` のときに見せる濃さ（0〜1）。",
           },
         ],
-        code: "import { Viewer, Viewshed } from '@plateau-ui/core'\n\nconst tower = new Viewshed({\n  at: { lng: 139.7454, lat: 35.6586, height: 150 },\n  range: 1500,\n  paints: 'buildings',\n})\n\nconst corner = new Viewshed({\n  at: { lng: 139.7016, lat: 35.658, height: 6 },\n  facing: 0,\n  fov: 120,\n  behind: 'dim',\n  dimmed: 0.2,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7454, 35.6586],\n  zoom: 16,\n  pitch: 50,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [tower, corner],\n})\n\ncorner.visible = false",
+        code: "import { Viewer, Viewshed } from '@plateau-ui/core'\n\nconst tower = new Viewshed({\n  at: { lng: 139.7454, lat: 35.6586, height: 150 },\n  range: 1500,\n  paints: 'buildings',\n})\n\nconst corner = new Viewshed({\n  at: { lng: 139.7016, lat: 35.658, height: 6 },\n  facing: 0,\n  fov: 120,\n  behind: 'dim',\n  dimmed: 0.2,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7454, 35.6586],\n  zoom: 16,\n  pitch: 50,\n  layers: [tower, corner],\n})\n\ncorner.visible = false",
       },
       {
         heading: '視線をさえぎる物',
@@ -2716,7 +2720,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '立体に結びつけた目は、その立体の表面より少し外に置きます。目より手前にある物は、自分の立体でも視線をさえぎるからです。',
           '`facing` は地図上の方位で、結びつけた物の向きとは別です。土台の立体を回したときは、`Viewshed` の `facing` もあわせて書き換えます。',
         ],
-        code: "import { Solid, Viewer, Viewshed } from '@plateau-ui/core'\nimport { BoxGeometry } from 'three'\n\nconst housing = new Solid({\n  geometry: new BoxGeometry(1, 1, 3).translate(0, 0, 1.5),\n  at: { lng: 139.70565, lat: 35.689029, height: 15 },\n  facing: 173,\n  fillColor: '#383d45',\n  pickable: false,\n})\n\nconst sight = new Viewshed({\n  at: { solid: housing, offset: [0, 3.05, 0] },\n  facing: 173,\n  fov: { horizontal: 90, vertical: 60 },\n  range: 120,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7057, 35.68867],\n  zoom: 18.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [sight, housing],\n})\n\nfunction turn(facing: number): void {\n  housing.facing = facing\n  sight.facing = facing\n}\n\nturn(150)",
+        code: "import { Solid, Viewer, Viewshed } from '@plateau-ui/core'\nimport { BoxGeometry } from 'three'\n\nconst housing = new Solid({\n  geometry: new BoxGeometry(1, 1, 3).translate(0, 0, 1.5),\n  at: { lng: 139.70565, lat: 35.689029, height: 15 },\n  facing: 173,\n  fillColor: '#383d45',\n  pickable: false,\n})\n\nconst sight = new Viewshed({\n  at: { solid: housing, offset: [0, 3.05, 0] },\n  facing: 173,\n  fov: { horizontal: 90, vertical: 60 },\n  range: 120,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7057, 35.68867],\n  zoom: 18.5,\n  pitch: 60,\n  layers: [sight, housing],\n})\n\nfunction turn(facing: number): void {\n  housing.facing = facing\n  sight.facing = facing\n}\n\nturn(150)",
       },
       {
         heading: 'ある地点が見えるか調べる',
@@ -2726,7 +2730,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '答えが新しくなると `changed` イベントが届きます。目が動いたときや、周りの建物が読み込まれたときにも届くので、`null` だった地点はこのときにもう一度聞きます。`on` は購読をやめる関数を返します。',
           '地面にある地点を聞くときは、少し高さを付けます。地面ちょうどの点は、浅い角度で見る遠くの地面そのものにさえぎられることがあります。人を写すカメラなら、頭の高さの 1.6 メートルなどを `height` に書きます。',
         ],
-        code: "import { Marker, Viewer, Viewshed, type Where } from '@plateau-ui/core'\n\nconst sight = new Viewshed({\n  at: { lng: 139.70565, lat: 35.689029, height: 15 },\n  facing: 173,\n  fov: 90,\n  range: 120,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7057, 35.68867],\n  zoom: 18.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'rect', center: [139.7057, 35.68867], width: 260, height: 260 }] },\n  layers: [sight],\n})\n\nconst pins: { marker: Marker; asked: Where }[] = []\n\nfunction judge(pin: { marker: Marker; asked: Where }): void {\n  const seen = sight.sees(pin.asked)\n  if (seen === null) return\n  pin.marker.label = seen ? '見える' : '見えない'\n}\n\nviewer.ground.on('click', ({ position: { lng, lat } }) => {\n  const pin = { marker: new Marker({ at: [lng, lat], label: '…' }), asked: { lng, lat, height: 1.6 } }\n  viewer.add(pin.marker)\n  pins.push(pin)\n  judge(pin)\n})\n\nsight.on('changed', () => {\n  for (const pin of pins) judge(pin)\n})",
+        code: "import { Marker, Viewer, Viewshed, type Where } from '@plateau-ui/core'\n\nconst sight = new Viewshed({\n  at: { lng: 139.70565, lat: 35.689029, height: 15 },\n  facing: 173,\n  fov: 90,\n  range: 120,\n})\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7057, 35.68867],\n  zoom: 18.5,\n  pitch: 60,\n  mask: { shape: { type: 'rect', center: [139.7057, 35.68867], width: 260, height: 260 } },\n  layers: [sight],\n})\n\nconst pins: { marker: Marker; asked: Where }[] = []\n\nfunction judge(pin: { marker: Marker; asked: Where }): void {\n  const seen = sight.sees(pin.asked)\n  if (seen === null) return\n  pin.marker.label = seen ? '見える' : '見えない'\n}\n\nviewer.ground.on('click', ({ position: { lng, lat } }) => {\n  const pin = { marker: new Marker({ at: [lng, lat], label: '…' }), asked: { lng, lat, height: 1.6 } }\n  viewer.add(pin.marker)\n  pins.push(pin)\n  judge(pin)\n})\n\nsight.on('changed', () => {\n  for (const pin of pins) judge(pin)\n})",
       },
     ],
   },
@@ -2853,7 +2857,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '日の当たらない面を照らす光の色味と、角の陰影の色。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  theme: { surface: '#efe7da', road: '#d8cbb5', wall: '#fbf6ee' },\n})\n\nviewer.theme = { ...viewer.theme, river: '#7fb3d5' }",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  theme: { surface: '#efe7da', road: '#d8cbb5', wall: '#fbf6ee' },\n})\n\nviewer.theme = { ...viewer.theme, river: '#7fb3d5' }",
       },
       {
         heading: '昼と夜の色',
@@ -2863,7 +2867,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '今が夜かどうかは `viewer.night` で読めます。配色が替わると `colors` イベントが届くので、地図の外にあるページの色を合わせるときに使います。',
           '自分のレイヤーで組の色を読むときは、`colorFor(color, viewer.night)` を使います。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  theme: {\n    road: { light: '#b5beca', dark: '#6b7480' },\n    edge: { light: '#1f2933', dark: '#e4e9f0' },\n  },\n  sun: { by: 'time', at: new Date('2026-12-22T18:00+09:00') },\n})\n\nfunction follow(): void {\n  document.body.style.background = viewer.colors.backdrop\n  document.body.classList.toggle('night', viewer.night)\n}\n\nfollow()\nviewer.on('colors', follow)",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  theme: {\n    road: { light: '#b5beca', dark: '#6b7480' },\n    edge: { light: '#1f2933', dark: '#e4e9f0' },\n  },\n  sun: { by: 'time', at: new Date('2026-12-22T18:00+09:00') },\n})\n\nfunction follow(): void {\n  document.body.style.background = viewer.colors.backdrop\n  document.body.classList.toggle('night', viewer.night)\n}\n\nfollow()\nviewer.on('colors', follow)",
       },
       {
         heading: '太陽を決める',
@@ -2918,7 +2922,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '太陽の明るさ。0〜2 の範囲で使われます。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  sun: { by: 'angle', azimuth: 135, elevation: 50, shading: 0.8 },\n})\n\nviewer.sun = {\n  by: 'time',\n  at: new Date('2026-06-21T15:00+09:00'),\n  over: [139.7671, 35.6812],\n}",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  sun: { by: 'angle', azimuth: 135, elevation: 50, shading: 0.8 },\n})\n\nviewer.sun = {\n  by: 'time',\n  at: new Date('2026-06-21T15:00+09:00'),\n  over: [139.7671, 35.6812],\n}",
       },
       {
         heading: '太陽の位置を調べる',
@@ -2927,7 +2931,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           "`angleOfSun(sun, over)` は、`by: 'angle'` と `by: 'time'` のどちらの `Sun` からでも、同じ形で角度を返します。地図の太陽を調べるときは、`viewer.sun` と `viewer.camera.center` を渡します。",
           '`down` が `true` のとき、地図は夜の配色になり、影は出ません。`viewer.night` と同じ判定です。',
         ],
-        code: "import { angleOfSun, sunAt, Viewer } from '@plateau-ui/core'\n\nconst sun = sunAt(new Date('2026-12-22T16:30+09:00'), [139.7671, 35.6812])\nconsole.log(sun.azimuth, sun.elevation, sun.down)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nconst given = viewer.sun\nif (given) console.log(angleOfSun(given, viewer.camera.center).elevation)",
+        code: "import { angleOfSun, sunAt, Viewer } from '@plateau-ui/core'\n\nconst sun = sunAt(new Date('2026-12-22T16:30+09:00'), [139.7671, 35.6812])\nconsole.log(sun.azimuth, sun.elevation, sun.down)\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n})\n\nconst given = viewer.sun\nif (given) console.log(angleOfSun(given, viewer.camera.center).elevation)",
       },
       {
         heading: '角の陰影',
@@ -2957,7 +2961,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '角を囲む物と見なす範囲（メートル）。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  occlusion: { strength: 1.5, radius: 10 },\n})\n\nviewer.occlusion.strength = 2\nviewer.theme = { ...viewer.theme, shadow: '#c9c4bc' }",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  occlusion: { strength: 1.5, radius: 10 },\n})\n\nviewer.occlusion.strength = 2\nviewer.theme = { ...viewer.theme, shadow: '#c9c4bc' }",
       },
       {
         heading: 'チルトシフト',
@@ -2995,7 +2999,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: 'いちばん強いぼかし。CSS ピクセル。',
           },
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 18,\n  pitch: 70,\n  mask: { shapes: [{ shape: 'view' }] },\n  tiltShift: { enabled: true },\n})\n\n// 決まった場所にピントを合わせ、ぼかしを強める\nviewer.tiltShift.focus = [139.6992, 35.6441]\nviewer.tiltShift.blur = 12\n\n// 視点まかせに戻す\nviewer.tiltShift.focus = undefined\nviewer.tiltShift.blur = undefined",
+        code: "import { Viewer } from '@plateau-ui/core'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.6982, 35.6439],\n  zoom: 18,\n  pitch: 70,\n  tiltShift: { enabled: true },\n})\n\n// 決まった場所にピントを合わせ、ぼかしを強める\nviewer.tiltShift.focus = [139.6992, 35.6441]\nviewer.tiltShift.blur = 12\n\n// 視点まかせに戻す\nviewer.tiltShift.focus = undefined\nviewer.tiltShift.blur = undefined",
       },
     ],
   },
@@ -3013,7 +3017,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '地図の座標と three.js の座標は、`viewer.worldFromLngLat(lng, lat)` と `viewer.lngLatFromWorld(x, z)` で変換します。three.js の座標は y が上です。1 単位の長さは緯度によって変わり、メートルを three.js の単位にするには `metersPerUnit(lat)` で割ります。地形の高さを使わない地図では、地面は y = 0 にあります。`ground: { elevation: true }` で地形の高さを使う地図では、`viewer.queryTerrainElevation([lng, lat])` がその場所の標高（メートル）を返します。',
           'three.js の `Raycaster` は、建物・地面・立体・モデルに当たります。地図に描いた図形とマーカーには当たりません。`pickable: false` にした物も通り抜けます。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\nimport { Raycaster, Vector2 } from 'three'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nconst raycaster = new Raycaster()\nconst pointer = new Vector2()\n\nviewer.canvas.addEventListener('pointerdown', (event) => {\n  const box = viewer.canvas.getBoundingClientRect()\n  pointer.set(((event.clientX - box.left) / box.width) * 2 - 1, -((event.clientY - box.top) / box.height) * 2 + 1)\n  raycaster.setFromCamera(pointer, viewer.threeCamera)\n  const [hit] = raycaster.intersectObjects(viewer.scene.children, true)\n  if (hit) console.log(viewer.lngLatFromWorld(hit.point.x, hit.point.z))\n})",
+        code: "import { Viewer } from '@plateau-ui/core'\nimport { Raycaster, Vector2 } from 'three'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 55,\n})\n\nconst raycaster = new Raycaster()\nconst pointer = new Vector2()\n\nviewer.canvas.addEventListener('pointerdown', (event) => {\n  const box = viewer.canvas.getBoundingClientRect()\n  pointer.set(((event.clientX - box.left) / box.width) * 2 - 1, -((event.clientY - box.top) / box.height) * 2 + 1)\n  raycaster.setFromCamera(pointer, viewer.threeCamera)\n  const [hit] = raycaster.intersectObjects(viewer.scene.children, true)\n  if (hit) console.log(viewer.lngLatFromWorld(hit.point.x, hit.point.z))\n})",
       },
       {
         heading: '自分のメッシュとライト',
@@ -3025,7 +3029,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           '`viewer.scene` に直接置いたメッシュには、マスクも配色の切り替えも届きません。地図のほかの物と同じように扱いたい形は、`Solid` で置きます。',
           '`viewer.lights` は地図を照らしているライトです。`viewer.lights.sun` が `DirectionalLight`、`viewer.lights.fill` が `HemisphereLight` です。読むためのもので、光を変えるときは `viewer.sun` と `viewer.theme` を使います。`scene.environment` は空なので、自分の金属の材質に映り込みが欲しいときは、最初のフレームの前にページが設定します。',
         ],
-        code: "import { marksSolid, metersPerUnit, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry, Mesh, MeshStandardMaterial, PointLight } from 'three'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 18,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\nconst place = viewer.worldFromLngLat(139.7671, 35.6812)\nconst unit = 1 / metersPerUnit(35.6812)\n\nconst material = new MeshStandardMaterial({ color: '#d9480f', roughness: 0.6 })\nmarksSolid(material)\n\nconst box = new Mesh(new BoxGeometry(20, 20, 20), material)\nbox.scale.setScalar(unit)\nbox.position.set(place.x, 10 * unit, place.z)\nbox.castShadow = true\nbox.receiveShadow = true\nviewer.scene.add(box)\n\nconst lamp = new PointLight('#ffd27f', 0, 0, 2)\nlamp.layers.enableAll()\nlamp.position.set(place.x, 40 * unit, place.z)\nviewer.scene.add(lamp)\n\nviewer.on('frame', ({ time }) => {\n  lamp.intensity = 1500 * (1 + Math.sin(time * 2))\n})",
+        code: "import { marksSolid, metersPerUnit, Viewer } from '@plateau-ui/core'\nimport { BoxGeometry, Mesh, MeshStandardMaterial, PointLight } from 'three'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 18,\n  pitch: 55,\n})\n\nconst place = viewer.worldFromLngLat(139.7671, 35.6812)\nconst unit = 1 / metersPerUnit(35.6812)\n\nconst material = new MeshStandardMaterial({ color: '#d9480f', roughness: 0.6 })\nmarksSolid(material)\n\nconst box = new Mesh(new BoxGeometry(20, 20, 20), material)\nbox.scale.setScalar(unit)\nbox.position.set(place.x, 10 * unit, place.z)\nbox.castShadow = true\nbox.receiveShadow = true\nviewer.scene.add(box)\n\nconst lamp = new PointLight('#ffd27f', 0, 0, 2)\nlamp.layers.enableAll()\nlamp.position.set(place.x, 40 * unit, place.z)\nviewer.scene.add(lamp)\n\nviewer.on('frame', ({ time }) => {\n  lamp.intensity = 1500 * (1 + Math.sin(time * 2))\n})",
       },
       {
         heading: '自分のレイヤーを書く',
@@ -3117,7 +3121,7 @@ export const DOC_PAGES: readonly DocPage[] = [
             meaning: '持っている物をすべて解放します。',
           },
         ],
-        code: "import { marksSolid, metersPerUnit, Viewer, type Change, type Layer } from '@plateau-ui/core'\nimport { Group, Mesh, MeshStandardMaterial, TorusGeometry } from 'three'\n\nclass Ring implements Layer {\n  readonly root = new Group()\n  readonly stage = 'structure' as const\n  private readonly geometry = new TorusGeometry(30, 3, 16, 64)\n  private readonly material = new MeshStandardMaterial({ color: '#f08c00' })\n  private readonly mesh = new Mesh(this.geometry, this.material)\n  private readonly at: readonly [number, number]\n  private viewer: Viewer | null = null\n\n  constructor(at: readonly [number, number]) {\n    this.at = at\n    this.mesh.castShadow = true\n    this.mesh.receiveShadow = true\n    marksSolid(this.material)\n    this.root.add(this.mesh)\n  }\n\n  attach(viewer: Viewer): void {\n    this.viewer = viewer\n    const unit = 1 / metersPerUnit(this.at[1])\n    const place = viewer.worldFromLngLat(this.at[0], this.at[1])\n    this.mesh.position.set(place.x, 60 * unit, place.z)\n    this.mesh.scale.setScalar(unit)\n  }\n\n  detach(): void {\n    this.viewer = null\n  }\n\n  changed(what: Change): void {\n    if (what === 'colors' && this.viewer) {\n      this.material.color.set(this.viewer.night ? '#ffd27f' : '#f08c00')\n    }\n  }\n\n  frame(delta: number): void {\n    this.mesh.rotation.y += delta\n    this.viewer?.stirShadows()\n  }\n\n  tallest(): number {\n    return 93\n  }\n\n  dispose(): void {\n    this.geometry.dispose()\n    this.material.dispose()\n  }\n}\n\nconst ring = new Ring([139.7671, 35.6812])\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 60,\n  mask: { shapes: [{ shape: 'view' }] },\n  layers: [ring],\n})",
+        code: "import { marksSolid, metersPerUnit, Viewer, type Change, type Layer } from '@plateau-ui/core'\nimport { Group, Mesh, MeshStandardMaterial, TorusGeometry } from 'three'\n\nclass Ring implements Layer {\n  readonly root = new Group()\n  readonly stage = 'structure' as const\n  private readonly geometry = new TorusGeometry(30, 3, 16, 64)\n  private readonly material = new MeshStandardMaterial({ color: '#f08c00' })\n  private readonly mesh = new Mesh(this.geometry, this.material)\n  private readonly at: readonly [number, number]\n  private viewer: Viewer | null = null\n\n  constructor(at: readonly [number, number]) {\n    this.at = at\n    this.mesh.castShadow = true\n    this.mesh.receiveShadow = true\n    marksSolid(this.material)\n    this.root.add(this.mesh)\n  }\n\n  attach(viewer: Viewer): void {\n    this.viewer = viewer\n    const unit = 1 / metersPerUnit(this.at[1])\n    const place = viewer.worldFromLngLat(this.at[0], this.at[1])\n    this.mesh.position.set(place.x, 60 * unit, place.z)\n    this.mesh.scale.setScalar(unit)\n  }\n\n  detach(): void {\n    this.viewer = null\n  }\n\n  changed(what: Change): void {\n    if (what === 'colors' && this.viewer) {\n      this.material.color.set(this.viewer.night ? '#ffd27f' : '#f08c00')\n    }\n  }\n\n  frame(delta: number): void {\n    this.mesh.rotation.y += delta\n    this.viewer?.stirShadows()\n  }\n\n  tallest(): number {\n    return 93\n  }\n\n  dispose(): void {\n    this.geometry.dispose()\n    this.material.dispose()\n  }\n}\n\nconst ring = new Ring([139.7671, 35.6812])\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17.5,\n  pitch: 60,\n  layers: [ring],\n})",
       },
       {
         heading: '描き直しを頼む',
@@ -3126,7 +3130,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           "ライブラリの設定を変えたときと、シーンに入っている three の物（位置、表示・非表示、ジオメトリの属性、マテリアルの色や不透明度、ライト、霧）を変えたときは、地図が自分で気づいて描き直します。`on('frame')` を聞いているページ、シーンに自分のメッシュを置いたページ、`effects` を使うページは、これまでどおり毎フレーム描きます。",
           'それ以外の変更は地図からは見えません。自分のマテリアルが読むシェーダーの値（`uniform`）を変えたときなどです。そのときは `viewer.triggerRepaint()` を呼びます。変えたあとに一度、変え続けている間は毎フレーム呼びます。自分のレイヤーの `frame` で値を動かすときも同じです。',
         ],
-        code: "import { Viewer } from '@plateau-ui/core'\nimport { uniform } from 'three/tsl'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  mask: { shapes: [{ shape: 'view' }] },\n})\n\n// 自分のマテリアルが読むシェーダーの値。地図はこの値の変化を知らない\nconst glow = uniform(0)\n\nsetInterval(() => {\n  glow.value = Math.random()\n  viewer.triggerRepaint()\n}, 500)",
+        code: "import { Viewer } from '@plateau-ui/core'\nimport { uniform } from 'three/tsl'\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n})\n\n// 自分のマテリアルが読むシェーダーの値。地図はこの値の変化を知らない\nconst glow = uniform(0)\n\nsetInterval(() => {\n  glow.value = Math.random()\n  viewer.triggerRepaint()\n}, 500)",
       },
       {
         heading: '完成した画面に描き足す',
@@ -3137,7 +3141,7 @@ export const DOC_PAGES: readonly DocPage[] = [
           "`draw` が例外を投げても、フレームは止まりません。地図の `error` イベントに `what: 'effect'` と、その処理（`effect`）が届きます。",
           '作った物の解放はページが行います。`viewer.effects` から外したあと、自分で `dispose()` を呼びます。',
         ],
-        code: "import { Viewer, type FramePass } from '@plateau-ui/core'\nimport { Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene } from 'three'\n\nconst overlay = new Scene()\nconst overlayCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)\nconst veil = new Mesh(\n  new PlaneGeometry(2, 2),\n  new MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.25, depthTest: false }),\n)\nveil.position.z = -0.5\noverlay.add(veil)\n\nconst darken: FramePass = {\n  draw(renderer) {\n    renderer.render(overlay, overlayCamera)\n  },\n}\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  mask: { shapes: [{ shape: 'view' }] },\n  effects: [darken],\n})\n\nviewer.on('error', (event) => {\n  if (event.what !== 'effect') return\n  viewer.effects = viewer.effects.filter((pass) => pass !== event.effect)\n})",
+        code: "import { Viewer, type FramePass } from '@plateau-ui/core'\nimport { Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene } from 'three'\n\nconst overlay = new Scene()\nconst overlayCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)\nconst veil = new Mesh(\n  new PlaneGeometry(2, 2),\n  new MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.25, depthTest: false }),\n)\nveil.position.z = -0.5\noverlay.add(veil)\n\nconst darken: FramePass = {\n  draw(renderer) {\n    renderer.render(overlay, overlayCamera)\n  },\n}\n\nconst viewer = new Viewer({\n  container: 'map',\n  center: [139.7671, 35.6812],\n  zoom: 17,\n  pitch: 55,\n  effects: [darken],\n})\n\nviewer.on('error', (event) => {\n  if (event.what !== 'effect') return\n  viewer.effects = viewer.effects.filter((pass) => pass !== event.effect)\n})",
       },
     ],
   },

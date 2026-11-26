@@ -35,8 +35,6 @@ const viewer = new Viewer({
   zoom: 17,
   pitch: 60,
   heading: 30,
-  // 描くものと読み込むもの。ここでは画面に映る範囲すべて
-  mask: { shapes: [{ shape: 'view' }] },
 })
 ```
 

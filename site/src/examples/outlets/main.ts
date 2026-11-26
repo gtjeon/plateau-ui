@@ -88,7 +88,7 @@ const viewer = new Viewer({
     minZoom: false,
     windows: { visible: false },
   },
-  mask: { shapes: [SITE] },
+  mask: { shape: SITE },
   layers: [labels],
 })
 

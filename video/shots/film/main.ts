@@ -111,7 +111,6 @@ const viewer = new Viewer({
   zoom: 17.6,
   pitch: 58,
   heading: 70,
-  mask: { shapes: [{ shape: 'view' }] },
   // Low enough that the city is there when the camera comes down to it, high
   // enough that it is not while the title is up
   buildings: { minZoom: 16.4 },
@@ -395,7 +394,7 @@ const STEPS: readonly Step[] = [
   { say: 'マーカーを付ける', code: `new Marker({ at: { building: id, offset: [0, 0, 163] } })` },
   { say: '動かす。マーカーもついてくる', code: `buildings.animate(id, [{ scale: [1, 1, 1.5] }], timing)` },
   { say: '別の場所へ移す', code: `buildings.place(id, { at, facing: 90 })` },
-  { say: 'まわりの建物を隠す', code: () => `buildings.hide({ shape: 'circle', center, radius: ${CLEARING.radius} })` },
+  { say: 'まわりの建物を隠す', code: () => `buildings.hide({ type: 'circle', center, radius: ${CLEARING.radius} })` },
   { say: '東京タワーを取り寄せる', code: `buildings.bring({ id: tokyoTower, findAt, at: center })` },
   { say: 'カメラから見える範囲を塗る', code: `new Viewshed({ at: { solid: camera, offset }, facing })` },
   {
@@ -408,7 +407,7 @@ const STEPS: readonly Step[] = [
   { say: '時刻を進めると、影が回り、夜が来る', code: `viewer.sun = { by: 'time', at: new Date(…) }` },
   {
     say: '必要なところだけ',
-    code: `viewer.mask = { shapes: [{ shape: 'circle', center, radius: ${ISLAND} }], fade: ${ISLAND_FADE} }`,
+    code: `viewer.mask = { shape: { type: 'circle', center, radius: ${ISLAND} }, fade: ${ISLAND_FADE} }`,
   },
   { say: 'ミニチュアのように見る', code: `viewer.tiltShift.enabled = true` },
   { say: 'three.js の物体を、同じ光と影の中に', code: `viewer.scene.add(new Mesh(knot, new MeshStandardMaterial()))` },
@@ -485,8 +484,8 @@ const CLEARING = {
 const TOKYO_TOWER = { id: 'bldg_7aff4a51-be8b-405b-abe4-ac489697cbc8', findAt: [139.74547, 35.65858] as const }
 /** Its own colour, near enough: white, it is lost among the white city. */
 const TOKYO_RED = '#e2583a'
-const clearing = (): { shape: 'circle'; center: [number, number]; radius: number } => ({
-  shape: 'circle',
+const clearing = (): { type: 'circle'; center: [number, number]; radius: number } => ({
+  type: 'circle',
   center: toward(home, CLEARING.distance, CLEARING.bearing),
   radius: CLEARING.radius,
 })
@@ -722,7 +721,7 @@ function firstPart(t: number): void {
     if (radius !== islandShown) {
       islandShown = radius
       viewer.mask = {
-        shapes: [{ shape: 'circle', center: islandCenter(), radius }],
+        shape: { type: 'circle', center: islandCenter(), radius },
         fade: ISLAND_FADE,
         fetch: 'onScreen',
       }
@@ -730,7 +729,7 @@ function firstPart(t: number): void {
   }
   once('whole city', t, stepAt(19) + 0.6, () => {
     islandShown = -1
-    viewer.mask = { shapes: [{ shape: 'view' }] }
+    viewer.mask = null
   })
 
   // 18: the miniature look, as simple-map has it, on the round of city

@@ -36,7 +36,7 @@ export const STAND = placeFrom(MIDDLE, -1019, 133)
  */
 export const AROUND = 600
 
-export const SITE: Mask = { shapes: [{ shape: 'circle', center: STAND, radius: AROUND }], fade: 60 }
+export const SITE: Mask = { shape: { type: 'circle', center: STAND, radius: AROUND }, fade: 60 }
 
 /**
  * The tsunami inundation the hazard portal publishes, as tiles.

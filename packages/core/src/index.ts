@@ -68,6 +68,7 @@ export {
   maskTouches,
   type Mask,
   type MaskShape,
+  type StandingShape,
   type MaskArea,
   type MaskView,
   type MaskField,

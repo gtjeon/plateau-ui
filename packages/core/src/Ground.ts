@@ -11,7 +11,7 @@ import {
   maskIn,
   maskTouches,
   standsSomewhere,
-  type MaskShape,
+  type StandingShape,
   type MaskArea,
 } from './mask.js'
 import { tileBounds, tileKey, tilesCovering, type TileId } from './geo/tiles.js'
@@ -650,7 +650,7 @@ export class Ground implements Layer {
   /** Whether the land's rise is being drawn, which is what holds it on; see {@link RELIEF_HOLD}. */
   private reliefShown = false
   /** The sites a page has cleared, in the order they were given. */
-  private readonly cleared: MaskShape[] = []
+  private readonly cleared: StandingShape[] = []
   /**
    * Those sites worked out, which carries the picture the card reads.
    *
@@ -1090,10 +1090,11 @@ export class Ground implements Layer {
    * the rest of the mask, so a footprint asks one question however many were
    * cleared.
    *
-   * A site stands somewhere: a circle or a box with no `center` rides the
-   * camera, and is refused rather than quietly clearing nothing.
+   * A site stands somewhere ({@link StandingShape}): the screen, or a circle
+   * or a box with no `center`, would ride the camera, and is refused rather
+   * than quietly clearing nothing.
    */
-  hide(what: MaskShape): this {
+  hide(what: StandingShape): this {
     standsSomewhere(what, 'Ground.hide')
     this.cleared.push(what)
     this.reclear()
@@ -1101,7 +1102,7 @@ export class Ground implements Layer {
   }
 
   /** Puts a site's footprints back, or with nothing given, every site's. */
-  show(what?: MaskShape): this {
+  show(what?: StandingShape): this {
     if (what === undefined) this.cleared.length = 0
     else {
       const at = this.cleared.indexOf(what)
@@ -1121,7 +1122,7 @@ export class Ground implements Layer {
    */
   private reclear(): void {
     this.clearedArea?.dispose()
-    this.clearedArea = maskArea({ shapes: this.cleared })
+    this.clearedArea = maskArea({ shape: this.cleared })
     this.materials.setCleared(this.clearedArea)
   }
 

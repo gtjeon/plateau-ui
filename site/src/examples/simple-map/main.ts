@@ -61,10 +61,9 @@ const viewer = new Viewer({
   // The miniature look, on from the start: sharp where the view is centred and
   // blurred in front and behind, by as much as the view's own tilt calls for
   tiltShift: { enabled: true },
-  // As far as the screen reaches, which is a viewer nobody has cut. Most of
+  // No mask: as far as the screen reaches, a viewer nobody has cut. Most of
   // the examples here name a shape instead and pay for only what is inside it;
   // this one is what the word means when nothing is being left out.
-  mask: { shapes: [{ shape: 'view' }] },
 })
 
 // Opens on this much ground, however wide the screen. Given as a zoom, the

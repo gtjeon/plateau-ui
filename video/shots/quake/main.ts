@@ -20,7 +20,6 @@ const viewer = new Viewer({
   zoom: 17.2,
   pitch: 58,
   heading: 126,
-  mask: { shapes: [{ shape: 'view' }] },
   buildings: { minZoom: false },
 })
 Object.assign(window, { viewer })

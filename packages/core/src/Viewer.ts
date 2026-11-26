@@ -709,25 +709,32 @@ export interface ViewerOptions {
    */
   models?: ModelLayerOptions
   /**
-   * The shape the scene is cut to, which every viewer says.
+   * The shape the scene is cut to: a circle, a rectangle or a ring, or a list
+   * of them, the scene cut to all of them together, with one hem, margin and
+   * way of fetching for the lot. One shape alone may stand on the map or ride
+   * the camera; a list stands; see {@link Mask}.
    *
-   * `{ shapes: [{ shape: 'view' }] }` is as far as the screen reaches, which
-   * is a viewer nobody has cut; anything else is circles, rectangles or rings,
-   * the scene cut to all of them together, with one hem, margin and way of
-   * fetching for the lot. They stand on the map or ride the camera as one;
-   * see {@link Mask}.
+   * Left out, nothing is cut, and the scene reaches as far as the screen does
+   * — what Mapbox and Cesium do with no clipping said. A mask with no `shape`,
+   * or with the screen's own (`{ type: 'view' }`), is the same, with a say in
+   * how far past the screen is fetched.
    *
-   * Said rather than left out because the shape is the whole of what is
-   * fetched, not only of what is drawn. A shape standing on the map has an
-   * inside that can be asked for whole, however the camera is pointed, so a
-   * page may say "every building in this circle" and be answered; one riding
-   * the camera has not. Nothing a page has to know about tiles — and one word,
-   * {@link Mask.fetch}, where a page would rather have that inside come as
-   * the view reaches it; see {@link Viewer.screenPicks}.
+   * The shape is the whole of what is fetched, not only of what is drawn. A
+   * shape standing on the map has an inside that can be asked for whole,
+   * however the camera is pointed, so a page may say "every building in this
+   * circle" and be answered; one riding the camera has not, and neither has a
+   * viewer nobody has cut. Nothing a page has to know about tiles — and one
+   * word, {@link Mask.fetch}, where a page would rather have that inside come
+   * as the view reaches it; see {@link Viewer.screenPicks}.
    *
-   * It may be set or moved at any time afterwards through {@link Viewer.mask}.
+   * It may be set, moved or taken away at any time afterwards through
+   * {@link Viewer.mask}.
+   *
+   * _(2026-11-26: it had to be said, and a viewer nobody had cut said so with
+   * `{ shapes: [{ shape: 'view' }] }`. That is `{ shape: { type: 'view' } }`
+   * now, and what leaving it out means.)_
    */
-  mask: Mask
+  mask?: Mask
   /**
    * The palette, as far as a page wants to say it.
    *
@@ -1074,8 +1081,8 @@ const SCROLLS = /^(auto|scroll|overlay)$/
  * {@link Viewer.mask} hands back, so that writing into it throws in a module
  * rather than reading one shape while another is drawn.
  */
-function frozenMask(mask: Mask): Mask {
-  return deepFrozen(structuredClone(mask))
+function frozenMask(mask: Mask | null): Mask | null {
+  return mask ? deepFrozen(structuredClone(mask)) : null
 }
 
 function deepFrozen<T>(value: T): T {
@@ -1599,7 +1606,7 @@ export class Viewer {
    * would read one shape and draw another, since the shape was baked when it
    * was handed over.
    */
-  private _maskGiven: Mask
+  private _maskGiven: Mask | null
   /** What this viewer last put behind the map, to tell it from a background the page put there; see {@link paintBackdrop}. */
   private backdrop: Color | null = null
   /** What the container's own `position` was before this set it, to put back; see {@link dispose}. */
@@ -1617,7 +1624,7 @@ export class Viewer {
   private readonly _buildings: Buildings
   /** The layer this viewer made for the page's models. */
   private readonly _models: ModelLayer
-  private _mask: Mask
+  private _mask: Mask | null
   /** The mask in world units, worked out once when it is set rather than by everyone who reads it. */
   private _maskArea: MaskArea | null
   /**
@@ -1796,8 +1803,8 @@ export class Viewer {
     this._pitch = this.clampPitch(given(options.pitch) ?? 0)
     this._heading = wrapHeading(given(options.heading) ?? 0)
     this._elevation = options.ground?.elevation ?? false
-    this._mask = options.mask
-    this._maskGiven = frozenMask(options.mask)
+    this._mask = options.mask ?? null
+    this._maskGiven = frozenMask(this._mask)
     this._maskArea = maskArea(this._mask, this.maskView)
     this._fetchMargin = this.marginOf(this._mask)
     this.picking.setMask(this._maskArea)
@@ -2937,31 +2944,32 @@ export class Viewer {
 
   // ── The mask ──────────────────────────────────────────────
 
-  /** The shape the scene is cut to; `{ shapes: [{ shape: 'view' }] }` is a viewer nobody has cut. */
-  get mask(): Mask {
+  /** The shape the scene is cut to, or null where nobody has cut it. */
+  get mask(): Mask | null {
     return this._maskGiven
   }
 
   /**
-   * Cuts the scene to a shape, moves the one it is cut to, or takes it away.
+   * Cuts the scene to a shape, moves the one it is cut to, or takes it away
+   * (null).
    *
    * Every layer is asked to choose again, so what falls outside stops being
    * fetched and what has come inside is asked for. Nothing has to be shaped
    * afresh: the shape is a value the materials read, not something built into
    * what they draw, so it may be moved every frame if a page wants that.
    */
-  set mask(value: Mask) {
+  set mask(value: Mask | null) {
     // Gone, there is no scene to cut, and the picture made for it would be a
     // texture nobody lets go of
     if (this.disposed) return
-    this._mask = value
-    this._maskGiven = frozenMask(value)
+    this._mask = value ?? null
+    this._maskGiven = frozenMask(this._mask)
     // The area carries the picture of the shape the card reads, which is a
     // texture; the one that was standing goes back here, since this is where
     // it stops being anyone's
     this._maskArea?.dispose()
-    this._maskArea = maskArea(value, this.maskView)
-    this._fetchMargin = this.marginOf(value)
+    this._maskArea = maskArea(this._mask, this.maskView)
+    this._fetchMargin = this.marginOf(this._mask)
     // The pointer finds what is drawn, so the pass that looks for it is cut
     // the same way. It belongs to no layer, so it is told here
     this.picking.setMask(this._maskArea)
@@ -2983,12 +2991,11 @@ export class Viewer {
   }
 
   /**
-   * Where the view is and how far it reaches, in world units — what a shape
-   * riding the camera is worked out against, and what `shape: 'view'` stands
-   * for. See {@link MaskView}.
+   * Where the view is, in world units — where a shape riding the camera is
+   * put. See {@link MaskView}.
    */
   get maskView(): MaskView {
-    return { x: lonToX(this._center[0]), z: -latToY(this._center[1]), reach: this.viewReach }
+    return { x: lonToX(this._center[0]), z: -latToY(this._center[1]) }
   }
 
   /**
@@ -3912,7 +3919,7 @@ export class Viewer {
   }
 
   /** What a mask asks to have fetched past the screen, in world units. */
-  private marginOf(mask: Mask): number {
+  private marginOf(mask: Mask | null): number {
     const metres = viewMargin(mask)
     return metres > 0 ? metres / metersPerUnit(this._center[1]) : 0
   }

@@ -61,7 +61,7 @@ const viewer = new Viewer({
   container: 'map',
   pitch: 55,
   heading: 225,
-  mask: { shapes: [{ shape: 'circle', center: [139.66439, 35.70761], radius: 385 }], fade: 110 },
+  mask: { shape: { type: 'circle', center: [139.66439, 35.70761], radius: 385 }, fade: 110 },
   buildings: {
     // The number guards against how many tiles a wide view asks for, and here
     // the circle is 385m in radius, so what comes in is bounded by the mask and

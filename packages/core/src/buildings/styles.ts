@@ -34,7 +34,7 @@ import { BATCH_ID, BUILDING_SLOTS } from './attributes.js'
 import { DecalLayers, MOST_PICTURES, type DecalImage } from './decals.js'
 import { aroundBox, boxAround } from './around.js'
 import { feetOf, feetOn, footOf, fromFoot, type FootBox } from './foot.js'
-import { maskArea, type MaskArea, type MaskShape } from '../mask.js'
+import { maskArea, type MaskArea, type StandingShape } from '../mask.js'
 import { DEFAULT_OUTLINE_GAP, DEFAULT_OUTLINE_WIDTH, WIDEST_OUTLINE, type Outlines } from '../outlines.js'
 import type { Building } from './Buildings.js'
 import type { BuildingRule } from './hidden.js'
@@ -604,12 +604,12 @@ export class BuildingStyles {
    * the world's own units the once, here: the judging walks a mesh's corners
    * and would otherwise read the shape afresh on every one of them.
    */
-  setSite(site: MaskShape, style: BuildingStyle | null): void {
-    this.paint(site, style, maskArea({ shapes: [site] }))
+  setSite(site: StandingShape, style: BuildingStyle | null): void {
+    this.paint(site, style, maskArea({ shape: site }))
   }
 
   /** One of the two, by whatever a page handed over. */
-  private paint(by: BuildingRule | MaskShape, style: BuildingStyle | null, area: MaskArea | null): void {
+  private paint(by: BuildingRule | StandingShape, style: BuildingStyle | null, area: MaskArea | null): void {
     const at = this.painters.findIndex((held) => held.by === by)
     // Whoever made an area gives it back, and a painter dropped or written
     // over is where these are dropped; see CLAUDE.md's fifth contract. This
@@ -1566,10 +1566,10 @@ function picturesOf(style: BuildingStyle | undefined): BuildingImage[] {
  * the buildings a page names are — so each rule is given a number the first
  * time it is seen and answers with it after.
  */
-const painterKeys = new WeakMap<BuildingRule | MaskShape, string>()
+const painterKeys = new WeakMap<BuildingRule | StandingShape, string>()
 let nextPainterKey = 0
 
-function keyOf(by: BuildingRule | MaskShape): string {
+function keyOf(by: BuildingRule | StandingShape): string {
   const had = painterKeys.get(by)
   if (had !== undefined) return had
   const key = `\u0000rule${nextPainterKey++}`
@@ -1584,7 +1584,7 @@ function keyOf(by: BuildingRule | MaskShape): string {
  * the object the page handed over, which is what it has to hand back.
  */
 interface Painter {
-  readonly by: BuildingRule | MaskShape
+  readonly by: BuildingRule | StandingShape
   readonly area: MaskArea | null
   readonly style: BuildingStyle
 }

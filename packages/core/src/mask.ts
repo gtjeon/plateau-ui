@@ -49,27 +49,32 @@ import { lookup } from './lookup.js'
  *
  * _(2026-10-29: until today a mask was a shape or a list of shapes, each
  * carrying its own `fade`, `margin` and `fetch`.)_
+ *
+ * _(2026-11-26: the shapes went from `shapes`, always a list, to `shape`, one
+ * shape or a list of them, the way three's `Mesh.material` takes one material
+ * or several. The kind of each shape moved from its own `shape` to `type`, so
+ * the word is not said twice over with two meanings. A mask may be left out,
+ * which is the screen's own shape, `{ type: 'view' }`, and that shape takes
+ * nothing else. A list holds only shapes that stand; see {@link StandingShape}.)_
  */
 export interface Mask {
   /**
-   * The shapes, which the scene is cut to all of together: what falls in any
-   * one is kept. That is a page showing four stations rather than the twenty
-   * kilometres between them, and it is the only reading a list can have —
-   * there is no sense in which a place could be asked to be inside two
-   * separate circles.
+   * The shape the scene is cut to: one, or a list of them cut to all together
+   * — what falls in any one is kept. That is a page showing four stations
+   * rather than the twenty kilometres between them, and it is the only reading
+   * a list can have: there is no sense in which a place could be asked to be
+   * inside two separate circles.
    *
-   * One is a list of one. None at all is a mask that holds nothing, not the
-   * absence of one; `{ shape: 'view' }` riding the camera is a viewer nobody
-   * has cut.
+   * One shape may stand on the map or ride the camera, or be the screen
+   * itself ({@link MaskShape}). A list holds only shapes that stand
+   * ({@link StandingShape}).
    *
-   * **The list stands or rides as one.** Shapes that ride the camera given
-   * beside shapes that stand are all stood, where the view is when the mask is
-   * set, and the console says so once. Mixed, the shape would be a different
-   * shape at every step of a drag and its picture would be drawn again each
-   * time — 15ms a frame for two circles, 55ms for a ring of 240 corners,
-   * measured.
+   * Left out, it is `{ type: 'view' }`: nothing is cut, the scene reaches as
+   * far as the screen does, and the rest of the mask still says how that is
+   * fetched ({@link margin}). An empty list is not that — it is a mask that
+   * holds nothing.
    */
-  readonly shapes: readonly MaskShape[]
+  readonly shape?: MaskShape | readonly StandingShape[]
   /**
    * How far in from the edge what is drawn fades out, in metres. 0, a hard
    * edge, by default.
@@ -77,6 +82,10 @@ export interface Mask {
    * Metres at each shape's own latitude, the way a building's height is, so
    * the same number is the same width on the ground over Tokyo and over
    * Okinawa.
+   *
+   * Cut to the screen — no shape, or `{ type: 'view' }` — there is no edge on
+   * screen to fade, and the console says so once. A hem at the edge of the
+   * screen is a picture nobody draws yet.
    */
   readonly fade?: number
   /**
@@ -85,6 +94,9 @@ export interface Mask {
    * What is drawn does not change — the shape still ends where it ended. This
    * is for a shape that moves: the ground it is about to reach is asked for
    * before it gets there, so the edge does not drag a bare strip behind it.
+   * Cut to the screen — no {@link shape}, or `{ type: 'view' }` — the edge is
+   * the screen's, and this is how far past it the next street is fetched
+   * before it comes into view.
    * A mask that stands still but waits for the screen ({@link Mask.fetch})
    * counts as one that moves here, each shape's box being widened by the
    * margin before it is cut down to the screen.
@@ -125,8 +137,7 @@ export interface Mask {
 }
 
 /**
- * One shape a mask is cut to, or a site a page names — a place to clear,
- * hide or paint.
+ * One shape a mask is cut to.
  *
  * A circle and a box are one shape underneath — a rectangle with rounded
  * corners, the circle being the case where the straight part has no length —
@@ -135,25 +146,129 @@ export interface Mask {
  * blunt for, and it carries the box round itself so that everything narrowing
  * a rectangle reads it without knowing which kind it is.
  *
- * There is one rule and the four shapes share it: **cut to `shape` round
- * `center`**, and only the way the size is written differs between them. So
- * where a shape sits is one field wherever it appears, and every shape can
- * either stand on the map or ride the camera.
+ * A circle and a box stand where their `center` says, or ride the camera with
+ * `'view'` there or nothing; a ring stands where its corners are. And
+ * `{ type: 'view' }` is the screen itself: cut to it, nothing anyone can see
+ * is cut, which is the viewer with no mask said out loud. It says nothing
+ * else — given a place it would have to be the screen as it was at some
+ * moment, a size the page cannot write and a phone and a desk would each
+ * answer differently.
  *
- * Which of those it does is what decides whether how much is fetched *can* be
- * the whole of it. A shape standing still has an inside that can be asked for
- * whole; one riding the camera has not, since the ground it is about to cover
- * has not been asked about yet. One thing hands that back where it is on
- * offer, and it is {@link Mask.fetch}; see {@link Viewer.screenPicks}.
+ * Which of standing and riding a shape does is what decides whether how much
+ * is fetched *can* be the whole of it. A shape standing still has an inside
+ * that can be asked for whole; one riding the camera has not, since the ground
+ * it is about to cover has not been asked about yet. One thing hands that back
+ * where it is on offer, and it is {@link Mask.fetch}; see
+ * {@link Viewer.screenPicks}.
+ *
+ * Any of these may be given alone. A list holds only shapes that stand; see
+ * {@link StandingShape}.
  */
-interface MaskShapeBase {
+export type MaskShape = ScreenShape | (CircleSize & MayRide) | (RectSize & MayRide) | RingShape
+
+/**
+ * A shape that stands on the map: a circle or a box with a place, or a ring.
+ *
+ * What a list of shapes holds, and what a page names as a site — a place to
+ * clear, hide or paint (`ground.hide`, `buildings.hide`,
+ * `buildings.setStyle`). Neither can ride the camera.
+ *
+ * **A list, because it is a union.** The screen beside any other shape leaves
+ * one of the two with nothing to do. A shape riding beside one standing is a
+ * different shape at every step of a drag, and its picture would be drawn
+ * again each time — 15ms a frame for two circles, 55ms for a ring of 240
+ * corners, measured; and several riding together all sit on the middle of the
+ * screen, one on another. Every list this repository's pages hand over stands.
+ *
+ * **A site, because it is read once where it stands.** A shape riding the
+ * camera has nowhere to be away from one, so it would quietly hold nothing.
+ *
+ * _(2026-11-26: until today a list could hold shapes that rode the camera,
+ * all of them or none — a list mixing the two was made to stand where the
+ * view was, and said so once — and a site that rode threw when it was given.
+ * Both are what the types now say, for a page they reach; one they do not
+ * reach is still told at run time.)_
+ */
+export type StandingShape = (CircleSize & Stands) | (RectSize & Stands) | RingShape
+
+/** The screen as a shape, which says nothing more; see {@link MaskShape}. */
+interface ScreenShape {
+  readonly type: 'view'
+}
+
+/** A circle's kind and size. */
+interface CircleSize {
+  readonly type: 'circle'
+  /** How far it reaches from the middle, in metres. */
+  readonly radius: number
+}
+
+/** A box's kind and size. */
+interface RectSize {
+  readonly type: 'rect'
+  /** How far across, east to west, in metres. */
+  readonly width: number
+  /**
+   * How far across, north to south, in metres. Left out, as wide as it is.
+   *
+   * Up nowhere: everywhere else in this library `height` is up, and here
+   * it is the second side of a flat rectangle, as three's `PlaneGeometry`
+   * names its two (`width`, `height`). A rectangle on the map has no up.
+   */
+  readonly height?: number
+  /** How far the corners are rounded, in metres. Never more than half the shorter side. */
+  readonly corner?: number
+}
+
+/**
+ * A ring of corners. It stands where its corners are and has no `center`.
+ *
+ * _(2026-11-26: until today it took one, to be moved there or to ride the
+ * camera. Nothing in this repository gave it one.)_
+ */
+interface RingShape {
+  readonly type: 'polygon'
+  /**
+   * The corners, each as [longitude, latitude].
+   *
+   * The ring closes itself — the last corner joins the first — and which
+   * way round they go does not matter. Fewer than three is no shape at
+   * all and holds nothing.
+   *
+   * For a shape a circle and a box are too blunt for: a district, a
+   * campus, the quarter of a mall. As many corners as a page has: one
+   * drawn by hand round a district is a dozen, one traced off a survey is
+   * hundreds, and neither is measured against a budget. A mask set on the
+   * viewer is drawn out on a grid once ({@link MaskField}) and read there,
+   * so what a fragment costs is one read whatever the ring is; everything
+   * else walks the corners on the processor.
+   *
+   * What the grid does cost is fineness: a neck narrower than a texel of
+   * it fills or parts. At a mall that texel is a metre or two, at a
+   * prefecture a hundred.
+   *
+   * A ring traced round the very things it will cut — a mall's own walls,
+   * say — wants pushing a metre or two clear of them first. On the line,
+   * every pixel of a wall asks which side of itself it is on and the
+   * answer comes out half and half, which draws the wall in stripes.
+   */
+  readonly points: readonly (readonly [number, number])[]
+}
+
+/** Where a standing circle or box sits. */
+interface Stands {
+  /** The middle of the shape on the map, as [longitude, latitude]. */
+  readonly center: readonly [number, number]
+}
+
+/** Where a circle or box given alone sits: a place, or the camera. */
+interface MayRide {
   /**
    * Where the shape sits: a place on the map, or `'view'` to ride the camera.
    *
-   * Left out it is `'view'` — except for a ring, whose corners already say
-   * where it is. A shape that rides the camera has no edge that stands still,
-   * so what is inside it changes as the view moves and nothing can be said to
-   * have all arrived; see {@link Viewer.screenPicks}.
+   * Left out it is `'view'`. A shape that rides the camera has no edge that
+   * stands still, so what is inside it changes as the view moves and nothing
+   * can be said to have all arrived; see {@link Viewer.screenPicks}.
    *
    * Its metres are turned into the map's own units at the latitude the camera
    * is at when the mask is set, and not again as it rides. Mercator stretches
@@ -164,65 +279,6 @@ interface MaskShapeBase {
    */
   readonly center?: readonly [number, number] | 'view'
 }
-
-export type MaskShape =
-  | (MaskShapeBase & {
-      /**
-       * As far as the screen reaches, which is the shape of a viewer nobody
-       * has cut. Riding the camera it cuts nothing anyone can see; given a
-       * place it keeps the reach it had at that moment, and becomes a circle
-       * standing there.
-       */
-      readonly shape: 'view'
-    })
-  | (MaskShapeBase & {
-      readonly shape: 'circle'
-      /** How far it reaches from the middle, in metres. */
-      readonly radius: number
-    })
-  | (MaskShapeBase & {
-      readonly shape: 'rect'
-      /** How far across, east to west, in metres. */
-      readonly width: number
-      /**
-       * How far across, north to south, in metres. Left out, as wide as it is.
-       *
-       * Up nowhere: everywhere else in this library `height` is up, and here
-       * it is the second side of a flat rectangle, as three's `PlaneGeometry`
-       * names its two (`width`, `height`). A rectangle on the map has no up.
-       */
-      readonly height?: number
-      /** How far the corners are rounded, in metres. Never more than half the shorter side. */
-      readonly corner?: number
-    })
-  | (MaskShapeBase & {
-      readonly shape: 'polygon'
-      /**
-       * The corners, each as [longitude, latitude].
-       *
-       * The ring closes itself — the last corner joins the first — and which
-       * way round they go does not matter. Fewer than three is no shape at
-       * all and holds nothing.
-       *
-       * For a shape a circle and a box are too blunt for: a district, a
-       * campus, the quarter of a mall. As many corners as a page has: one
-       * drawn by hand round a district is a dozen, one traced off a survey is
-       * hundreds, and neither is measured against a budget. A mask set on the
-       * viewer is drawn out on a grid once ({@link MaskField}) and read there,
-       * so what a fragment costs is one read whatever the ring is; everything
-       * else walks the corners on the processor.
-       *
-       * What the grid does cost is fineness: a neck narrower than a texel of
-       * it fills or parts. At a mall that texel is a metre or two, at a
-       * prefecture a hundred.
-       *
-       * A ring traced round the very things it will cut — a mall's own walls,
-       * say — wants pushing a metre or two clear of them first. On the line,
-       * every pixel of a wall asks which side of itself it is on and the
-       * answer comes out half and half, which draws the wall in stripes.
-       */
-      readonly points: readonly (readonly [number, number])[]
-    })
 
 /**
  * One piece of a mask, in the world's own units.
@@ -333,16 +389,19 @@ export interface MaskArea {
 }
 
 /**
- * Where the view is and how far it reaches, in the world's own units.
+ * Where the view is, in the world's own units: where a shape that rides the
+ * camera is put.
  *
  * Handed in rather than read, because the mask is worked out in `mask.ts` and
- * the camera belongs to the viewer. `reach` is what `shape: 'view'` stands
- * for: the circle {@link Viewer.visibleBounds} is the box round.
+ * the camera belongs to the viewer.
+ *
+ * _(2026-11-26: it carried how far the view reaches as well, `reach`, for the
+ * `'view'` shape to be as wide as. That shape is gone and nothing else read
+ * it.)_
  */
 export interface MaskView {
   readonly x: number
   readonly z: number
-  readonly reach: number
 }
 
 /**
@@ -358,50 +417,24 @@ export interface MaskView {
  * draws. Pieces far apart each get their own, so a mask over Tokyo and one
  * over Okinawa are both right.
  *
- * No shapes is a mask that holds nothing, not the absence of one: the union
- * of nothing is nothing. `null` is how a caller says there is no mask.
+ * An empty list of shapes is a mask that holds nothing, not the absence of
+ * one: the union of nothing is nothing. No mask, or a mask with no shape, is a
+ * viewer nobody has cut, and that is null.
  */
 export function maskArea(mask: Mask | null | undefined, view?: MaskView): MaskArea | null {
-  if (!mask) return null
-  const given = mask.shapes
+  const given = shapesOf(mask)
+  if (!given) return null
   // Every piece a page hands over, however many. What is counted against the
   // card's arrays is counted where the card is fed; see {@link MaskShader.set}
-  let pieces = shapely(given.map((one) => partOf(one, mask, view)))
-  // Nothing left of a mask that had pieces: all of them were the screen's own
-  // reach riding the camera. That is a viewer nobody has cut, which is not
-  // the same as one cut to nothing — an empty list is still a shape, and
-  // holds nothing.
-  if (given.length > 0 && pieces.length === 0) return null
-
-  // All of them ride the camera or none does. Mixed, the shape is a different
-  // shape at every step, and the picture the card reads — drawn once over the
-  // box round every piece — would have to be drawn again each time: measured
-  // at 15ms for two circles and 55ms for a ring of 240 corners, every frame a
-  // drag moves the view. The ones that would have ridden are left where the
-  // view was when the mask was set, which is a shape a page can see and
-  // understand, and it is said once.
-  const riding = pieces.filter((piece) => piece.follows).length
-  if (riding > 0 && riding < pieces.length) {
-    console.warn(
-      '[plateau-ui] A mask mixes shapes that ride the camera with shapes that stand on the map. ' +
-        'They all stand: give every piece a center, or none of them.',
-    )
-    // Standing now, so each one holds its inside whole unless the page asked
-    // otherwise. Rebuilt rather than reused: the part a riding piece carries
-    // says it waits for the screen because it rode, and it no longer does.
-    pieces = pieces.map((piece) => ({
-      part: { ...piece.part, onScreen: piece.waits },
-      follows: false,
-      waits: piece.waits,
-    }))
-  }
+  const pieces = shapely(given.map((one) => partOf(one, mask!, view)))
 
   let parts = pieces.map((piece) => piece.part)
   let bounds = boxRound(parts)
   const follows = pieces.some((piece) => piece.follows)
-  // Every piece is told alike, and one riding the camera is told the screen
-  // whatever the page said; either way what is in hand then turns on where
-  // the camera is, and nothing can be said to have all arrived
+  // Every piece is told alike, and one riding the camera — only ever one
+  // alone; see {@link StandingShape} — is told the screen whatever the page
+  // said; either way what is in hand then turns on where the camera is, and
+  // nothing can be said to have all arrived
   const fetchesAll = parts.every((part) => !part.onScreen)
   let at = { x: view?.x ?? 0, z: view?.z ?? 0 }
   let field: MaskField | null = null
@@ -605,84 +638,105 @@ export function maskIn(area: MaskArea | null, bounds: WorldBounds): WorldBounds 
   return overlap(area.bounds, bounds)
 }
 
+/**
+ * The shapes a mask is cut to, as a list however they were given, or null
+ * where it cuts nothing — no mask, no shape, or the screen's own.
+ *
+ * A list holds only shapes that stand. The types say so; a page they do not
+ * reach is told once, and what rides is left out, the way a solid set on a
+ * building is left undrawn (`sayIfOnABuilding`). Not made to stand where the
+ * view was, as a list mixing the two once was: a page writing shapes that
+ * ride meant them to ride, and standing them would answer something it never
+ * asked.
+ */
+export function shapesOf(mask: Mask | null | undefined): readonly MaskShape[] | null {
+  const shape = mask?.shape
+  if (shape === undefined) return null
+  if (!isShapeList(shape)) return shape.type === 'view' ? null : [shape]
+  const standing = (shape as readonly MaskShape[]).filter((one) => !ridesTheCamera(one))
+  if (standing.length < shape.length && !saidRidingInAList) {
+    saidRidingInAList = true
+    console.warn(
+      '[plateau-ui] A list of mask shapes holds only shapes that stand on the map. ' +
+        "The screen ('view') and shapes with no center are left out: give each one a center, " +
+        'or give a shape that rides the camera alone.',
+    )
+  }
+  return standing
+}
+
+/** Whether a list holding a shape that rides has been said, once for the page. */
+let saidRidingInAList = false
+
+/** Whether a mask's {@link Mask.shape} was given as a list. */
+function isShapeList(shape: MaskShape | readonly StandingShape[]): shape is readonly StandingShape[] {
+  return Array.isArray(shape)
+}
+
 /** How a mask behaves, which every one of its shapes wears alike; see {@link Mask}. */
 type MaskHow = Pick<Mask, 'fade' | 'margin' | 'fetch'>
 
-/** One mask as a piece in world units: a rounded box, or a ring and the box round it. */
-/** A piece worked out, and whether it rides the camera. */
+/** One shape worked out as a piece in world units, and whether it rides the camera. */
 interface MaskPiece {
   readonly part: MaskPart
   readonly follows: boolean
-  /**
-   * What the page itself asked for, which is not the same as what the part
-   * carries: a piece that rides the camera is given `onScreen` whatever the
-   * page said, having no inside to hold. Kept apart so that a mixed shape
-   * forced to stand can be rebuilt with the page's own wish — otherwise a
-   * piece that only ever waited because it rode would go on waiting after it
-   * had been made to stand still.
-   */
-  readonly waits: boolean
 }
 
-/**
- * One of a page's shapes worked out where it sits, or nothing where it cuts
- * nothing at all.
- *
- * The only one that cuts nothing is the screen's own reach riding the camera,
- * which is what a viewer nobody has cut looks like. It could be drawn as the
- * circle it is — every pixel of the screen falls inside it — but then its
- * radius would change with every notch of the wheel, and the picture the card
- * reads would be rasterised afresh each time for an edge no one can see.
- */
 /**
  * Whether a shape rides the camera rather than standing somewhere on the map:
- * a size with no `center`, or one told to ride it.
+ * the screen, or a circle or box with no `center` or one told to ride it. A
+ * ring stands where its corners are.
  *
  * What a page names as a site — a place to clear, to hide, to paint — has to
- * stand somewhere. A shape that rides the camera has nowhere to be read away
- * from one, so asked of a site it would quietly hold nothing; see {@link partOf}.
+ * stand somewhere, and so does every shape in a list; see {@link StandingShape}.
  */
 export function ridesTheCamera(shape: MaskShape): boolean {
-  return shape.center === 'view' || (shape.center === undefined && shape.shape !== 'polygon')
+  if (shape.type === 'view') return true
+  if (shape.type === 'polygon') return false
+  return shape.center === undefined || shape.center === 'view'
 }
 
-/** Throws, naming `owner`, where a shape named as a site rides the camera; see {@link ridesTheCamera}. */
-export function standsSomewhere(shapes: MaskShape | readonly MaskShape[], owner: string): void {
-  for (const piece of Array.isArray(shapes) ? (shapes as readonly MaskShape[]) : [shapes as MaskShape]) {
-    if (ridesTheCamera(piece)) {
-      throw new Error(
-        `${owner}: a site has to stand somewhere on the map — give the ${piece.shape} a \`center\``,
-      )
-    }
-  }
+/**
+ * Throws, naming `owner`, where a shape named as a site rides the camera.
+ *
+ * The types already say a site stands ({@link StandingShape}); this is for a
+ * page they do not reach. Thrown rather than held as nothing: a shape riding
+ * the camera, read away from one, would quietly clear, hide or paint nothing.
+ */
+export function standsSomewhere(site: StandingShape, owner: string): void {
+  const shape = site as MaskShape
+  if (!ridesTheCamera(shape)) return
+  throw new Error(
+    shape.type === 'view'
+      ? `${owner}: a site has to stand somewhere on the map — the screen ('view') stands nowhere`
+      : `${owner}: a site has to stand somewhere on the map — give the ${shape.type} a \`center\``,
+  )
 }
 
+/**
+ * One of a page's shapes worked out where it sits, or nothing where it has
+ * nowhere to be: the screen, which cuts nothing, or a shape that rides the
+ * camera asked about with no camera.
+ */
 function partOf(shape: MaskShape, how: MaskHow, view: MaskView | undefined): MaskPiece | null {
-  const ring = shape.shape === 'polygon'
-  // A ring's corners already say where it is, so left out it stays there.
-  // Everything else is a size with no place, and rides the camera until it is
-  // given one.
+  if (shape.type === 'view') return null
+  const waits = how.fetch === 'onScreen'
+  // A ring's corners say where it is, and it stands there
+  if (shape.type === 'polygon') {
+    return { part: ringPart(shape.points, how.fade ?? 0, how.margin ?? 0, waits), follows: false }
+  }
+  // A size with no place rides the camera until it is given one.
   // Written out rather than asked of `ridesTheCamera`, which says the same,
   // so that the type of `center` follows the answer
-  const follows = shape.center === 'view' || (shape.center === undefined && !ring)
+  const follows = shape.center === undefined || shape.center === 'view'
   // Nothing to hand back where the piece rides the camera: it has no inside
-  // that could have been asked for whole in the first place. What the page
-  // asked for is kept beside it; see {@link MaskPiece.waits}.
-  const waits = how.fetch === 'onScreen'
+  // that could have been asked for whole in the first place
   const onScreen = follows || waits
-  if (shape.shape === 'view' && follows) return null
   // Asked about away from any camera — `buildings.hide(shape)` and the rest
   // read a page's shape where it stands, once — a shape that rides one holds
   // nothing. There is nowhere to put it, and the world's middle is a worse
   // answer than none.
   if (follows && !view) return null
-
-  if (ring) {
-    const part = ringPart(shape.points, how.fade ?? 0, how.margin ?? 0, onScreen)
-    if (shape.center === undefined) return { part, follows: false, waits }
-    const to = follows ? view! : placeOf(shape.center)
-    return { part: movedPart(part, to.x, to.z), follows, waits }
-  }
 
   const to = follows ? view! : placeOf(shape.center as readonly [number, number])
   // Mercator's stretch where the shape stands, the same way a building's
@@ -696,14 +750,11 @@ function partOf(shape: MaskShape, how: MaskHow, view: MaskView | undefined): Mas
   const stretch = 1 / metersPerUnit(yToLat(-to.z))
   const fade = Math.max(0, how.fade ?? 0) * stretch
   const margin = Math.max(0, how.margin ?? 0) * stretch
-  const round = (): number =>
-    shape.shape === 'view' ? view!.reach : Math.max(0, (shape as { radius: number }).radius) * stretch
-
-  if (shape.shape === 'view' || shape.shape === 'circle') {
+  if (shape.type === 'circle') {
+    const round = Math.max(0, shape.radius) * stretch
     return {
-      part: { x: to.x, z: to.z, halfX: 0, halfZ: 0, round: round(), fade, margin, onScreen },
+      part: { x: to.x, z: to.z, halfX: 0, halfZ: 0, round, fade, margin, onScreen },
       follows,
-      waits,
     }
   }
 
@@ -722,35 +773,31 @@ function partOf(shape: MaskShape, how: MaskHow, view: MaskView | undefined): Mas
       onScreen,
     },
     follows,
-    waits,
   }
 }
 
 /**
  * How far past the screen a mask asks to be fetched anyway, in metres.
  *
- * `shape: 'view'` riding the camera cuts nothing anyone can see, so it is left
- * out of the pieces altogether and the {@link Mask.margin} it was given with
- * would have nowhere to live. It is the one place that margin is worth most —
- * an uncut viewer fetches exactly what is on screen, and a page that wants
- * the next street ready before it comes into view has no other way to say
- * so — so it is read off here and the viewer widens what it counts as
- * reachable by it.
+ * A mask cut to the screen — no shape, or `{ type: 'view' }` — cuts nothing,
+ * so there are no pieces for its {@link Mask.margin} to live on. It is the one
+ * place that margin is worth most — an uncut viewer fetches exactly what is
+ * on screen, and a page that wants the next street ready before it comes into
+ * view has no other way to say so — so it is read off here and the viewer
+ * widens what it counts as reachable by it. With any other shape, the margin
+ * is the shape's, and this is nought.
  *
- * The {@link Mask.fade} of a mask that is nothing but that has nowhere to live
- * either, and unlike margin there is nothing to read it: a hem at the edge of
- * the screen is a picture nobody draws yet. Said once rather than quietly
- * doing nothing. Beside other shapes it is theirs, and nothing is said.
+ * The {@link Mask.fade} of such a mask has nowhere to live either, and unlike
+ * margin there is nothing to read it: a hem at the edge of the screen is a
+ * picture nobody draws yet. Said once rather than quietly doing nothing.
  */
-export function viewMargin(mask: Mask): number {
-  const screen = (one: MaskShape): boolean =>
-    one.shape === 'view' && (one.center === undefined || one.center === 'view')
-  if (!mask.shapes.some(screen)) return 0
-  if (mask.fade && mask.shapes.every(screen)) {
-    console.warn(
-      "[plateau-ui] A mask of shape 'view' riding the camera cannot be hemmed: " +
-        'there is no edge on screen to fade. The fade is ignored.',
-    )
+export function viewMargin(mask: Mask | null | undefined): number {
+  if (!mask) return 0
+  const shape = mask.shape
+  const screen = shape === undefined || (!isShapeList(shape) && shape.type === 'view')
+  if (!screen) return 0
+  if (mask.fade) {
+    console.warn('[plateau-ui] A mask cut to the screen has no edge on screen to fade. The fade is ignored.')
   }
   return mask.margin ?? 0
 }

@@ -10,7 +10,6 @@ const viewer = new Viewer({
   zoom: Number(q.get('z') ?? 18.3),
   pitch: Number(q.get('p') ?? 55),
   heading: Number(q.get('h') ?? 30),
-  mask: { shapes: [{ shape: 'view' }] },
   buildings: { minZoom: false },
 })
 ;Object.assign(window, { viewer, __three: { Raycaster, Vector3 } })

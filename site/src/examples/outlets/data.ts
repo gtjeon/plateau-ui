@@ -76,7 +76,7 @@ export interface Zone {
    */
   readonly middle: readonly [number, number]
   /** The ground it covers. */
-  readonly site: Extract<MaskShape, { shape: 'polygon' }>
+  readonly site: Extract<MaskShape, { type: 'polygon' }>
   /** The walls and roofs of everything standing on that ground. */
   readonly color: string
   /**
@@ -128,8 +128,8 @@ export interface Zone {
  * corner by corner, so the length is not what this is for — it is for a file
  * somebody reads.
  */
-export const SITE: Extract<MaskShape, { shape: 'polygon' }> = {
-  shape: 'polygon',
+export const SITE: Extract<MaskShape, { type: 'polygon' }> = {
+  type: 'polygon',
   // prettier-ignore
   points: [
     [138.9615939, 35.3043731], [138.9617921, 35.304409], [138.9623315, 35.3045797],
@@ -177,7 +177,7 @@ export const ZONES: readonly Zone[] = [
     color: '#ff7d35',
     edge: '#8c451d',
     site: {
-      shape: 'polygon',
+      type: 'polygon',
       // prettier-ignore
       points: [
         [138.9628119, 35.3085484], [138.9627685, 35.3084474], [138.9628184, 35.3084353],
@@ -234,7 +234,7 @@ export const ZONES: readonly Zone[] = [
     color: '#fb2b74',
     edge: '#8a1840',
     site: {
-      shape: 'polygon',
+      type: 'polygon',
       // prettier-ignore
       points: [
         [138.966734, 35.3081503], [138.9667375, 35.3081598], [138.9668056, 35.3081434],
@@ -270,7 +270,7 @@ export const ZONES: readonly Zone[] = [
     color: '#6c348f',
     edge: '#3b1d4f',
     site: {
-      shape: 'polygon',
+      type: 'polygon',
       // prettier-ignore
       points: [
         [138.9661271, 35.3065747], [138.9661479, 35.3065891], [138.966238, 35.3065027],

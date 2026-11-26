@@ -27,7 +27,7 @@ export const REACH = 900
  * the land runs on past it either way, and a building at the rim is better cut
  * clean than dissolved into the ground it stands on.
  */
-export const MASK: Mask = { shapes: [{ shape: 'circle', center: SITE, radius: REACH }], fade: 0 }
+export const MASK: Mask = { shape: { type: 'circle', center: SITE, radius: REACH }, fade: 0 }
 
 /**
  * The board the district stands on: a plain grey, no hue in it, a few steps

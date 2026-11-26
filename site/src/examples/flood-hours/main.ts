@@ -43,7 +43,7 @@ const viewer = new Viewer({
   // whole strip; the default holds it back until 18
   buildings: { minZoom: 16 },
   // A narrow strip round the street and nothing else, and so is what the page fetches
-  mask: { shapes: [{ shape: 'rect', center: STREET, width: 800, height: 400 }] },
+  mask: { shape: { type: 'rect', center: STREET, width: 800, height: 400 } },
   layers: [steps],
 })
 

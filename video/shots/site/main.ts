@@ -52,7 +52,7 @@ const PAGES: Record<string, Page> = {
   },
   stay: { src: '/site/src/examples/airstay/index.html', bare: true, api: `viewer.models.bring({ url, at })` },
   outlets: { src: '/site/src/examples/outlets/index.html', bare: true, api: `buildings.setStyle(zone, { wallColor })` },
-  office: { src: '/site/src/examples/workspace/index.html', bare: true, api: `mask: { shapes: [circle, circle, …] }` },
+  office: { src: '/site/src/examples/workspace/index.html', bare: true, api: `mask: { shape: [circle, circle, …] }` },
   cityhall: { src: '/site/src/examples/guide-map/index.html', bare: true, api: `new Polyline({ points })` },
   hazard: {
     src: '/site/src/examples/flood-hours/index.html',

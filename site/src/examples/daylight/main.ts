@@ -195,8 +195,7 @@ const viewer = new Viewer({
   sun: lit(momentOf(START_SEASON, START)),
   // Nothing here is fetched for being looked at — the house is named — so
   // the guard on how close the view must be has nothing to hold back.
-  // Nothing cut away: the house is the whole of the page.
-  mask: { shapes: [{ shape: 'view' }] },
+  // No mask, so nothing is cut away: the house is the whole of the page.
   // No map's ground under it: this page stands the house on a plane of its
   // own, so the land is turned off and fetches nothing.
   ground: { visible: false },

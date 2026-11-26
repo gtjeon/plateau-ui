@@ -1,5 +1,5 @@
 import type { Mesh } from 'three/webgpu'
-import { maskArea, type MaskArea, type MaskShape } from '../mask.js'
+import { maskArea, type MaskArea, standsSomewhere, type StandingShape } from '../mask.js'
 import { BUILDING_FACTS, type BuildingFacts } from './tileContent.js'
 import { feetOf, feetOn, type FootBox } from './foot.js'
 import type { Building } from './Buildings.js'
@@ -34,7 +34,7 @@ import type { Building } from './Buildings.js'
 
 /** A site to clear, kept as the shape a page gave and the area it was read into. */
 interface Site {
-  readonly given: MaskShape
+  readonly given: StandingShape
   readonly area: MaskArea
 }
 
@@ -83,7 +83,9 @@ export class HiddenBuildings {
    * Takes a building out by name, every building whose foot falls inside a
    * shape, or every one a rule picks.
    */
-  hide(what: string | MaskShape | BuildingRule): void {
+  hide(what: string | StandingShape | BuildingRule): void {
+    // A site stands somewhere; one riding the camera would hide nothing
+    if (typeof what === 'object') standsSomewhere(what, 'Buildings.hide')
     if (typeof what === 'string') {
       this.named.add(what)
       return
@@ -95,7 +97,7 @@ export class HiddenBuildings {
       if (!this.rules.includes(what)) this.rules.push(what)
       return
     }
-    const area = maskArea({ shapes: [what] })
+    const area = maskArea({ shape: what })
     if (area) this.sites.push({ given: what, area })
   }
 
@@ -105,7 +107,7 @@ export class HiddenBuildings {
    * A shape is matched by being the same shape a page handed over, since that
    * is the only thing a page has to hand back.
    */
-  show(what?: string | MaskShape | BuildingRule): void {
+  show(what?: string | StandingShape | BuildingRule): void {
     if (what === undefined) {
       this.named.clear()
       for (const site of this.sites) site.area.dispose()

@@ -54,7 +54,7 @@ const fireworks = new Fireworks([139.6392, 35.4589])
  * every wall that would take that light already standing.
  */
 const SITE = {
-  shape: 'circle',
+  type: 'circle',
   center: [139.6361, 35.4588],
   radius: 800,
 } as const
@@ -86,7 +86,7 @@ const viewer = new Viewer({
   // at this time of year. Pinned over the ground with `over`, so dragging the
   // map does not move the hour.
   sun: { by: 'time', at: new Date('2026-08-01T19:30+09:00'), over: SITE.center },
-  mask: { shapes: [SITE] },
+  mask: { shape: SITE },
   layers: [fireworks],
 })
 

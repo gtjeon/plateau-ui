@@ -34,7 +34,7 @@ const viewer = new Viewer({
   pitch: WHOLE_SLOPE.pitch,
   heading: WHOLE_SLOPE.heading,
   // One circle, and nothing outside it is drawn or fetched
-  mask: { shapes: [{ shape: 'circle', center: MIDDLE, radius: RADIUS }], fade: FADE },
+  mask: { shape: { type: 'circle', center: MIDDLE, radius: RADIUS }, fade: FADE },
   // What the page is about. The ground is cut to the real shape of the hill
   // and every house stands on the ground under its own foot. The slope and the
   // houses on it come from PLATEAU and the GSI; only the five stays are the

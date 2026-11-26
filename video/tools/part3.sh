@@ -22,5 +22,5 @@ shoot() {
 shoot zilla '怪獣が歩くと、街が揺れる' 'buildings.animateAll(keyframes, { from })' ''
 shoot flood-hours '浸水が続く時間を、高さで見せる' 'new ImageExtrusionTileLayer({ url, legend })' '820,430,-0.5,0'
 shoot airstay '宿の 3D モデルを、地図に並べる' 'viewer.models.bring({ url, at })' '900,460,0.5,0'
-shoot workspace '離れた駅を、ひとつの画面に' "mask: { shapes: [circle, circle, …] }" '800,430,0.6,0'
+shoot workspace '離れた駅を、ひとつの画面に' "mask: { shape: [circle, circle, …] }" '800,430,0.6,0'
 shoot guide-map '道順を、地図の上に描く' 'new Polyline({ points })' '900,430,-0.5,0'

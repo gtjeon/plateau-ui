@@ -32,7 +32,15 @@ import { Events, type Anchor, type Hit, type LoadFailure, type Position } from '
 import { geodeticOf, orientationAt } from '../geo/ecef.js'
 import { latToY, lonToX, metersPerUnit, xToLon, yToLat, type WorldBounds } from '../geo/mercator.js'
 import { drop, TileSet } from '../tileSet.js'
-import { boundsRound, type MaskArea, type MaskShape, maskBoxesIn, MaskShader, maskTouches } from '../mask.js'
+import {
+  boundsRound,
+  type MaskArea,
+  maskBoxesIn,
+  MaskShader,
+  maskTouches,
+  standsSomewhere,
+  type StandingShape,
+} from '../mask.js'
 import { marksSolid } from '../classify.js'
 import { inStage } from '../order.js'
 import { drawsOutline } from '../outlines.js'
@@ -312,7 +320,7 @@ export interface BuildingsOptions {
    * proposal stands on means neither — those houses are not being demolished,
    * they were never part of what this page is about — so it says it here.
    */
-  hide?: readonly (string | MaskShape | BuildingRule)[]
+  hide?: readonly (string | StandingShape | BuildingRule)[]
 }
 
 /**
@@ -2550,8 +2558,8 @@ export class Buildings implements Layer {
    */
   setStyle(building: string, style: BuildingStyle | null): this
   setStyle(rule: BuildingRule, style: SharedStyle | null): this
-  setStyle(site: MaskShape, style: SharedStyle | null): this
-  setStyle(a: string | BuildingRule | MaskShape, b: BuildingStyle | null): this {
+  setStyle(site: StandingShape, style: SharedStyle | null): this
+  setStyle(a: string | BuildingRule | StandingShape, b: BuildingStyle | null): this {
     // One building, by the name PLATEAU gives it
     if (typeof a === 'string') {
       this.styles.set(a, b ?? null)
@@ -2573,6 +2581,8 @@ export class Buildings implements Layer {
     // that outline is less to write and more to read than a rule that says
     // the same thing in arithmetic.
     if (isSite(a)) {
+      // A site stands somewhere; one riding the camera would paint nothing
+      standsSomewhere(a, 'Buildings.setStyle')
       this.styles.setSite(a, b ?? null)
       this.remarkAll()
       return this
@@ -3075,7 +3085,7 @@ export class Buildings implements Layer {
    * layer's, so the plan of the buildings taken out is still on the map under
    * whatever is put in their place.
    */
-  hide(what: string | MaskShape | BuildingRule): this {
+  hide(what: string | StandingShape | BuildingRule): this {
     const before = this.whatIsOut()
     this.hidden.hide(what)
     // Whatever was standing a line ago goes under the way a city does, rather
@@ -3093,7 +3103,7 @@ export class Buildings implements Layer {
    * the undoing of {@link hide} and reads as the undoing: a page stepping
    * through what it has cleared sees the same thing happen backwards.
    */
-  show(what?: string | MaskShape | BuildingRule): this {
+  show(what?: string | StandingShape | BuildingRule): this {
     const before = this.whatIsOut()
     this.hidden.show(what)
     // Marked first. A building still carrying "taken out" is thrown away by
@@ -4187,9 +4197,17 @@ function toldOf(mesh: Mesh, at: number, feet?: () => Map<number, FootBox>): Buil
   }
 }
 
-/** Whether what a page handed the painter is a piece of ground rather than a style. */
-function isSite(what: BuildingStyle | MaskShape): what is MaskShape {
-  return 'shape' in what
+/**
+ * Whether what a page handed the painter is a piece of ground rather than a
+ * style: a shape says which kind it is in `type`, and no style has one.
+ *
+ * _(2026-11-26: the kind was `shape` until the mask's shapes were renamed, and
+ * this went on asking for `shape` — the type checker cannot see into an `in`
+ * — so every site was read as a style and painted nothing. The outlets example
+ * lost its zones; found by comparing it on screen before and after.)_
+ */
+function isSite(what: BuildingStyle | StandingShape): what is StandingShape {
+  return 'type' in what
 }
 
 /** Held between readings: a foot is turned into a place and the vector thrown away. */

@@ -58,7 +58,7 @@ const viewer = new Viewer({
   container: 'map',
   pitch: VIEW.pitch,
   heading: VIEW.heading,
-  mask: { shapes: [{ shape: 'rect', center: MIDDLE, width: SQUARE, height: SQUARE }] },
+  mask: { shape: { type: 'rect', center: MIDDLE, width: SQUARE, height: SQUARE } },
   // The guard is for a wide view asking for half a prefecture of tiles. The
   // square is 260 m across, so there is nothing left for it to guard.
   buildings: { minZoom: false },

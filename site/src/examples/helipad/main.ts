@@ -30,7 +30,7 @@ const viewer = new Viewer({
   container: 'map',
   pitch: VIEW.pitch,
   heading: VIEW.heading,
-  mask: { shapes: [{ shape: 'circle', center: MIDDLE, radius: AROUND }], fade: HEM },
+  mask: { shape: { type: 'circle', center: MIDDLE, radius: AROUND }, fade: HEM },
   // Boxes rather than the surveyed roof shapes. A pad is laid on a roof as one
   // flat marking, and a surveyed top is not one flat thing: plant rooms, lift
   // overruns and stair heads come through as stacked blocks a few metres

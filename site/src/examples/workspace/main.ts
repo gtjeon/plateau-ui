@@ -26,7 +26,7 @@ import { ui } from './ui.js'
  * worth less than the three districts.
  */
 const MASK: Mask = {
-  shapes: STATIONS.map(({ at }) => ({ shape: 'circle', center: at, radius: RADIUS })),
+  shape: STATIONS.map(({ at }) => ({ type: 'circle', center: at, radius: RADIUS })),
   fetch: 'onScreen',
 }
 
